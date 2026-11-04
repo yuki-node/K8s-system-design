@@ -1,0 +1,13 @@
+{
+  "renderer": "react-isokit",
+  "version": "0.5.0",
+  "react": "19.3.1",
+  "outputs": {
+    "dist/isokit.js": {
+      "bytes": 273527
+    },
+    "dist/isokit.css": {
+      "bytes": 10755
+    }
+  }
+}

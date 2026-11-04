@@ -1,0 +1,17 @@
+# Namespace 与配额 · 一个受限的实验命名空间
+# 前提：完整多文档清单；已有实验 Pod 时，创建配额不会驱逐它们，但会限制后续创建。
+# 预期：kubectl -n quota-lab describe quota 显示 Hard 与 Used；此清单未配置网络隔离。
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: quota-lab
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-budget
+  namespace: quota-lab
+spec:
+  hard:
+    pods: "4"
+    services: "2"

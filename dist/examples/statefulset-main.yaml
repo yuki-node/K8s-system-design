@@ -1,0 +1,33 @@
+# StatefulSet 与稳定身份 · 不依赖存储插件的身份实验
+# 前提：demo 已存在；该完整清单专门观察身份，不声明持久卷，也不把 nginx 解释为数据库。
+# 预期：应看到 stable-web-0 和 stable-web-1；稳定网络身份的解析还依赖 DNS 与就绪等条件。
+apiVersion: v1
+kind: Service
+metadata:
+  name: stable-web
+  namespace: demo
+spec:
+  clusterIP: None
+  selector: {app: stable-web}
+  ports:
+    - port: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stable-web
+  namespace: demo
+spec:
+  serviceName: stable-web
+  replicas: 2
+  selector:
+    matchLabels: {app: stable-web}
+  template:
+    metadata:
+      labels: {app: stable-web}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.28
+          readinessProbe:
+            httpGet: {path: /, port: 80}

@@ -1,0 +1,19 @@
+# NetworkPolicy 网络隔离 · 只隔离 web 的入站
+# 前提：需要支持 NetworkPolicy 的 CNI。demo 中 app=web 为目标，app=client 为允许来源；仅限制入站，未限制出站。
+# 预期：同 namespace 的 client 标签 Pod 可访问 web 的 TCP/80；其他适用策略仍可能额外放行，需做允许／拒绝双向测试。
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-from-client
+  namespace: demo
+spec:
+  podSelector:
+    matchLabels: {app: web}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: client}
+      ports:
+        - protocol: TCP
+          port: 80

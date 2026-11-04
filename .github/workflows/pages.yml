@@ -31,8 +31,6 @@ jobs:
         run: node --check dist/app.js
       - name: Run content, rendering, and motion checks
         run: npm run check
-      - name: Build local assets
-        run: npm run build
       - name: Upload site
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4

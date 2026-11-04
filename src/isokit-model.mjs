@@ -54,8 +54,8 @@ export function labelLines(text, max = 18) {
 
 export function illustrationFor(name) {
   if (/队列|缓冲|Outbox|就绪集合/.test(name)) return 'queue';
-  if (/校验|检查器|规范|权限|锁状态|监控|模型|控制器|MMU|TLB/.test(name)) return 'control';
-  if (/日志|存储|数据库|磁盘|数据页|版本链|检查点|记录|页面|索引|内存|主存|DRAM|缓存|页表/.test(name)) return 'storage';
-  if (/CPU|线程|Worker|任务|事务|Leader|Follower|客户端|服务端|执行|调度|处理|消费|转发|回调/.test(name)) return 'compute';
+  if (/校验|检查|规范|权限|锁状态|监控|模型|控制器|调度|规则|准入|策略|探针|Service|Ingress|Gateway|PDB|API|RBAC|HPA|readiness|liveness|startup|MMU|TLB/.test(name)) return 'control';
+  if (/日志|存储|数据库|磁盘|快照|ConfigMap|Secret|PVC|PV|etcd|数据页|版本链|检查点|记录|页面|索引|内存|主存|DRAM|缓存|页表/.test(name)) return 'storage';
+  if (/CPU|线程|Worker|Pod|kubelet|CRI|kubectl|节点|应用|容器|任务|事务|Leader|Follower|客户端|服务端|执行|处理|消费|转发|回调/.test(name)) return 'compute';
   return 'record';
 }

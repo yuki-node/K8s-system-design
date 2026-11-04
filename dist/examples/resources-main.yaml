@@ -1,0 +1,19 @@
+# 资源请求与限制 · 资源边界完整清单
+# 前提：demo 已存在；启动后可用 describe 检查配置。kubectl top 还需要资源指标 API。
+# 预期：CPU 为 0.1 核请求、0.5 核限制；内存为二进制单位 Mi，不是毫字节 m。
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo
+  namespace: demo
+spec:
+  containers:
+    - name: web
+      image: nginx:1.28
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 128Mi

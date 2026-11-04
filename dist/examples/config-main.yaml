@@ -1,0 +1,32 @@
+# ConfigMap 与 Secret · 环境变量与卷对照实验
+# 前提：demo 已存在；仅使用无敏感信息的演示 ConfigMap。
+# 预期：两份值起初相同；更新 ConfigMap 后文件可延迟更新，已运行容器的 MODE 环境变量保持原值。
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: demo
+data:
+  MODE: learning
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-reader
+  namespace: demo
+spec:
+  containers:
+    - name: reader
+      image: busybox:1.37
+      command: [sh, -c, 'while true; do echo "$MODE"; cat /config/MODE; sleep 10; done']
+      env:
+        - name: MODE
+          valueFrom:
+            configMapKeyRef: {name: app-config, key: MODE}
+      volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+  volumes:
+    - name: config
+      configMap: {name: app-config}

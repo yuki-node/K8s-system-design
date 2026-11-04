@@ -1,0 +1,22 @@
+# Pod 安全与准入 · 非 root 的最小 Pod
+# 前提：demo 已存在且有 Linux 节点；busybox 的 echo/sleep 支持以数值 UID 1000 运行，仍须服从集群额外准入策略。
+# 预期：日志应显示 uid=1000；本清单演示常见 Restricted 配置，不承诺满足任意自定义策略。
+apiVersion: v1
+kind: Pod
+metadata:
+  name: restricted-demo
+  namespace: demo
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: app
+      image: busybox:1.37
+      command: [sh, -c, 'id; sleep 3600']
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]

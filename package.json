@@ -1,10 +1,14 @@
 {
-  "name": "systems-explorer",
+  "name": "k8s-systems-design",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.0.0",
   "scripts": {
+    "start": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
-    "check": "node check-content.cjs && node check-isokit.cjs && node check-motion.cjs"
+    "typecheck": "tsc --noEmit",
+    "test:course": "node --test test/course.test.cjs",
+    "check": "npm run build && npm run typecheck && node --check dist/app.js && node --test test/*.test.cjs && node check-isokit.cjs && node check-motion.cjs",
+    "test": "npm run check"
   },
   "dependencies": {
     "react": "19.3.1",
@@ -12,6 +16,8 @@
     "react-isokit": "0.5.0"
   },
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "jsdom": "26.1.0",
+    "typescript": "5.9.3"
   }
 }

@@ -1,0 +1,20 @@
+# Ingress 与 Gateway API · 标准 Ingress 规则
+# 前提：已安装 ingressClassName=nginx 的兼容控制器，demo/web Service 存在。示例域名不配置真实 DNS。
+# 预期：只有匹配的控制器处理规则后才可能生效；先核对实际控制器支持与入口地址。
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  namespace: demo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: web.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {number: 80}

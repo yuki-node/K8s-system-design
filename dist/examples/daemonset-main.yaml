@@ -1,0 +1,24 @@
+# DaemonSet 与节点服务 · 非特权守护 Pod 实验
+# 前提：demo 已存在且有 Linux 节点；只是演示每节点部署，不提供真实日志采集，也不挂载宿主机路径。
+# 预期：观察 DESIRED 和 READY；有未容忍污点或资源不足的节点不保证能运行该 Pod。
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-demo
+  namespace: demo
+spec:
+  selector:
+    matchLabels: {app: node-demo}
+  template:
+    metadata:
+      labels: {app: node-demo}
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: agent
+          image: busybox:1.37
+          command: [sh, -c, 'while true; do date; sleep 30; done']
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}

@@ -1,0 +1,16 @@
+# Service 与 EndpointSlice · 与入门 Deployment 对应的 Service
+# 前提：demo/web Pod 的标签为 app=web，nginx 监听 80；不创建公网负载均衡。
+# 预期：集群内以 web.demo.svc 的 80 端口访问，实际域后缀取决于集群配置。
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: demo
+spec:
+  type: ClusterIP
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

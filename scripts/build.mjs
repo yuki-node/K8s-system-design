@@ -1,5 +1,20 @@
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import vm from 'node:vm';
+await build({ entryPoints: ['src/course.ts'], outfile: 'dist/data.js', bundle: true, format: 'iife', globalName: 'K8sCourse', target: ['es2020'] });
+const scope = {};
+vm.runInNewContext(await readFile('dist/data.js', 'utf8'), scope);
+await mkdir('dist/examples', { recursive: true });
+for (const lesson of scope.K8sCourse.LESSONS) {
+  for (const [name, scene] of [['main', lesson], ['fault', lesson.fault]]) {
+    const example = scene.example;
+    const extension = example.language === 'yaml' ? 'yaml' : 'sh';
+    const header = `# ${lesson.title} · ${example.title}\n# 前提：${example.prerequisite}\n# 预期：${example.expected}\n`;
+    await writeFile(`dist/examples/${lesson.id}-${name}.${extension}`, header + example.code + '\n');
+  }
+}
+await writeFile('dist/examples/lab.yaml', await readFile('src/lab.yaml', 'utf8'));
+await writeFile('dist/accuracy-audit.md', await readFile('docs/content-guide.md', 'utf8'));
 const result = await build({
   entryPoints: ['src/isokit-renderer.jsx'],
   outfile: 'dist/isokit.js',

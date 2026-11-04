@@ -14,7 +14,7 @@ const { renderToStaticMarkup } = require('react-dom/server');
     external: ['react', 'react/jsx-runtime'], define: { 'process.env.NODE_ENV': '"production"' } });
   const { MechanismScene } = require('./.openai/local/scene.cjs');
   const scope = {};
-  vm.runInNewContext(fs.readFileSync('dist/data.js', 'utf8') + ';this.lessons=LESSONS;', scope);
+  vm.runInNewContext(fs.readFileSync('dist/data.js', 'utf8') + ';this.lessons=K8sCourse.LESSONS;', scope);
   let stages = 0;
   for (const lesson of scope.lessons) for (const [caseName, scene] of [['main', lesson], ['alternate', lesson.fault]]) {
     for (const name of scene.nodes) assert(labelLines(name).length <= 2, 'node label must fit two readable lines: ' + name);

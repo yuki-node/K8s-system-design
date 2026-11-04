@@ -1,0 +1,210 @@
+{
+  "checked": "2026-11-05",
+  "sources": [
+    {
+      "url": "https://kubernetes.io/docs/concepts/architecture/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/architecture/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/overview/working-with-objects/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/architecture/controller/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/pods/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/policy/resource-quotas/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/policy/resource-quotas/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/job/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/controllers/job/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/configuration/configmap/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/configuration/configmap/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/configuration/secret/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/configuration/secret/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/service/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/ingress/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/gateway/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/gateway/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/storage/storage-classes/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/storage/storage-classes/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/security/pod-security-admission/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/security/pod-security-admission/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/cluster-administration/observability/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/cluster-administration/observability/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/cluster-administration/logging/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/cluster-administration/logging/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "status": 200,
+      "final": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/"
+    },
+    {
+      "url": "https://kubernetes.io/docs/setup/release/version-skew-policy/",
+      "status": 200,
+      "final": "https://kubernetes.io/releases/version-skew-policy/"
+    }
+  ]
+}

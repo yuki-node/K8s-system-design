@@ -1,0 +1,22 @@
+# HPA 自动扩缩容 · 基于 CPU 的 HPA
+# 前提：demo/web Deployment 存在，所有相关容器设置 CPU requests，已安装 Metrics Server 或等效资源指标提供者。
+# 预期：HPA 显示指标与条件；没有实际负载时不保证扩容。与持续 apply 固定 replicas 的自动化需要协调字段管理。
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web
+  namespace: demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

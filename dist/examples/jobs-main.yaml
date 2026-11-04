@@ -1,0 +1,18 @@
+# Job 与 CronJob · 一个会完成的 Job
+# 前提：demo 已存在；命令只输出时间，不产生外部业务副作用。
+# 预期：kubectl -n demo logs job/clock-once 读取输出；任务成功后 Pod 显示 Completed 是正常现象。
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clock-once
+  namespace: demo
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: clock
+          image: busybox:1.37
+          command: [sh, -c, 'date; echo completed']

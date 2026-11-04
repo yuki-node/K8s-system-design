@@ -1,0 +1,29 @@
+# Deployment 与滚动发布 · 可运行的滚动更新清单
+# 前提：demo 已存在；该清单定义 demo/web，可与入门实验对齐。修改镜像版本才会产生模板修订。
+# 预期：两个副本为目标；发布可能需要第三个 Pod 的暂时容量，终止中的 Pod 也可能暂时占用资源。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: demo
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels: {app: web}
+  template:
+    metadata:
+      labels: {app: web}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.28
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 128Mi}
+          readinessProbe:
+            httpGet: {path: /, port: 80}

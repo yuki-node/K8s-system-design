@@ -1,3632 +1,1549 @@
-// Audited teaching content. Frames: label, from, to, event, explanation, state, relation kind.
-const SOURCES = {
-  "fsync_notes": {
-    "name": "Linux man-pages · fsync(2)",
-    "url": "https://man7.org/linux/man-pages/man2/fsync.2.html",
-    "note": "文件数据同步到存储设备的语义、返回值与错误；目录项另有同步要求。",
-    "kind": "具体机制资料"
-  },
-  "csapp": {
-    "name": "CMU 15-213 · Computer Systems",
-    "url": "https://csapp.cs.cmu.edu/3e/curriculum.html",
-    "note": "系统、内存层次、虚拟内存与并发编程",
-    "kind": "课程背景"
-  },
-  "os": {
-    "name": "OSTEP · 操作系统教材",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/",
-    "note": "虚拟化、并发与持久化",
-    "kind": "课程背景"
-  },
-  "arch": {
-    "name": "Berkeley CS 152 · Computer Architecture",
-    "url": "https://www2.eecs.berkeley.edu/Courses/CS152/",
-    "note": "流水线、存储层次与并行执行",
-    "kind": "课程背景"
-  },
-  "db": {
-    "name": "Berkeley CS 186 · 数据库系统",
-    "url": "https://cs186berkeley.net/sp25/",
-    "note": "索引、事务、并发控制与恢复",
-    "kind": "课程背景"
-  },
-  "pg": {
-    "name": "PostgreSQL · 事务隔离",
-    "url": "https://www.postgresql.org/docs/18/transaction-iso.html",
-    "note": "隔离级别、快照与序列化异常",
-    "kind": "官方文档"
-  },
-  "wal": {
-    "name": "PostgreSQL · Write-Ahead Logging",
-    "url": "https://www.postgresql.org/docs/18/wal-intro.html",
-    "note": "日志先于对应数据页持久化",
-    "kind": "官方文档"
-  },
-  "dist": {
-    "name": "MIT 6.5840 · Distributed Systems",
-    "url": "https://pdos.csail.mit.edu/6.5840/schedule.html",
-    "note": "复制、共识、一致性与分布式事务",
-    "kind": "课程背景"
-  },
-  "raft": {
-    "name": "Raft · 原始论文",
-    "url": "https://raft.github.io/raft.pdf",
-    "note": "领导者选举、日志复制与安全性",
-    "kind": "原始论文"
-  },
-  "retry": {
-    "name": "AWS · Timeouts, retries and backoff",
-    "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
-    "note": "超时、有限重试、指数退避与随机抖动",
-    "kind": "官方工程资料"
-  },
-  "systems": {
-    "name": "MIT 6.1800 · Computer Systems Engineering",
-    "url": "https://web.mit.edu/6.1800/2025/wwwdocs/index.shtml",
-    "note": "系统设计、容错、安全与事务",
-    "kind": "课程背景"
-  },
-  "cache_notes": {
-    "name": "CMU 15-213 · Cache Memories",
-    "url": "https://www.cs.cmu.edu/~213/lectures/10-cache-memories.pdf",
-    "note": "缓存行位于缓存集合内部；未命中后装入数据块。",
-    "kind": "具体机制资料"
-  },
-  "tlb_notes": {
-    "name": "OSTEP 第 19 章 · TLB",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-tlbs.pdf",
-    "note": "地址翻译缓存、访问权限、TLB 未命中处理。",
-    "kind": "具体机制资料"
-  },
-  "fault_notes": {
-    "name": "OSTEP 第 21 章 · 缺页机制",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf",
-    "note": "驻留位、缺页异常、页面准备与指令重试。",
-    "kind": "具体机制资料"
-  },
-  "cpu_notes": {
-    "name": "Intel · Optimization Reference Manual",
-    "url": "https://cdrdv2-public.intel.com/821612/248966-Optimization-Reference-Manual-V1-050.pdf",
-    "note": "乱序执行与按序退休；§2.8.2.4 讨论退休及存储。",
-    "kind": "具体机制资料"
-  },
-  "process_notes": {
-    "name": "OSTEP 第 4 章 · 进程状态",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-intro.pdf",
-    "note": "就绪、运行、阻塞，以及状态转移的不同含义。",
-    "kind": "具体机制资料"
-  },
-  "schedule_notes": {
-    "name": "OSTEP 第 8 章 · 多级反馈队列",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched-mlfq.pdf",
-    "note": "优先级调度、饥饿与优先级提升。",
-    "kind": "具体机制资料"
-  },
-  "memory_order": {
-    "name": "Linux 内核 · Memory Barriers",
-    "url": "https://kernel.org/doc/html/latest/core-api/wrappers/memory-barriers.html",
-    "note": "acquire/release 与内存可见性；具体语言模型仍需各自核对。",
-    "kind": "具体机制资料"
-  },
-  "deadlock_notes": {
-    "name": "OSTEP 第 32 章 · 并发错误",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-bugs.pdf",
-    "note": "原子性违反、次序违反与死锁等待环。",
-    "kind": "具体机制资料"
-  },
-  "epoll": {
-    "name": "Linux man-pages · epoll(7)",
-    "url": "https://man7.org/linux/man-pages/man7/epoll.7.html",
-    "note": "就绪通知后仍需执行非阻塞 I/O 并处理 EAGAIN。",
-    "kind": "具体机制资料"
-  },
-  "read": {
-    "name": "Linux man-pages · read(2)",
-    "url": "https://man7.org/linux/man-pages/man2/read.2.html",
-    "note": "短读、EOF、错误与非阻塞读取。",
-    "kind": "具体机制资料"
-  },
-  "bounded": {
-    "name": "OSTEP 第 30 章 · 条件变量",
-    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-cv.pdf",
-    "note": "受同步保护的容量检查、等待和入队。",
-    "kind": "具体机制资料"
-  },
-  "amdahl": {
-    "name": "CMU 15-740 · Parallel Architecture",
-    "url": "https://www.cs.cmu.edu/afs/cs/academic/class/15740-s18/www/lectures/05-06-parallel.pdf",
-    "note": "Amdahl 定律及串行部分对理想加速比的限制。",
-    "kind": "具体机制资料"
-  },
-  "locks_notes": {
-    "name": "Berkeley CS186 · Concurrency II",
-    "url": "https://cs186berkeley.net/notes/note12/",
-    "note": "2PL、严格变体、锁授予和死锁。",
-    "kind": "具体机制资料"
-  },
-  "recovery_notes": {
-    "name": "Berkeley CS186 · Recovery",
-    "url": "https://cs186berkeley.net/notes/note14/",
-    "note": "WAL 的两条持久化规则、pageLSN 与 ARIES 恢复。",
-    "kind": "具体机制资料"
-  },
-  "wal_commit": {
-    "name": "PostgreSQL · Transaction implementation",
-    "url": "https://github.com/postgres/postgres/blob/master/src/backend/access/transam/README",
-    "note": "同步提交刷到提交记录 LSN；与异步提交区别。",
-    "kind": "具体机制资料"
-  },
-  "occ_paper": {
-    "name": "Kung & Robinson · OCC 原始论文",
-    "url": "https://www.eecs.harvard.edu/~htk/publication/1981-tods-kung-robinson.pdf",
-    "note": "读取、验证、写入阶段，以及最终校验和更新的原子边界。",
-    "kind": "具体机制资料"
-  },
-  "bpt": {
-    "name": "Berkeley CS186 · B+ Trees",
-    "url": "https://cs186berkeley.net/notes/note4/",
-    "note": "页式树、叶子、插入与分裂。",
-    "kind": "具体机制资料"
-  },
-  "rocks": {
-    "name": "RocksDB · Overview",
-    "url": "https://github.com/meta/rocksdb/wiki/RocksDB-Overview",
-    "note": "MemTable、SST 与后台压实。",
-    "kind": "具体机制资料"
-  },
-  "stalls": {
-    "name": "RocksDB · Write Stalls",
-    "url": "https://github.com/meta/rocksdb/wiki/Write-Stalls",
-    "note": "压实积压与写入限速、暂停条件。",
-    "kind": "具体机制资料"
-  },
-  "tla": {
-    "name": "Lamport · Specifying Systems",
-    "url": "https://lamport.azurewebsites.net/tla/book-21-07-04.pdf",
-    "note": "第 8、14 章：公平性、安全属性与时序属性检查。",
-    "kind": "具体机制资料"
-  },
-  "idempotent": {
-    "name": "AWS · Making retries safe with idempotent APIs",
-    "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
-    "note": "稳定请求身份、原子记录、参数匹配与保留语义。",
-    "kind": "具体机制资料"
-  },
-  "acks": {
-    "name": "RabbitMQ · Acknowledgements and Confirms",
-    "url": "https://www.rabbitmq.com/docs/confirms",
-    "note": "消费确认、发布确认与故障后的重新投递。",
-    "kind": "具体机制资料"
-  },
-  "migration": {
-    "name": "MIT 6.5840 · Sharded KV Lab",
-    "url": "https://pdos.csail.mit.edu/6.824/labs/lab-shard1.html",
-    "note": "冻结旧分片、安装新状态、发布配置。本例后台预复制加最终冻结为教学综合方案。",
-    "kind": "具体机制资料"
-  },
-  "versioning": {
-    "name": "MIT 6.5840 · KV Server Lab",
-    "url": "https://pdos.csail.mit.edu/6.824/labs/lab-kvsrv1.html",
-    "note": "版本条件写入与操作的实时先后关系。",
-    "kind": "具体机制资料"
-  },
-  "chubby": {
-    "name": "Chubby · 原始论文",
-    "url": "https://www.usenix.org/legacy/event/osdi06/tech/full_papers/burrows/burrows_html/",
-    "note": "§2.1、2.4：延迟请求、锁代际与资源侧校验。本例使用简化的单调令牌协议。",
-    "kind": "具体机制资料"
-  },
-  "outbox_doc": {
-    "name": "AWS · Transactional Outbox",
-    "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
-    "note": "本地提交意图、重复发布和下游幂等。",
-    "kind": "具体机制资料"
-  },
-  "authz": {
-    "name": "OWASP · Authorization Cheat Sheet",
-    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
-    "note": "默认拒绝、每次请求和具体对象的授权检查。",
-    "kind": "具体机制资料"
-  },
-  "health": {
-    "name": "AWS · Implementing health checks",
-    "url": "https://aws.amazon.com/builders-library/implementing-health-checks/",
-    "note": "存活、应用行为与有条件的故障恢复。",
-    "kind": "具体机制资料"
+"use strict";
+var K8sCourse = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/course.ts
+  var course_exports = {};
+  __export(course_exports, {
+    COURSE_META: () => COURSE_META,
+    GROUPS: () => GROUPS,
+    LESSONS: () => LESSONS,
+    SOURCES: () => SOURCES
+  });
+
+  // src/course-types.ts
+  function sh(title, prerequisite, code, expected) {
+    return { title, language: "sh", prerequisite, code: code.trim(), expected };
   }
-};
-const GROUPS = [
-  {
-    "id": "execution",
-    "name": "执行与性能",
-    "en": "EXECUTION & PERFORMANCE",
-    "color": "#164bc4",
-    "question": "怎样让有限的资源做更多工作？"
-  },
-  {
-    "id": "state",
-    "name": "状态与正确性",
-    "en": "STATE & CORRECTNESS",
-    "color": "#087e7f",
-    "question": "并发和崩溃之后，结果仍然正确吗？"
-  },
-  {
-    "id": "distributed",
-    "name": "分布式协作",
-    "en": "DISTRIBUTED COORDINATION",
-    "color": "#8052c7",
-    "question": "消息不可靠时，机器如何一起工作？"
+  function yaml(title, prerequisite, filename, code, expected) {
+    return { title, language: "yaml", prerequisite, filename, code: code.trim(), expected };
   }
-];
-const LESSONS = [
-  {
-    "group": 0,
-    "id": "cache",
-    "title": "缓存与局部性",
-    "en": "CACHE & LOCALITY",
-    "summary": "把经常使用、即将再次使用的数据，放到离计算更近的地方。",
-    "nodes": [
-      "CPU",
-      "缓存控制器",
-      "缓存存储阵列",
-      "主存 DRAM"
-    ],
-    "steps": [
-      [
-        "发出读取",
-        0,
-        1,
-        "LOAD A",
-        "CPU 发出对 A 的读取请求；缓存控制器用索引和标签检查存储阵列中的行。本例省略地址翻译，并用单级缓存说明过程。",
-        "A 的读取尚未完成",
-        "request"
+
+  // src/lessons/foundations.ts
+  var foundations = [
+    {
+      id: "architecture",
+      group: 0,
+      title: "\u96C6\u7FA4\u67B6\u6784\u4E0E\u7EC4\u4EF6",
+      en: "CLUSTER ARCHITECTURE",
+      summary: "\u4ECE\u63D0\u4EA4\u4E00\u4E2A Pod \u5F00\u59CB\uFF0C\u5206\u6E05 API Server\u3001\u63A7\u5236\u5668\u3001\u8C03\u5EA6\u5668\u4E0E kubelet \u7684\u804C\u8D23\u3002",
+      principle: "\u63A7\u5236\u9762\u901A\u8FC7 API \u534F\u4F5C\uFF0C\u8282\u70B9\u4E0A\u7684 kubelet \u624D\u9A71\u52A8\u5BB9\u5668\u8FD0\u884C\u65F6\u8FD0\u884C\u5BB9\u5668\u3002",
+      tradeoff: "\u7EC4\u4EF6\u5206\u5DE5\u8BA9\u7CFB\u7EDF\u53EF\u4EE5\u72EC\u7ACB\u6269\u5C55\u4E0E\u6062\u590D\uFF0C\u4E5F\u4F7F\u4E00\u6B21\u64CD\u4F5C\u9700\u8981\u8DE8\u8D8A\u591A\u4E2A\u5F02\u6B65\u73AF\u8282\u3002",
+      pitfall: "API \u8FD4\u56DE\u6210\u529F\u53EA\u8BF4\u660E\u5BF9\u8C61\u5DF2\u88AB\u63A5\u53D7\uFF1B\u4E0D\u4EE3\u8868 Pod \u5DF2\u8C03\u5EA6\u3001\u955C\u50CF\u5DF2\u62C9\u53D6\u6216\u5E94\u7528\u5DF2\u5C31\u7EEA\u3002",
+      nodes: ["kubectl", "API / etcd", "\u8C03\u5EA6\u5668", "kubelet / CRI"],
+      steps: [
+        ["\u63D0\u4EA4 Pod \u58F0\u660E", 0, 1, "CREATE POD", "\u5047\u8BBE\u96C6\u7FA4\u53EF\u7528\u4E14\u7528\u6237\u6709\u6743\u9650\u3002kubectl \u8BF7\u6C42 API Server \u521B\u5EFA Pod\uFF0C\u7ECF\u8FC7\u6821\u9A8C\u540E\u4FDD\u5B58\u5230\u540E\u7AEF\u5B58\u50A8\u3002", "\u5BF9\u8C61\u5DF2\u4FDD\u5B58 \xB7 \u5C1A\u672A\u8FD0\u884C", "request"],
+        ["\u53D1\u73B0\u672A\u7ED1\u5B9A Pod", 1, 2, "WATCH UNSCHEDULED", "\u8C03\u5EA6\u5668\u901A\u8FC7 API \u89C2\u5BDF\u5C1A\u672A\u7ED1\u5B9A\u8282\u70B9\u7684 Pod\uFF0C\u800C\u4E0D\u662F\u7531 kubectl \u76F4\u63A5\u9009\u62E9\u4E00\u53F0\u673A\u5668\u3002", "\u7B49\u5F85\u8C03\u5EA6\u51B3\u7B56", "data"],
+        ["\u8BB0\u5F55\u8282\u70B9\u7ED1\u5B9A", 2, 1, "BIND NODE", "\u8C03\u5EA6\u5668\u7B5B\u9009\u4E0E\u6253\u5206\u540E\uFF0C\u901A\u8FC7 API \u8BB0\u5F55\u7ED1\u5B9A\u7ED3\u679C\uFF1B\u8FD9\u91CC\u7701\u7565\u5019\u9009\u8282\u70B9\u4EE5\u805A\u7126\u804C\u8D23\u3002", "spec.nodeName \u5DF2\u8BBE\u7F6E", "control"],
+        ["\u8282\u70B9\u9A71\u52A8\u8FD0\u884C", 1, 3, "OBSERVE ASSIGNED POD", "\u76EE\u6807\u8282\u70B9\u7684 kubelet \u89C2\u5BDF\u5230\u5206\u914D\u7ED9\u81EA\u5DF1\u7684 Pod\uFF0C\u901A\u8FC7 CRI \u9A71\u52A8\u8FD0\u884C\u65F6\uFF0C\u5E76\u4E0A\u62A5\u72B6\u6001\uFF1B\u5C31\u7EEA\u8FD8\u9700\u540E\u7EED\u68C0\u67E5\u3002", "\u5DF2\u5206\u914D\u5230\u8282\u70B9 \xB7 \u5C31\u7EEA\u53E6\u884C\u5224\u65AD", "control"]
       ],
-      [
-        "未命中后取整行",
-        1,
-        3,
-        "READ LINE",
-        "缓存中没有 A 所在的行，控制器向主存请求该行。真实系统通常先检查更低一级缓存。",
-        "第 1 次访问未命中",
-        "request"
+      code: ["kubectl \u2192 API Server\uFF1A\u63D0\u4EA4\u5BF9\u8C61", "API Server \u2192 etcd\uFF1A\u6301\u4E45\u5316", "scheduler \u2192 API Server\uFF1A\u8BB0\u5F55\u7ED1\u5B9A", "kubelet \u2192 CRI\uFF1A\u534F\u8C03\u5BB9\u5668\u8FD0\u884C"],
+      example: sh("\u89C2\u5BDF\u63A7\u5236\u9762\u4E0E\u8282\u70B9", "\u9700\u8981\u53EF\u8BBF\u95EE\u7684\u5B9E\u9A8C\u96C6\u7FA4\uFF1B\u6258\u7BA1\u96C6\u7FA4\u53EF\u80FD\u4E0D\u5C55\u793A\u63A7\u5236\u9762 Pod\uFF0C\u4E0D\u80FD\u636E\u6B64\u5224\u65AD\u7EC4\u4EF6\u7F3A\u5931\u3002", `kubectl cluster-info
+kubectl get nodes -o wide
+kubectl -n kube-system get pods
+kubectl -n demo get pods -o wide`, "\u8282\u70B9\u5217\u8868\u663E\u793A\u72B6\u6001\u4E0E\u7248\u672C\uFF1Bdemo Pod \u7684 NODE \u5217\u53EF\u4E0E\u8C03\u5EA6\u7ED3\u679C\u5BF9\u5E94\u3002"),
+      sections: [
+        { title: "\u63A7\u5236\u9762\u4FDD\u5B58\u76EE\u6807\uFF0C\u8282\u70B9\u843D\u5B9E\u76EE\u6807", body: "API Server \u63D0\u4F9B\u8D44\u6E90\u8BFB\u5199\u5165\u53E3\uFF0Cetcd \u4FDD\u5B58\u96C6\u7FA4\u72B6\u6001\u3002\u8C03\u5EA6\u5668\u8D1F\u8D23\u9009\u62E9\u8282\u70B9\uFF0C\u63A7\u5236\u5668\u8D1F\u8D23\u5404\u7C7B\u8D44\u6E90\u7684\u63A7\u5236\u5FAA\u73AF\u3002kubelet \u7BA1\u7406\u8282\u70B9\u4E0A\u7684 Pod\uFF0C\u5BB9\u5668\u8FD0\u884C\u65F6\u8D1F\u8D23\u5BB9\u5668\u6267\u884C\uFF1BCNI\u3001CSI \u7B49\u6269\u5C55\u627F\u62C5\u76F8\u5E94\u7F51\u7EDC\u4E0E\u5B58\u50A8\u5DE5\u4F5C\u3002" },
+        { title: "\u63A7\u5236\u8DEF\u5F84\u4E0E\u4E1A\u52A1\u8DEF\u5F84\u5206\u5F00", body: "\u8BF7\u6C42\u5E94\u7528 Service \u7684\u4E1A\u52A1\u6D41\u91CF\u901A\u5E38\u4E0D\u7ECF\u8FC7 API Server\u3002Service \u7684\u8F6C\u53D1\u53EF\u80FD\u7531 kube-proxy \u6216\u66FF\u4EE3\u6570\u636E\u9762\u5B9E\u73B0\uFF1BAPI \u4FDD\u5B58\u914D\u7F6E\u4E0E\u53D1\u73B0\u4FE1\u606F\uFF0C\u4E0D\u66FF\u6BCF\u4E2A\u8BF7\u6C42\u505A\u4E1A\u52A1\u4EE3\u7406\u3002" },
+        { title: "\u5148\u627E\u5230\u5361\u4F4F\u7684\u73AF\u8282", body: "\u5BF9\u8C61\u4E0D\u5B58\u5728\u5148\u67E5\u8BF7\u6C42\u4E0E\u6743\u9650\uFF1B\u6CA1\u6709\u8282\u70B9\u7ED1\u5B9A\u67E5\u8C03\u5EA6\u4E8B\u4EF6\uFF1B\u5DF2\u7ED1\u5B9A\u4F46\u5BB9\u5668\u672A\u521B\u5EFA\u67E5 kubelet\u3001\u8FD0\u884C\u65F6\u3001\u955C\u50CF\u548C\u6302\u8F7D\u3002\u7EC4\u4EF6\u804C\u8D23\u662F\u6392\u67E5\u987A\u5E8F\u7684\u4F9D\u636E\uFF0C\u56DB\u4E2A\u56FE\u89E3\u8282\u70B9\u53EA\u662F\u903B\u8F91\u89D2\u8272\u3002" }
       ],
-      [
-        "填入缓存阵列",
-        3,
-        2,
-        "FILL 64B",
-        "主存返回包含 A 的数据行，填入缓存阵列；随后所需字返回 CPU，完成第一次读取。64 字节只是本例行大小。",
-        "A 所在行已缓存 · 首次读取完成",
-        "data"
-      ],
-      [
-        "再次访问命中",
-        2,
-        0,
-        "HIT A+4",
-        "CPU 随后读取同一行内的 A+4；控制器命中后从缓存阵列返回所需字，不必再次访问主存。缓存行是缓存内部的存储单位。",
-        "2 次访问：1 miss / 1 hit",
-        "data"
-      ]
-    ],
-    "principle": "时间局部性复用最近访问；空间局部性利用相邻数据。",
-    "tradeoff": "提高命中率通常要同时考虑布局、工作集、替换策略和维护一致性的成本。",
-    "pitfall": "缓存行不同于对象；不同线程写同一行中的不同变量，也可能产生伪共享。",
-    "code": [
-      "entry = cache.lookup(address)",
-      "if entry.missing:",
-      "  block = lowerLevel.readLine(lineBase(address))",
-      "  entry = cache.install(block)",
-      "return entry.readWord(offset(address))"
-    ],
-    "sources": [
-      "cache_notes",
-      "csapp"
-    ],
-    "related": [
-      "vm",
-      "pipeline",
-      "measure"
-    ],
-    "fault": {
-      "name": "工作集超过容量",
-      "nodes": [
-        "CPU",
-        "缓存控制器",
-        "缓存阵列 · 2 行",
-        "主存 DRAM"
-      ],
-      "steps": [
-        [
-          "先装入 A 与 B",
-          3,
-          2,
-          "FILL A,B",
-          "用一个初始为空、仅能容纳两行的全相联 LRU 缓存举例。CPU 依次读取 A、B，两次冷未命中都从主存装入；A、B、C 分别位于不同缓存行。",
-          "缓存 [A,B] · A 最久未用",
-          "data"
+      sources: ["architecture", "pods"],
+      related: ["api", "reconcile", "scheduling", "pod"],
+      fault: {
+        name: "API \u53EF\u7528\uFF0C\u955C\u50CF\u62C9\u53D6\u5931\u8D25",
+        nodes: ["Pod \u58F0\u660E", "\u8C03\u5EA6\u7ED1\u5B9A", "kubelet / CRI", "\u955C\u50CF\u4ED3\u5E93"],
+        steps: [
+          ["\u786E\u8BA4\u5BF9\u8C61\u5DF2\u5B58\u5728", 0, 0, "POD CREATED", "\u72EC\u7ACB\u573A\u666F\uFF1APod \u5BF9\u8C61\u5DF2\u521B\u5EFA\uFF0C\u955C\u50CF\u5730\u5740\u4E0D\u5B58\u5728\u3002API \u63A5\u53D7\u58F0\u660E\u65F6\u4E0D\u4F1A\u9884\u5148\u9A8C\u8BC1\u955C\u50CF\u80FD\u5426\u62C9\u53D6\u3002", "\u5B58\u5728\u5BF9\u8C61 \u2260 \u5BB9\u5668\u8FD0\u884C", "local"],
+          ["Pod \u6210\u529F\u5206\u914D\u8282\u70B9", 1, 2, "ASSIGNED", "\u8C03\u5EA6\u6CA1\u6709\u53D1\u73B0\u8D44\u6E90\u6216\u7EA6\u675F\u51B2\u7A81\uFF0C\u8282\u70B9\u5F00\u59CB\u5904\u7406\u8BE5 Pod\u3002", "PodScheduled=True", "control"],
+          ["\u4ED3\u5E93\u62D2\u7EDD\u62C9\u53D6", 2, 3, "IMAGE PULL ERROR", "\u8FD0\u884C\u65F6\u8BF7\u6C42\u955C\u50CF\u5931\u8D25\uFF0C\u5E38\u89C1\u539F\u56E0\u5305\u62EC\u5730\u5740\u9519\u8BEF\u3001\u51ED\u636E\u9519\u8BEF\u6216\u7F51\u7EDC\u4E0D\u53EF\u8FBE\u3002", "ErrImagePull / ImagePullBackOff", "reject"],
+          ["\u4FDD\u7559\u9519\u8BEF\u8BC1\u636E", 2, 2, "BACKOFF", "\u8282\u70B9\u7A0D\u540E\u4F1A\u91CD\u8BD5\uFF1B\u5E94\u67E5\u770B\u4E8B\u4EF6\u5B9A\u4F4D\u539F\u56E0\uFF0C\u4E0D\u80FD\u56E0\u4E3A API \u5065\u5EB7\u5C31\u5224\u5B9A\u6574\u4E2A\u96C6\u7FA4\u8FD0\u884C\u6B63\u5E38\u3002", "\u8C03\u5EA6\u6210\u529F \xB7 \u5BB9\u5668\u5C1A\u672A\u542F\u52A8", "local"]
         ],
-        [
-          "继续读取 C",
-          0,
-          1,
-          "LOAD C / MISS",
-          "CPU 循环访问 A、B、C；现在请求 C。C 不在缓存中，且两行空间都已占用。",
-          "缓存 [A,B] · C 未命中",
-          "request"
-        ],
-        [
-          "替换 A 装入 C",
-          3,
-          2,
-          "EVICT A / FILL C",
-          "LRU 选择 A 为牺牲行，主存返回 C 后缓存变为 B、C。本例只读，不涉及脏行写回。",
-          "缓存 [B,C] · A 已被替换",
-          "data"
-        ],
-        [
-          "下一轮 A 再次未命中",
-          0,
-          1,
-          "LOAD A / MISS",
-          "下一轮又需要 A，但 A 已被替换。三行工作集反复轮转超过两行容量，持续产生容量未命中；应测量后考虑分块或缩小工作集。",
-          "缓存 [B,C] · 再次请求主存 A",
-          "request"
-        ]
+        code: ["\u68C0\u67E5 Pod \u7684 nodeName", "\u8BFB\u53D6 Events \u7684\u62C9\u53D6\u9519\u8BEF", "\u6838\u5BF9\u955C\u50CF\u5730\u5740\u3001\u51ED\u636E\u4E0E\u4ED3\u5E93\u8FDE\u901A\u6027", "\u4FEE\u6B63\u58F0\u660E\u540E\u89C2\u5BDF\u65B0\u4E8B\u4EF6"],
+        example: sh("\u5B9A\u4F4D\u955C\u50CF\u95EE\u9898", "\u5C06 POD \u66FF\u6362\u4E3A demo \u4E2D\u771F\u5B9E\u7684\u5F02\u5E38 Pod \u540D\uFF1B\u4E0D\u901A\u8FC7\u5220\u9664 Pod \u63A9\u76D6\u9996\u6B21\u5931\u8D25\u8BC1\u636E\u3002", `POD=replace-me
+kubectl -n demo get pod "$POD" -o wide
+kubectl -n demo describe pod "$POD"`, "\u67E5\u770B Events \u4E2D Failed\u3001BackOff \u7684\u5177\u4F53\u539F\u56E0\uFF1B\u6CA1\u6709\u8FD0\u884C\u8FC7\u7684\u5BB9\u5668\u901A\u5E38\u6CA1\u6709\u5E94\u7528\u65E5\u5FD7\u3002")
+      }
+    },
+    {
+      id: "api",
+      group: 0,
+      title: "\u58F0\u660E\u5F0F API \u4E0E\u5BF9\u8C61",
+      en: "DECLARATIVE API",
+      summary: "\u7528\u6E05\u5355\u63CF\u8FF0\u76EE\u6807\uFF0C\u901A\u8FC7 spec \u4E0E status \u7684\u533A\u522B\u5224\u65AD\u201C\u63A5\u53D7\u4E86\u201D\u4E0E\u201C\u5B8C\u6210\u4E86\u201D\u3002",
+      principle: "spec \u662F\u671F\u671B\uFF0Cstatus \u662F\u89C2\u6D4B\uFF1B\u58F0\u660E\u5F0F\u7BA1\u7406\u4F9D\u8D56\u6301\u7EED\u6536\u655B\u3002",
+      tradeoff: "\u53EF\u91CD\u590D\u58F0\u660E\u4FBF\u4E8E\u5BA1\u67E5\u4E0E\u81EA\u52A8\u5316\uFF0C\u4F46\u591A\u65B9\u4FEE\u6539\u540C\u4E00\u5B57\u6BB5\u65F6\u9700\u8981\u660E\u786E\u5B57\u6BB5\u6240\u6709\u6743\u548C\u53D8\u66F4\u6765\u6E90\u3002",
+      pitfall: "apply \u6210\u529F\u4E0D\u4F1A\u7B49\u5F85\u5E94\u7528\u5065\u5EB7\uFF1B--dry-run=server \u4E5F\u4E0D\u4F1A\u771F\u6B63\u521B\u5EFA Pod \u6216\u8FD0\u884C\u5BB9\u5668\u3002",
+      nodes: ["\u8D44\u6E90\u6E05\u5355", "API Server", "\u5DF2\u5B58\u5BF9\u8C61", "\u63A7\u5236\u5668"],
+      steps: [
+        ["\u63D0\u4EA4\u671F\u671B\u72B6\u6001", 0, 1, "APPLY MANIFEST", "\u5047\u8BBE\u6E05\u5355\u683C\u5F0F\u6B63\u786E\u4E14\u8BF7\u6C42\u6709\u6743\u9650\u3002\u5BA2\u6237\u7AEF\u628A\u6E05\u5355\u63D0\u4EA4\u7ED9 API\uFF0C\u800C\u4E0D\u662F\u76F4\u63A5\u5728\u8282\u70B9\u6267\u884C\u811A\u672C\u3002", "\u8BF7\u6C42\u6B63\u5728\u9A8C\u8BC1", "request"],
+        ["\u4FDD\u5B58\u58F0\u660E", 1, 2, "PERSIST SPEC", "API \u6267\u884C\u9ED8\u8BA4\u503C\u3001\u51C6\u5165\u548C\u6821\u9A8C\u7B49\u5904\u7406\u540E\u4FDD\u5B58\u5BF9\u8C61\u3002\u6B64\u523B\u4E0D\u80FD\u63A8\u65AD\u4E1A\u52A1\u53EF\u7528\u3002", "spec \u5DF2\u66F4\u65B0", "data"],
+        ["\u89C2\u5BDF\u65B0\u76EE\u6807", 2, 3, "OBSERVE CHANGE", "\u63A7\u5236\u5668\u901A\u8FC7 API \u89C2\u5BDF\u8D44\u6E90\u53D8\u5316\u5E76\u5C1D\u8BD5\u534F\u8C03\u5BF9\u5E94\u5B50\u8D44\u6E90\u3002", "\u76EE\u6807\u4E0E\u73B0\u72B6\u53EF\u80FD\u4E0D\u540C", "control"],
+        ["\u89C2\u5BDF\u6536\u655B\u7ED3\u679C", 3, 2, "UPDATE STATUS", "\u7EC4\u4EF6\u56DE\u5199\u6761\u4EF6\u4E0E\u72B6\u6001\u3002\u5B66\u4E60\u8005\u9700\u8981\u7ED3\u5408\u8D44\u6E90\u6761\u4EF6\u3001\u4E8B\u4EF6\u548C\u4E1A\u52A1\u68C0\u67E5\u9A8C\u8BC1\u7ED3\u679C\u3002", "status \u53CD\u6620\u89C2\u6D4B\u8FDB\u5C55", "data"]
       ],
-      "code": [
-        "cache = FullyAssociativeLRU(capacityLines=2)",
-        "for address in cycle(A, B, C):",
-        "  entry = cache.lookup(address)",
-        "  if entry.missing:",
-        "    entry = cache.install(memory.readLine(address))",
-        "  consume(entry)"
-      ]
+      code: ["\u58F0\u660E desired spec", "API \u9A8C\u8BC1\u5E76\u4FDD\u5B58", "\u63A7\u5236\u5668\u534F\u8C03\u8D44\u6E90", "\u8BFB status / conditions \u9A8C\u8BC1\u8FDB\u5C55"],
+      example: sh("\u9884\u68C0\u6E05\u5355\u5E76\u89C2\u5BDF\u7ED3\u679C", "\u5DF2\u4E0B\u8F7D\u5165\u95E8\u5B9E\u9A8C\u6E05\u5355\u4E3A lab.yaml\uFF1Bserver dry-run \u9700\u8981\u76F8\u5E94\u6743\u9650\u53CA\u652F\u6301 dry-run \u7684\u51C6\u5165\u7EC4\u4EF6\u3002", `kubectl apply --dry-run=server -f lab.yaml
+kubectl diff -f lab.yaml
+kubectl apply -f lab.yaml
+kubectl -n demo rollout status deployment/web --timeout=120s`, "diff \u9000\u51FA\u7801 1 \u8868\u793A\u5B58\u5728\u5DEE\u5F02\uFF1Brollout status \u7684\u6210\u529F\u662F Deployment \u8FDB\u5EA6\u68C0\u67E5\uFF0C\u4E0D\u66FF\u4EE3\u4E1A\u52A1\u9A8C\u6536\u3002"),
+      sections: [
+        { title: "\u5BF9\u8C61\u8EAB\u4EFD\u4E0D\u662F\u53EA\u6709\u540D\u5B57", body: "apiVersion\u3001kind\u3001metadata\u3001spec \u5171\u540C\u63CF\u8FF0\u8D44\u6E90\u3002\u547D\u540D\u7A7A\u95F4\u5185\u540C\u4E00\u79CD\u8D44\u6E90\u7684\u540D\u5B57\u552F\u4E00\uFF0CUID \u533A\u5206\u540C\u540D\u5BF9\u8C61\u7684\u4E0D\u540C\u751F\u547D\u5468\u671F\u3002status \u901A\u5E38\u7531\u7CFB\u7EDF\u7EC4\u4EF6\u5199\u5165\uFF0C\u4E0D\u80FD\u628A\u5B83\u5F53\u4F5C\u7528\u6237\u7684\u76EE\u6807\u58F0\u660E\u3002" },
+        { title: "\u6821\u9A8C\u4E0E\u6267\u884C\u662F\u4E0D\u540C\u9636\u6BB5", body: "server dry-run \u53EF\u4EE5\u7ECF\u8FC7\u670D\u52A1\u7AEF\u6821\u9A8C\u4E0E\u51C6\u5165\uFF0C\u4F46\u4E0D\u6301\u4E45\u5316\u8D44\u6E90\uFF0C\u4E5F\u4E0D\u4F1A\u9A8C\u8BC1\u955C\u50CF\u53EF\u62C9\u53D6\u3001\u5377\u53EF\u6302\u8F7D\u6216 HTTP \u63A5\u53E3\u53EF\u5DE5\u4F5C\u3002\u58F0\u660E\u88AB\u63A5\u53D7\u540E\uFF0C\u4ECD\u6709\u5F02\u6B65\u63A7\u5236\u73AF\u8282\u53EF\u80FD\u5931\u8D25\u3002" },
+        { title: "\u7BA1\u7406\u5B57\u6BB5\u9700\u8981\u534F\u4F5C\u7EA6\u5B9A", body: "Server-Side Apply \u8BB0\u5F55\u5B57\u6BB5\u7BA1\u7406\u8005\u3002\u591A\u4E2A\u5DE5\u5177\u4E89\u7528\u5B57\u6BB5\u65F6\u53EF\u80FD\u51FA\u73B0\u51B2\u7A81\uFF1B\u5728\u4E0D\u4E86\u89E3\u6765\u6E90\u524D\u5F3A\u5236\u63A5\u7BA1\u5B57\u6BB5\u4F1A\u8986\u76D6\u522B\u4EBA\u7684\u914D\u7F6E\u3002\u5E94\u5148\u68C0\u67E5 managedFields\u3001\u63D0\u4EA4\u5DEE\u5F02\u4E0E\u81EA\u52A8\u5316\u63A7\u5236\u5668\u3002" }
+      ],
+      sources: ["api", "apply"],
+      related: ["reconcile", "deployment", "rbac"],
+      fault: {
+        name: "\u7F3A\u5C11\u5B57\u6BB5\uFF0C\u58F0\u660E\u88AB\u62D2\u7EDD",
+        nodes: ["\u65E0\u6548\u6E05\u5355", "API \u6821\u9A8C", "\u6301\u4E45\u5316\u5B58\u50A8", "\u63A7\u5236\u5668"],
+        steps: [
+          ["\u63D0\u4EA4\u65E0\u6548\u5BF9\u8C61", 0, 1, "INVALID MANIFEST", "\u72EC\u7ACB\u573A\u666F\uFF1A\u65B0\u5EFA Deployment \u65F6\u6A21\u677F\u6807\u7B7E\u4E0E selector \u4E0D\u5339\u914D\u3002", "\u8BF7\u6C42\u5C1A\u672A\u6301\u4E45\u5316", "request"],
+          ["\u670D\u52A1\u7AEF\u9A8C\u8BC1\u5931\u8D25", 1, 1, "VALIDATION FAILED", "API \u68C0\u67E5 selector \u5FC5\u987B\u5339\u914D Pod \u6A21\u677F\u6807\u7B7E\u7B49\u7EA6\u675F\uFF0C\u4E0D\u80FD\u63A5\u53D7\u8BE5\u5BF9\u8C61\u3002", "Invalid", "local"],
+          ["\u8FD4\u56DE\u660E\u786E\u9519\u8BEF", 1, 0, "422 INVALID", "\u8C03\u7528\u65B9\u6536\u5230\u5B57\u6BB5\u8DEF\u5F84\u4E0E\u9519\u8BEF\u539F\u56E0\u3002\u63A7\u5236\u5668\u6CA1\u6709\u6536\u5230\u4E00\u4E2A\u6210\u529F\u521B\u5EFA\u7684\u8BE5\u5BF9\u8C61\u3002", "\u672C\u6B21\u521B\u5EFA\u672A\u6210\u529F", "reject"],
+          ["\u4FEE\u6B63\u540E\u518D\u63D0\u4EA4", 0, 0, "FIX AND RETRY", "\u4FDD\u7559\u539F\u59CB\u9519\u8BEF\uFF0C\u5BF9\u9F50 selector \u4E0E\u6A21\u677F\u6807\u7B7E\u540E\u91CD\u65B0\u6267\u884C dry-run\uFF1B\u4E0D\u8981\u628A\u6821\u9A8C\u9519\u8BEF\u5F53\u4F5C\u8282\u70B9\u95EE\u9898\u3002", "\u5F85\u4FEE\u6B63\u6E05\u5355", "local"]
+        ],
+        code: ["\u8BFB\u53D6\u9519\u8BEF\u5B57\u6BB5\u8DEF\u5F84", "\u6BD4\u5BF9 selector \u548C template.labels", "\u4FEE\u6B63\u672C\u5730\u6E05\u5355", "\u518D\u6B21\u6267\u884C server dry-run"],
+        example: sh("\u67E5\u8BE2\u5B57\u6BB5\u7EA6\u675F", "kubectl \u80FD\u8BBF\u95EE\u96C6\u7FA4 OpenAPI\uFF1B\u628A\u5F85\u68C0\u67E5 Deployment \u6E05\u5355\u4FDD\u5B58\u4E3A deployment.yaml\u3002", `kubectl explain deployment.spec.selector
+kubectl explain deployment.spec.template
+kubectl apply --dry-run=server -f deployment.yaml`, "\u547D\u4EE4\u663E\u793A\u5B57\u6BB5\u8BF4\u660E\uFF1B\u65E0\u6548\u6E05\u5355\u4F1A\u8FD4\u56DE\u6821\u9A8C\u9519\u8BEF\uFF0C\u4E0D\u521B\u5EFA\u8D44\u6E90\u3002")
+      }
+    },
+    {
+      id: "reconcile",
+      group: 0,
+      title: "\u63A7\u5236\u5FAA\u73AF\u4E0E\u81EA\u6108",
+      en: "RECONCILIATION LOOP",
+      summary: "\u7406\u89E3\u63A7\u5236\u5668\u5982\u4F55\u53CD\u590D\u89C2\u5BDF\u5DEE\u5F02\uFF0C\u4EE5\u53CA\u201C\u81EA\u6108\u201D\u4E3A\u4EC0\u4E48\u9700\u8981\u8D44\u6E90\u3001\u6743\u9650\u548C\u4F9D\u8D56\u6761\u4EF6\u3002",
+      principle: "\u63A7\u5236\u5668\u4E0D\u65AD\u7F29\u5C0F\u671F\u671B\u4E0E\u73B0\u72B6\u7684\u5DEE\u8DDD\uFF1B\u6BCF\u6B21\u534F\u8C03\u90FD\u53EF\u80FD\u9700\u8981\u91CD\u8BD5\u3002",
+      tradeoff: "\u6700\u7EC8\u6536\u655B\u53EF\u4EE5\u5BB9\u5FCD\u4E34\u65F6\u6545\u969C\uFF0C\u4EE3\u4EF7\u662F\u4E2D\u95F4\u72B6\u6001\u3001\u89C2\u5BDF\u5EF6\u8FDF\u548C\u53CD\u590D\u91CD\u8BD5\u3002",
+      pitfall: "\u63A7\u5236\u5668\u8865\u5EFA\u7684\u662F\u65B0 Pod\uFF1B\u5B83\u4E0D\u4F1A\u8BA9\u5DF2\u7ECF\u6D88\u5931\u7684 Pod \u4EE5\u76F8\u540C UID \u590D\u6D3B\uFF0C\u4E5F\u4E0D\u4FDD\u8BC1\u4E1A\u52A1\u6570\u636E\u81EA\u52A8\u6062\u590D\u3002",
+      nodes: ["\u671F\u671B\u526F\u672C 2", "ReplicaSet \u63A7\u5236\u5668", "Pod \u96C6\u5408", "API Server"],
+      steps: [
+        ["\u89C2\u5BDF\u53D7\u7BA1\u8D44\u6E90", 0, 1, "DESIRED=2", "\u5047\u8BBE ReplicaSet \u76EE\u6807\u526F\u672C\u4E3A 2\uFF0C\u5F53\u524D\u53EA\u6709\u4E00\u4E2A\u53D7\u5B83\u7BA1\u7406\u7684\u6D3B\u52A8 Pod\u3002", "desired=2 \xB7 observed=1", "control"],
+        ["\u6BD4\u8F83\u526F\u672C\u5DEE\u989D", 1, 2, "OBSERVE PODS", "\u63A7\u5236\u5668\u57FA\u4E8E\u89C2\u5BDF\u5230\u7684\u8D44\u6E90\u8EAB\u4EFD\u3001\u6240\u6709\u6743\u548C\u5220\u9664\u72B6\u6001\u5224\u65AD\u5DEE\u989D\u3002\u56FE\u4E2D\u96C6\u5408\u4E0D\u662F\u4E00\u53F0\u670D\u52A1\u5668\u3002", "\u7F3A\u5C11\u4E00\u4E2A Pod", "check"],
+        ["\u8BF7\u6C42\u521B\u5EFA\u65B0 Pod", 1, 3, "CREATE REPLACEMENT", "\u63A7\u5236\u5668\u5411 API \u53D1\u8D77\u521B\u5EFA\u8BF7\u6C42\uFF1BAPI \u63A5\u53D7\u540E\uFF0C\u8C03\u5EA6\u4E0E\u8282\u70B9\u6267\u884C\u7EE7\u7EED\u63A8\u8FDB\u3002", "\u5DF2\u8BF7\u6C42\u8865\u5EFA", "request"],
+        ["\u518D\u6B21\u89C2\u5BDF\u73B0\u72B6", 2, 1, "RECONCILE AGAIN", "\u540E\u7EED\u89C2\u5BDF\u786E\u8BA4\u6709\u4E24\u4E2A\u6D3B\u52A8 Pod\uFF1B\u5C31\u7EEA\u548C\u4E1A\u52A1\u5065\u5EB7\u4ECD\u9700\u5404\u81EA\u6761\u4EF6\uFF0C\u4E0D\u7531\u6570\u91CF\u4EE3\u66FF\u3002", "\u526F\u672C\u6570\u6536\u655B \xB7 \u5C31\u7EEA\u53E6\u67E5", "data"]
+      ],
+      code: ["desired = ReplicaSet.spec.replicas", "observed = controlled active Pods", "if observed < desired: request new Pods", "\u518D\u6B21\u89C2\u5BDF\uFF0C\u5931\u8D25\u5219\u6709\u8282\u5236\u5730\u91CD\u8BD5"],
+      example: sh("\u89C2\u5BDF\u671F\u671B\u4E0E\u5B9E\u9645\u526F\u672C", "\u5DF2\u5E94\u7528 lab.yaml\uFF0Cdemo/web Deployment \u76EE\u6807\u4E3A 2\uFF1B\u8FD9\u91CC\u53EA\u89C2\u5BDF\uFF0C\u4E0D\u4E3B\u52A8\u5236\u9020\u6545\u969C\u3002", `kubectl -n demo get deployment web
+kubectl -n demo get replicasets
+kubectl -n demo get pods -l app=web -w`, "Deployment\u3001ReplicaSet \u4E0E Pod \u662F\u4E0D\u540C\u8D44\u6E90\uFF1B\u6700\u540E\u4E00\u6761\u6301\u7EED\u89C2\u5BDF\uFF0C\u53EF\u6309 Ctrl+C \u7ED3\u675F\u3002"),
+      sections: [
+        { title: "\u63A7\u5236\u5668\u5BF9\u8D44\u6E90\u8D1F\u8D23", body: "Deployment \u7BA1\u7406 ReplicaSet\uFF0CReplicaSet \u7BA1\u7406 Pod \u526F\u672C\u3002\u89C2\u5BDF\u4E8B\u4EF6\u662F\u63A8\u8FDB\u534F\u8C03\u7684\u7EBF\u7D22\uFF0C\u63A7\u5236\u5668\u4ECD\u8981\u8BFB\u53D6\u5F53\u524D\u72B6\u6001\u518D\u51B3\u5B9A\u52A8\u4F5C\uFF1B\u4E0D\u80FD\u628A\u6BCF\u4E2A\u4E8B\u4EF6\u673A\u68B0\u5730\u6620\u5C04\u4E3A\u4E00\u6B21\u521B\u5EFA\u3002" },
+        { title: "\u5E42\u7B49\u4E0E\u91CD\u8BD5", body: "\u7F51\u7EDC\u8D85\u65F6\u3001\u51B2\u7A81\u4E0E\u4E34\u65F6\u4F9D\u8D56\u9519\u8BEF\u53EF\u80FD\u53CD\u590D\u51FA\u73B0\u3002\u63A7\u5236\u5FAA\u73AF\u5FC5\u987B\u80FD\u591F\u5728\u5DF2\u7ECF\u90E8\u5206\u5B8C\u6210\u7684\u72B6\u6001\u4E0B\u7EE7\u7EED\u5DE5\u4F5C\uFF0C\u800C\u4E0D\u662F\u6BCF\u6B21\u4ECE\u96F6\u5047\u8BBE\u3002\u81EA\u5B9A\u4E49\u63A7\u5236\u5668\u540C\u6837\u9700\u8981\u8003\u8651\u91CD\u590D\u534F\u8C03\u4E0E\u4E1A\u52A1\u526F\u4F5C\u7528\u3002" },
+        { title: "\u81EA\u6108\u6709\u6761\u4EF6", body: "\u6743\u9650\u4E0D\u8DB3\u3001\u914D\u989D\u8017\u5C3D\u3001\u8C03\u5EA6\u65E0\u89E3\u6216\u955C\u50CF\u5931\u8D25\u90FD\u4F1A\u963B\u6B62\u6536\u655B\u3002\u76F4\u63A5\u521B\u5EFA\u7684\u88F8 Pod \u88AB\u5220\u9664\u540E\u6CA1\u6709\u5DE5\u4F5C\u8D1F\u8F7D\u63A7\u5236\u5668\u8D1F\u8D23\u8865\u5EFA\uFF1B\u5BB9\u5668\u5728\u539F Pod \u5185\u91CD\u542F\u5219\u662F kubelet \u5C42\u9762\u7684\u53E6\u4E00\u79CD\u6062\u590D\u3002" }
+      ],
+      sources: ["controllers", "deployment", "lifecycle"],
+      related: ["api", "pod", "deployment", "observability"],
+      fault: {
+        name: "\u60F3\u8865\u526F\u672C\uFF0C\u5374\u88AB\u914D\u989D\u62E6\u4F4F",
+        nodes: ["\u671F\u671B\u526F\u672C", "\u526F\u672C\u63A7\u5236\u5668", "API / \u914D\u989D", "\u53D7\u7BA1 Pod"],
+        steps: [
+          ["\u73B0\u6709\u526F\u672C\u4E0D\u8DB3", 0, 1, "DESIRED > OBSERVED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u76EE\u6807\u4E3A\u4E24\u4E2A\u526F\u672C\uFF0C\u53EA\u6709\u4E00\u4E2A Pod\uFF0C\u800C\u547D\u540D\u7A7A\u95F4 Pod \u914D\u989D\u5DF2\u88AB\u5176\u4ED6\u8D1F\u8F7D\u5360\u6EE1\u3002", "\u9700\u8981\u521B\u5EFA\u66FF\u4EE3 Pod", "control"],
+          ["\u5C1D\u8BD5\u8865\u5EFA", 1, 2, "CREATE POD", "\u63A7\u5236\u5668\u6309\u76EE\u6807\u53D1\u8D77\u521B\u5EFA\u8BF7\u6C42\uFF0C\u4E0D\u80FD\u7ED5\u8FC7\u51C6\u5165\u4E0E\u547D\u540D\u7A7A\u95F4\u914D\u989D\u3002", "\u7B49\u5F85\u51C6\u5165\u7ED3\u679C", "request"],
+          ["\u914D\u989D\u62D2\u7EDD\u521B\u5EFA", 2, 1, "EXCEEDED QUOTA", "API \u62D2\u7EDD\u8BF7\u6C42\uFF0CReplicaSet \u4E8B\u4EF6\u53EF\u80FD\u51FA\u73B0 FailedCreate\u3002\u65B0 Pod \u5C1A\u4E0D\u5B58\u5728\uFF0C\u4E0D\u5C5E\u4E8E Pending \u8C03\u5EA6\u5931\u8D25\u3002", "\u526F\u672C\u7F3A\u53E3\u4ECD\u5728", "reject"],
+          ["\u5B9A\u4F4D\u7EA6\u675F\u518D\u5904\u7406", 1, 1, "RETRY AFTER DIAGNOSIS", "\u68C0\u67E5\u914D\u989D\u4E0E\u6D88\u8017\u65B9\uFF0C\u8C03\u6574\u9700\u6C42\u6216\u5408\u7406\u91CA\u653E\u8D44\u6E90\u3002\u63A7\u5236\u5668\u91CD\u8BD5\u4E0D\u80FD\u521B\u9020\u65E0\u9650\u5BB9\u91CF\u3002", "\u81EA\u6108\u53D7\u914D\u989D\u7EA6\u675F", "local"]
+        ],
+        code: ["\u68C0\u67E5 ReplicaSet FailedCreate \u4E8B\u4EF6", "\u8BFB\u53D6 ResourceQuota \u5F53\u524D\u7528\u91CF", "\u4E0E\u76EE\u6807\u526F\u672C\u5BF9\u5E94\u7684\u8D44\u6E90\u9700\u6C42\u6BD4\u8F83", "\u4FEE\u6B63\u7EA6\u675F\u540E\u91CD\u65B0\u89C2\u5BDF"],
+        example: sh("\u5206\u6E05\u521B\u5EFA\u5931\u8D25\u4E0E\u8C03\u5EA6\u5931\u8D25", "\u5DF2\u90E8\u7F72 demo/web\uFF1B\u82E5\u5B58\u5728\u914D\u989D\u95EE\u9898\uFF0CReplicaSet \u4E8B\u4EF6\u6BD4\u4E0D\u5B58\u5728\u7684 Pod \u66F4\u6709\u8BCA\u65AD\u4EF7\u503C\u3002", `kubectl -n demo describe deployment web
+kubectl -n demo describe replicasets
+kubectl -n demo describe resourcequota`, "FailedCreate \u8868\u793A\u521B\u5EFA\u73AF\u8282\u5931\u8D25\uFF1B\u6CA1\u6709\u914D\u989D\u5BF9\u8C61\u65F6 describe \u4F1A\u63D0\u793A\u6CA1\u6709\u8D44\u6E90\u3002")
+      }
+    },
+    {
+      id: "pod",
+      group: 0,
+      title: "Pod \u4E0E\u5BB9\u5668\u751F\u547D\u5468\u671F",
+      en: "POD LIFECYCLE",
+      summary: "\u628A Pod \u9636\u6BB5\u3001\u5BB9\u5668\u72B6\u6001\u3001\u91CD\u542F\u6B21\u6570\u548C Ready \u6761\u4EF6\u5206\u522B\u8BFB\u61C2\u3002",
+      principle: "Pod \u662F\u8C03\u5EA6\u4E0E\u5171\u4EAB\u7F51\u7EDC\u7684\u5355\u5143\uFF1B\u5BB9\u5668\u662F\u5176\u4E2D\u8FD0\u884C\u548C\u91CD\u542F\u7684\u5355\u5143\u3002",
+      tradeoff: "\u540C Pod \u5BB9\u5668\u65B9\u4FBF\u5171\u4EAB\u7F51\u7EDC\u4E0E\u5377\uFF0C\u4E5F\u7ED1\u5B9A\u4E86\u8C03\u5EA6\u3001\u751F\u547D\u5468\u671F\u548C\u8D44\u6E90\u6545\u969C\u8FB9\u754C\u3002",
+      pitfall: "Running \u4E0D\u7B49\u4E8E Ready\uFF1BCrashLoopBackOff \u662F kubectl \u53EF\u80FD\u663E\u793A\u7684\u5BB9\u5668\u7B49\u5F85\u539F\u56E0\uFF0C\u4E0D\u662F Pod phase\u3002",
+      nodes: ["Pod \u5BF9\u8C61", "\u8C03\u5EA6\u7ED1\u5B9A", "kubelet", "\u5BB9\u5668 / \u63A2\u9488"],
+      steps: [
+        ["\u521B\u5EFA\u5F85\u8FD0\u884C Pod", 0, 0, "PENDING", "\u5047\u8BBE\u76F4\u63A5\u521B\u5EFA\u4E00\u4E2A\u6709\u6548 Pod\u3002Pending \u53EF\u5305\u542B\u7B49\u5F85\u8C03\u5EA6\u3001\u62C9\u53D6\u955C\u50CF\u7B49\u65F6\u95F4\uFF0C\u4E0D\u53EA\u662F\u6CA1\u6709\u8282\u70B9\u3002", "phase=Pending", "local"],
+        ["\u7ED1\u5B9A\u76EE\u6807\u8282\u70B9", 1, 2, "POD SCHEDULED", "\u8282\u70B9 kubelet \u63A5\u7BA1\u5206\u914D\u7ED9\u81EA\u5DF1\u7684 Pod\uFF0C\u51C6\u5907\u7F51\u7EDC\u3001\u5377\u548C\u5BB9\u5668\u8FD0\u884C\u6761\u4EF6\u3002", "PodScheduled=True", "control"],
+        ["\u542F\u52A8\u5BB9\u5668", 2, 3, "START CONTAINER", "\u8FD0\u884C\u65F6\u542F\u52A8\u5BB9\u5668\u540E\uFF0CPod \u53EF\u8FDB\u5165 Running\uFF1B\u63A2\u9488\u6216\u5176\u4ED6\u5C31\u7EEA\u6761\u4EF6\u4ECD\u53EF\u80FD\u672A\u6EE1\u8DB3\u3002", "Running \xB7 Ready \u53EF\u80FD\u4E3A False", "control"],
+        ["\u62A5\u544A\u5C31\u7EEA\u6761\u4EF6", 3, 2, "READINESS OK", "\u5047\u8BBE\u6240\u6709\u76F8\u5173\u5BB9\u5668\u548C\u5C31\u7EEA\u95E8\u6EE1\u8DB3\u6761\u4EF6\uFF0Ckubelet \u66F4\u65B0 Pod Ready\u3002\u8FD9\u91CC\u53EA\u63CF\u8FF0\u6B64\u523B\u7684\u5C31\u7EEA\u89C2\u5BDF\u3002", "Ready=True", "data"]
+      ],
+      code: ["\u8BFB .status.phase", "\u8BFB .status.conditions", "\u8BFB containerStatuses[*].state", "\u533A\u5206\u5BB9\u5668\u91CD\u542F\u548C Pod \u66FF\u6362"],
+      example: yaml("\u4E00\u4E2A\u5B8C\u6574\u7684 Pod \u6E05\u5355", "\u5B9E\u9A8C\u96C6\u7FA4\u53EF\u62C9\u53D6 nginx:1.28\uFF1B\u4FDD\u5B58\u4E3A pod.yaml \u540E kubectl apply -f pod.yaml\u3002", "pod.yaml", `apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-demo
+  namespace: demo
+spec:
+  containers:
+    - name: web
+      image: nginx:1.28
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 80`, "Pod \u6700\u7EC8\u5E94 Running \u4E14 Ready\uFF1B\u88F8 Pod \u88AB\u5220\u9664\u540E\u4E0D\u4F1A\u7531 Deployment \u81EA\u52A8\u8865\u5EFA\u3002"),
+      sections: [
+        { title: "\u540C\u4E00\u4E2A Pod \u5171\u4EAB\u4EC0\u4E48", body: "Pod \u5185\u5BB9\u5668\u5171\u4EAB\u7F51\u7EDC\u547D\u540D\u7A7A\u95F4\u548C IP\uFF0C\u53EF\u901A\u8FC7 localhost \u901A\u4FE1\uFF0C\u5E76\u53EF\u663E\u5F0F\u6302\u8F7D\u5171\u4EAB\u5377\u3002\u5B83\u4EEC\u4ECD\u662F\u72EC\u7ACB\u5BB9\u5668\uFF0C\u9ED8\u8BA4\u5E76\u4E0D\u7B49\u4E8E\u5171\u4EAB\u5168\u90E8\u8FDB\u7A0B\u89C6\u56FE\u6216\u6587\u4EF6\u7CFB\u7EDF\u3002" },
+        { title: "\u91CD\u542F\u4E0E\u66FF\u6362", body: "\u5BB9\u5668\u9000\u51FA\u540E\uFF0Ckubelet \u6309 restartPolicy \u7B49\u6761\u4EF6\u5904\u7406\u91CD\u542F\uFF1BPod UID \u4E0D\u56E0\u6B64\u53D8\u5316\u3002\u5DE5\u4F5C\u8D1F\u8F7D\u63A7\u5236\u5668\u521B\u5EFA\u66FF\u4EE3 Pod \u65F6\u4F1A\u4EA7\u751F\u65B0\u7684 UID\uFF0C\u53EF\u80FD\u83B7\u5F97\u4E0D\u540C\u8282\u70B9\u548C IP\u3002\u4E0D\u80FD\u628A IP \u5F53\u4F5C\u6C38\u4E45\u8EAB\u4EFD\u3002" },
+        { title: "\u8BFB\u53D6\u5B8C\u6574\u72B6\u6001", body: "phase \u53EA\u6709\u7C97\u7C92\u5EA6\u63CF\u8FF0\uFF0Cconditions \u8868\u8FBE\u8C03\u5EA6\u548C\u5C31\u7EEA\u7B49\u5224\u65AD\uFF0CcontainerStatuses \u63D0\u4F9B Waiting\u3001Running\u3001Terminated \u4E0E lastState\u3002\u7ED3\u5408\u4E8B\u4EF6\u548C\u65E5\u5FD7\u624D\u80FD\u5224\u65AD\u6545\u969C\u539F\u56E0\uFF0C\u5355\u4E2A STATUS \u5217\u4E0D\u591F\u3002" }
+      ],
+      sources: ["pods", "lifecycle"],
+      related: ["probes", "reconcile", "pod-debug", "resources"],
+      fault: {
+        name: "\u5BB9\u5668\u53CD\u590D\u9000\u51FA",
+        nodes: ["\u5E94\u7528\u8FDB\u7A0B", "\u5BB9\u5668\u72B6\u6001", "kubelet", "\u540C\u4E00\u4E2A Pod"],
+        steps: [
+          ["\u8FDB\u7A0B\u9000\u51FA", 0, 1, "EXIT CODE \u2260 0", "\u72EC\u7ACB\u573A\u666F\uFF1ArestartPolicy=Always \u7684 Pod \u5185\u5E94\u7528\u542F\u52A8\u5373\u9000\u51FA\uFF0C\u9000\u51FA\u539F\u56E0\u53EF\u80FD\u662F\u914D\u7F6E\u9519\u8BEF\u3002", "container=Terminated", "data"],
+          ["\u8282\u70B9\u51B3\u5B9A\u91CD\u542F", 1, 2, "RESTART POLICY", "kubelet \u6839\u636E\u91CD\u542F\u7B56\u7565\u5C1D\u8BD5\u91CD\u542F\u8BE5\u5BB9\u5668\uFF0C\u5E76\u5BF9\u91CD\u590D\u5931\u8D25\u4F7F\u7528\u9000\u907F\u3002", "restartCount \u4E0A\u5347", "control"],
+          ["\u4FDD\u6301 Pod \u8EAB\u4EFD", 2, 3, "SAME POD UID", "\u91CD\u542F\u7684\u662F\u539F Pod \u5185\u7684\u5BB9\u5668\uFF0C\u800C\u4E0D\u662F\u8C03\u5EA6\u5668\u628A\u65E7 Pod \u642C\u5230\u53E6\u4E00\u53F0\u8282\u70B9\u3002", "Pod UID \u4E0D\u53D8", "control"],
+          ["\u8C03\u67E5\u4E0A\u4E00\u6B21\u9000\u51FA", 1, 1, "LAST STATE / PREVIOUS LOG", "\u7ED3\u5408\u9000\u51FA\u7801\u3001reason\u3001previous \u65E5\u5FD7\u4E0E\u4E8B\u4EF6\u627E\u539F\u56E0\u3002\u9000\u907F\u72B6\u6001\u4E0D\u662F\u6839\u56E0\uFF0C\u91CD\u542F\u6B21\u6570\u4E5F\u4E0D\u80FD\u89E3\u91CA\u4E1A\u52A1\u9519\u8BEF\u3002", "CrashLoopBackOff \u53EA\u662F\u7EBF\u7D22", "local"]
+        ],
+        code: ["\u89C2\u5BDF restartCount \u548C lastState", "\u8BFB\u53D6\u5BB9\u5668\u4E0A\u4E00\u6B21\u8FD0\u884C\u65E5\u5FD7", "\u68C0\u67E5\u542F\u52A8\u53C2\u6570\u4E0E\u914D\u7F6E", "\u4FEE\u6B63\u539F\u56E0\u540E\u9A8C\u8BC1\u6301\u7EED\u5065\u5EB7"],
+        example: sh("\u8BFB\u53D6\u4E0A\u4E00\u6B21\u5BB9\u5668\u65E5\u5FD7", "\u5C06 POD \u66FF\u6362\u4E3A demo \u4E2D\u6709\u91CD\u542F\u8BB0\u5F55\u7684 Pod\uFF0C\u5BB9\u5668\u540D\u5047\u8BBE\u4E3A web\uFF1B\u9996\u6B21\u672A\u542F\u52A8\u65F6\u6CA1\u6709 previous \u65E5\u5FD7\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl -n demo logs "$POD" -c web --previous --tail=100`, "previous \u65E5\u5FD7\u6765\u81EA\u4E0A\u4E00\u5B9E\u4F8B\uFF1B\u65E5\u5FD7\u53EF\u56E0\u8F6E\u8F6C\u6216\u8282\u70B9\u53D8\u5316\u4E0D\u53EF\u7528\uFF0C\u9700\u4E0E\u72B6\u6001\u548C\u4E8B\u4EF6\u4E92\u8BC1\u3002")
+      }
+    },
+    {
+      id: "namespace",
+      group: 0,
+      title: "Namespace \u4E0E\u914D\u989D",
+      en: "NAMESPACE & QUOTA",
+      summary: "\u7528\u547D\u540D\u7A7A\u95F4\u7EC4\u7EC7\u8D44\u6E90\uFF0C\u7528\u914D\u989D\u9650\u5236\u6D88\u8017\uFF0C\u907F\u514D\u628A\u547D\u540D\u9694\u79BB\u8BEF\u5F53\u4F5C\u5B89\u5168\u9694\u79BB\u3002",
+      principle: "Namespace \u5212\u5206\u547D\u540D\u548C\u7BA1\u7406\u8303\u56F4\uFF1B\u5B89\u5168\u4E0E\u7F51\u7EDC\u9694\u79BB\u9700\u8981\u989D\u5916\u7B56\u7565\u3002",
+      tradeoff: "\u7EC6\u5206\u547D\u540D\u7A7A\u95F4\u4FBF\u4E8E\u6388\u6743\u548C\u914D\u989D\u7BA1\u7406\uFF0C\u4E5F\u589E\u52A0\u8DE8\u7A7A\u95F4\u914D\u7F6E\u3001\u53D1\u73B0\u548C\u7EF4\u62A4\u6210\u672C\u3002",
+      pitfall: "Node\u3001PV \u548C Namespace \u7B49\u662F\u96C6\u7FA4\u4F5C\u7528\u57DF\u8D44\u6E90\uFF1BNamespace \u672C\u8EAB\u4E0D\u4F1A\u963B\u6B62\u8DE8\u7A7A\u95F4\u7F51\u7EDC\u901A\u4FE1\u3002",
+      nodes: ["\u7528\u6237\u8BF7\u6C42", "API / Namespace", "ResourceQuota", "\u547D\u540D\u7A7A\u95F4\u8D44\u6E90"],
+      steps: [
+        ["\u6307\u5B9A\u8D44\u6E90\u5F52\u5C5E", 0, 1, "NAMESPACE=DEMO", "\u5047\u8BBE demo \u5DF2\u5B58\u5728\uFF0C\u7528\u6237\u521B\u5EFA\u547D\u540D\u7A7A\u95F4\u4F5C\u7528\u57DF\u7684\u5BF9\u8C61\u3002\u663E\u5F0F -n \u53EF\u907F\u514D\u8BEF\u7528\u5F53\u524D\u4E0A\u4E0B\u6587\u3002", "\u8BF7\u6C42\u76EE\u6807=demo", "request"],
+        ["\u68C0\u67E5\u8D44\u6E90\u7528\u91CF", 1, 2, "ADMISSION CHECK", "\u5982\u679C\u5B58\u5728\u5339\u914D\u914D\u989D\uFF0C\u51C6\u5165\u6839\u636E\u5F53\u524D\u5DF2\u7528\u91CF\u4E0E\u8BF7\u6C42\u68C0\u67E5\u9650\u989D\u3002\u6743\u9650\u5224\u65AD\u662F\u53E6\u4E00\u5C42\u3002", "\u68C0\u67E5 hard / used", "check"],
+        ["\u5141\u8BB8\u521B\u5EFA\u5BF9\u8C61", 1, 3, "CREATE IN DEMO", "\u5047\u8BBE\u6743\u9650\u548C\u914D\u989D\u5747\u6EE1\u8DB3\uFF0C\u8D44\u6E90\u5728 demo \u4E2D\u521B\u5EFA\uFF1B\u53E6\u4E00\u4E2A\u547D\u540D\u7A7A\u95F4\u53EF\u5B58\u5728\u540C\u540D\u540C\u7C7B\u5BF9\u8C61\u3002", "\u540C\u7A7A\u95F4\u540C\u7C7B\u578B\u540D\u5B57\u552F\u4E00", "data"],
+        ["\u89C2\u5BDF\u7A7A\u95F4\u5185\u8D44\u6E90", 3, 3, "LIST SCOPED RESOURCES", "\u7528 -n demo \u67E5\u8BE2\u8D44\u6E90\uFF0C\u518D\u7528 -A \u5BF9\u6BD4\u3002\u547D\u540D\u7A7A\u95F4\u4E0D\u4F1A\u81EA\u52A8\u5F62\u6210\u7F51\u7EDC\u8FB9\u754C\u3002", "\u7BA1\u7406\u8FB9\u754C\u5DF2\u660E\u786E", "local"]
+      ],
+      code: ["\u660E\u786E\u8D44\u6E90\u662F\u5426 namespaced", "\u6307\u5B9A namespace", "\u68C0\u67E5\u6743\u9650\u3001Quota \u4E0E LimitRange", "\u6309\u4F5C\u7528\u57DF\u67E5\u8BE2\u548C\u7BA1\u7406"],
+      example: yaml("\u4E00\u4E2A\u53D7\u9650\u7684\u5B9E\u9A8C\u547D\u540D\u7A7A\u95F4", "\u5B8C\u6574\u591A\u6587\u6863\u6E05\u5355\uFF1B\u5DF2\u6709\u5B9E\u9A8C Pod \u65F6\uFF0C\u521B\u5EFA\u914D\u989D\u4E0D\u4F1A\u9A71\u9010\u5B83\u4EEC\uFF0C\u4F46\u4F1A\u9650\u5236\u540E\u7EED\u521B\u5EFA\u3002", "namespace.yaml", `apiVersion: v1
+kind: Namespace
+metadata:
+  name: quota-lab
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-budget
+  namespace: quota-lab
+spec:
+  hard:
+    pods: "4"
+    services: "2"`, "kubectl -n quota-lab describe quota \u663E\u793A Hard \u4E0E Used\uFF1B\u6B64\u6E05\u5355\u672A\u914D\u7F6E\u7F51\u7EDC\u9694\u79BB\u3002"),
+      sections: [
+        { title: "\u547D\u540D\u8FB9\u754C", body: "Pod\u3001Deployment\u3001Service \u7B49\u5C5E\u4E8E\u547D\u540D\u7A7A\u95F4\uFF0CNode\u3001PV\u3001StorageClass \u7B49\u5C5E\u4E8E\u96C6\u7FA4\u3002\u4E0D\u80FD\u7528 -n \u628A\u4E00\u4E2A\u96C6\u7FA4\u4F5C\u7528\u57DF\u5BF9\u8C61\u53D8\u6210\u5C40\u90E8\u5BF9\u8C61\u3002\u53EF\u7528 api-resources \u67E5\u8BE2\u8D44\u6E90\u662F\u5426\u652F\u6301\u547D\u540D\u7A7A\u95F4\u3002" },
+        { title: "\u914D\u989D\u4E0E\u9ED8\u8BA4\u503C\u5206\u5DE5", body: "ResourceQuota \u9650\u5236\u7A7A\u95F4\u5185\u8D44\u6E90\u603B\u91CF\u6216\u5BF9\u8C61\u6570\uFF1BLimitRange \u53EF\u4EE5\u63D0\u4F9B\u9ED8\u8BA4\u503C\u6216\u8303\u56F4\u7EA6\u675F\u3002\u82E5\u914D\u989D\u8981\u6C42 requests/limits\uFF0C\u672A\u58F0\u660E\u4E14\u6CA1\u6709\u9ED8\u8BA4\u503C\u7684 Pod \u53EF\u80FD\u5728\u521B\u5EFA\u65F6\u88AB\u62D2\u7EDD\u3002" },
+        { title: "\u9694\u79BB\u662F\u7EC4\u5408\u80FD\u529B", body: "\u591A\u4EBA\u5171\u4EAB\u96C6\u7FA4\u901A\u5E38\u8FD8\u9700\u8981 RBAC\u3001NetworkPolicy\u3001Pod \u5B89\u5168\u7EA6\u675F\u7B49\u3002\u547D\u540D\u7A7A\u95F4\u9002\u5408\u7EC4\u7EC7\u56E2\u961F\u548C\u73AF\u5883\uFF0C\u4F46\u7BA1\u7406\u5458\u6743\u9650\u3001\u96C6\u7FA4\u7EA7\u8D44\u6E90\u4E0E\u5171\u4EAB\u8282\u70B9\u4ECD\u9700\u5355\u72EC\u8BBE\u8BA1\u3002" }
+      ],
+      sources: ["namespace", "quota"],
+      related: ["rbac", "network-policy", "resources", "reconcile"],
+      fault: {
+        name: "\u8D44\u6E90\u5728\uFF0C\u5374\u67E5\u9519\u7A7A\u95F4",
+        nodes: ["kubectl \u4E0A\u4E0B\u6587", "default \u7A7A\u95F4", "demo \u7A7A\u95F4", "\u76EE\u6807 Deployment"],
+        steps: [
+          ["\u4F7F\u7528\u9ED8\u8BA4\u67E5\u8BE2\u8303\u56F4", 0, 1, "GET DEPLOYMENT", "\u72EC\u7ACB\u573A\u666F\uFF1Aweb \u5728 demo\uFF0C\u5F53\u524D\u4E0A\u4E0B\u6587\u4F7F\u7528 default\u3002\u666E\u901A get \u8BF7\u6C42\u53EA\u67E5\u8BE2\u5F53\u524D\u547D\u540D\u7A7A\u95F4\u3002", "\u67E5\u8BE2 namespace=default", "request"],
+          ["\u76EE\u6807\u672A\u5728\u8303\u56F4\u5185", 1, 1, "NOT FOUND", "\u8FD4\u56DE NotFound \u4E0D\u8868\u793A\u6574\u4E2A\u96C6\u7FA4\u6CA1\u6709\u540D\u4E3A web \u7684 Deployment\u3002", "\u5F53\u524D\u8303\u56F4\u6CA1\u6709\u5BF9\u8C61", "local"],
+          ["\u663E\u5F0F\u9009\u62E9 demo", 0, 2, "GET -N DEMO", "\u5148\u6838\u5BF9 context \u7684\u96C6\u7FA4\u548C\u8EAB\u4EFD\uFF0C\u518D\u660E\u786E\u547D\u540D\u7A7A\u95F4\u91CD\u65B0\u67E5\u8BE2\uFF0C\u907F\u514D\u5BF9\u9519\u8BEF\u73AF\u5883\u505A\u4FEE\u6539\u3002", "\u67E5\u8BE2 namespace=demo", "request"],
+          ["\u5B9A\u4F4D\u771F\u5B9E\u5BF9\u8C61", 2, 3, "FOUND WEB", "\u627E\u5230\u76EE\u6807\u540E\u518D\u5F00\u59CB\u8BCA\u65AD\uFF1B\u6743\u9650\u4E0D\u8DB3\u8FD8\u53EF\u80FD\u9020\u6210\u5176\u4ED6\u67E5\u8BE2\u9519\u8BEF\uFF0C\u4E0D\u80FD\u4E00\u6982\u5F52\u56E0\u4E3A\u7A7A\u95F4\u3002", "\u5BF9\u8C61\u8EAB\u4EFD\u5DF2\u786E\u8BA4", "data"]
+        ],
+        code: ["\u6838\u5BF9 current-context", "\u67E5\u770B namespace \u8BBE\u7F6E", "\u663E\u5F0F -n demo \u67E5\u8BE2", "\u786E\u8BA4\u540E\u624D\u4FEE\u6539\u8D44\u6E90"],
+        example: sh("\u786E\u8BA4\u67E5\u8BE2\u8303\u56F4", "\u53EA\u8BFB\u547D\u4EE4\uFF1B-A \u7684\u53EF\u89C1\u6027\u53D7\u5F53\u524D\u8EAB\u4EFD\u6743\u9650\u9650\u5236\uFF0C\u4E0D\u8F93\u51FA kubeconfig \u51ED\u636E\u3002", `kubectl config current-context
+kubectl get deployments -A
+kubectl -n demo get deployment web
+kubectl api-resources --namespaced=false`, "\u5BF9\u6BD4\u8D44\u6E90\u7684 NAMESPACE \u5217\uFF0C\u8BC6\u522B\u96C6\u7FA4\u7EA7\u4E0E\u547D\u540D\u7A7A\u95F4\u7EA7\u8D44\u6E90\u3002")
+      }
+    },
+    {
+      id: "labels",
+      group: 0,
+      title: "\u6807\u7B7E\u4E0E\u9009\u62E9\u5668",
+      en: "LABELS & SELECTORS",
+      summary: "\u901A\u8FC7\u96C6\u5408\u5339\u914D\u628A\u5DE5\u4F5C\u8D1F\u8F7D\u3001Pod \u548C Service \u5173\u8054\u8D77\u6765\uFF0C\u800C\u4E0D\u662F\u9760\u5BF9\u8C61\u540D\u79F0\u731C\u5173\u7CFB\u3002",
+      principle: "\u6807\u7B7E\u63CF\u8FF0\u5C5E\u6027\uFF0C\u9009\u62E9\u5668\u5B9A\u4E49\u96C6\u5408\uFF1B\u5339\u914D\u7ED3\u679C\u51B3\u5B9A\u5173\u8054\u5BF9\u8C61\u3002",
+      tradeoff: "\u677E\u8026\u5408\u7684\u6807\u7B7E\u652F\u6301\u7075\u6D3B\u5206\u7EC4\uFF0C\u4F46\u968F\u610F\u4FEE\u6539\u6807\u7B7E\u4F1A\u6539\u53D8\u6D41\u91CF\u3001\u7B56\u7565\u4E0E\u63A7\u5236\u5668\u53EF\u89C1\u96C6\u5408\u3002",
+      pitfall: "Service selector \u5339\u914D\u7684\u662F Pod \u6807\u7B7E\uFF0C\u4E0D\u662F Deployment \u7684 metadata.labels\uFF0C\u4E5F\u4E0D\u662F\u5BB9\u5668\u540D\u3002",
+      nodes: ["Service selector", "Pod \u6807\u7B7E\u96C6\u5408", "\u5339\u914D\u7684 Pod", "EndpointSlice"],
+      steps: [
+        ["\u58F0\u660E\u6807\u7B7E\u6761\u4EF6", 0, 0, "SELECT app=web", "\u5047\u8BBE Service \u4E0E Pod \u540C\u5728 demo\uFF0CService \u9009\u62E9 app=web\u3002", "selector \u5DF2\u5B9A\u4E49", "local"],
+        ["\u5BF9\u7167 Pod \u6807\u7B7E", 0, 1, "MATCH POD LABELS", "\u63A7\u5236\u5668\u6839\u636E selector \u5339\u914D\u5F53\u524D\u547D\u540D\u7A7A\u95F4\u5185\u7684 Pod\u3002\u540D\u79F0\u5305\u542B web \u4E0D\u6784\u6210\u5339\u914D\u4F9D\u636E\u3002", "\u6309\u6807\u7B7E\u51B3\u5B9A\u96C6\u5408", "check"],
+        ["\u6536\u96C6\u5339\u914D\u5BF9\u8C61", 1, 2, "MATCHED PODS", "\u5339\u914D\u96C6\u5408\u8FD8\u4F1A\u968F\u6807\u7B7E\u3001Pod \u751F\u547D\u5468\u671F\u548C\u5C31\u7EEA\u72B6\u6001\u53D8\u5316\u3002", "\u5DF2\u627E\u5230\u5019\u9009\u540E\u7AEF", "data"],
+        ["\u66F4\u65B0\u670D\u52A1\u7AEF\u70B9", 2, 3, "UPDATE ENDPOINTS", "\u5BF9\u4E8E\u6709 selector \u7684\u5E38\u89C1 Service\uFF0CEndpointSlice \u63A7\u5236\u5668\u636E\u6B64\u7EF4\u62A4\u7AEF\u70B9\u53CA\u76F8\u5E94\u6761\u4EF6\u3002", "\u6D41\u91CF\u5019\u9009\u53D6\u51B3\u4E8E\u7AEF\u70B9\u6761\u4EF6", "control"]
+      ],
+      code: ["\u8BFB\u53D6 Service.spec.selector", "\u68C0\u67E5 Pod.metadata.labels", "\u6309\u76F8\u540C selector \u67E5\u8BE2 Pod", "\u68C0\u67E5 EndpointSlice.conditions"],
+      example: sh("\u628A\u9009\u62E9\u5668\u4E0E\u7AEF\u70B9\u5BF9\u8D77\u6765", "\u5DF2\u5E94\u7528 lab.yaml\uFF1BService web \u9009\u62E9 app=web\u3002", `kubectl -n demo get service web -o yaml
+kubectl -n demo get pods -l app=web --show-labels
+kubectl -n demo get endpointslices -l kubernetes.io/service-name=web -o yaml`, "\u6838\u5BF9 selector\u3001Pod \u6807\u7B7E\u3001\u7AEF\u70B9 targetRef \u548C ready \u6761\u4EF6\uFF1B\u4E0D\u80FD\u4EC5\u6BD4\u8F83\u8D44\u6E90\u540D\u5B57\u3002"),
+      sections: [
+        { title: "\u6A21\u677F\u6807\u7B7E\u624D\u4F1A\u4F20\u7ED9 Pod", body: "Deployment \u9876\u5C42\u6807\u7B7E\u7528\u4E8E\u63CF\u8FF0 Deployment \u81EA\u8EAB\uFF0Cspec.template.metadata.labels \u624D\u5B9A\u4E49\u65B0 Pod \u6807\u7B7E\u3002Deployment \u7684 selector \u5FC5\u987B\u5339\u914D\u6A21\u677F\uFF0C\u5E76\u4E14\u5DF2\u6709 Deployment \u7684 selector \u901A\u5E38\u4E0D\u53EF\u53D8\u3002" },
+        { title: "\u9009\u62E9\u5668\u662F\u5B9E\u65F6\u5173\u7CFB", body: "\u591A\u4E2A\u6807\u7B7E\u6761\u4EF6\u901A\u5E38\u7EC4\u6210 AND\u3002\u66F4\u6539 Pod \u6807\u7B7E\u53EF\u8BA9\u5176\u8FDB\u5165\u6216\u79BB\u5F00\u67D0\u4E2A Service \u6216 NetworkPolicy \u7684\u9009\u62E9\u8303\u56F4\uFF0C\u56E0\u6B64\u6807\u7B7E\u53D8\u66F4\u4E5F\u53EF\u80FD\u6539\u53D8\u884C\u4E3A\u548C\u5B89\u5168\u8FB9\u754C\u3002" },
+        { title: "\u9009\u62E9\u5668\u4E0D\u662F\u6240\u6709\u6743", body: "\u5339\u914D Service \u7684 Pod \u4E0D\u5F52 Service \u7BA1\u7406\u3002\u5DE5\u4F5C\u8D1F\u8F7D\u6240\u6709\u6743\u9700\u8981 ownerReferences \u7B49\u673A\u5236\u8868\u8FBE\uFF1B\u89C2\u5BDF\u5230\u76F8\u540C\u6807\u7B7E\u4E0D\u80FD\u63A8\u65AD\u54EA\u4E2A\u63A7\u5236\u5668\u8D1F\u8D23\u5220\u9664\u6216\u8865\u5EFA\u5BF9\u8C61\u3002" }
+      ],
+      sources: ["labels", "service", "endpoints"],
+      related: ["service", "deployment", "network-policy", "service-debug"],
+      fault: {
+        name: "Service \u6807\u7B7E\u62FC\u9519",
+        nodes: ["Service app=weeb", "Pod app=web", "EndpointSlice", "\u5BA2\u6237\u7AEF"],
+        steps: [
+          ["\u58F0\u660E\u4E86\u9519\u8BEF\u9009\u62E9\u5668", 0, 1, "SELECTOR MISMATCH", "\u72EC\u7ACB\u573A\u666F\uFF1AService selector \u62FC\u4E3A app=weeb\uFF0C\u800C\u5B9E\u9645 Pod \u4E3A app=web\u3002", "\u5339\u914D\u96C6\u5408\u4E3A\u7A7A", "check"],
+          ["\u6CA1\u6709\u5339\u914D\u540E\u7AEF", 2, 2, "NO MATCHED ENDPOINTS", "\u5E38\u89C4\u9009\u62E9\u5668\u63A7\u5236\u5668\u65E0\u6CD5\u4E3A\u5B83\u751F\u6210\u5339\u914D\u7684\u53EF\u7528\u540E\u7AEF\uFF1BPod \u81EA\u8EAB\u53EF\u80FD\u5B8C\u5168\u5065\u5EB7\u3002", "\u670D\u52A1\u6CA1\u6709\u53EF\u7528\u76EE\u6807", "local"],
+          ["\u8BF7\u6C42\u4ECD\u53D1\u5411\u670D\u52A1", 3, 0, "CONNECT SERVICE", "DNS \u53EF\u80FD\u6B63\u5E38\u8FD4\u56DE ClusterIP\uFF0C\u4F46\u6709\u5730\u5740\u4E0D\u8868\u793A\u6709\u53EF\u7528\u540E\u7AEF\u3002", "\u670D\u52A1\u8BBF\u95EE\u5931\u8D25", "request"],
+          ["\u5BF9\u7167\u800C\u975E\u91CD\u542F", 0, 1, "COMPARE LABELS", "\u68C0\u67E5 selector \u4E0E\u6A21\u677F\u6807\u7B7E\u5E76\u4FEE\u6B63\u58F0\u660E\u3002\u91CD\u542F\u5065\u5EB7 Pod \u4E0D\u4F1A\u628A weeb \u81EA\u52A8\u6539\u6210 web\u3002", "\u6839\u56E0\u5728\u5173\u8054\u6761\u4EF6", "check"]
+        ],
+        code: ["\u670D\u52A1 DNS \u6B63\u5E38\u4E5F\u8981\u67E5\u540E\u7AEF", "\u6BD4\u5BF9 selector \u4E0E Pod \u6807\u7B7E", "\u4FEE\u6B63\u6E90\u6E05\u5355\u4E2D\u7684\u62FC\u5199", "\u89C2\u5BDF\u7AEF\u70B9\u518D\u9A8C\u8BC1\u8BBF\u95EE"],
+        example: sh("\u67E5\u770B\u5339\u914D\u96C6\u5408", "\u5DF2\u6709 demo/web Service\uFF1B\u6807\u7B7E\u9009\u62E9\u67E5\u8BE2\u4E3A\u7A7A\u65F6\u5148\u6838\u5BF9\u6E90\u6E05\u5355\uFF0C\u4E0D\u76F4\u63A5\u4FEE\u6539\u6240\u6709 Pod \u6807\u7B7E\u3002", `kubectl -n demo get pods -l app=weeb
+kubectl -n demo get pods --show-labels
+kubectl -n demo get deployment web -o yaml`, "\u9519\u8BEF selector \u7684\u67E5\u8BE2\u4E3A\u7A7A\uFF1B\u6A21\u677F\u6807\u7B7E\u4E0E\u5B9E\u9645 Pod \u6807\u7B7E\u53EF\u4EA4\u53C9\u6838\u5BF9\u3002")
+      }
+    },
+    {
+      id: "scheduling",
+      group: 0,
+      title: "\u8C03\u5EA6\u4E0E\u8282\u70B9\u7EA6\u675F",
+      en: "SCHEDULING & PLACEMENT",
+      summary: "\u7406\u89E3\u8C03\u5EA6\u5668\u5982\u4F55\u5728\u8D44\u6E90\u8BF7\u6C42\u3001\u8282\u70B9\u9009\u62E9\u3001\u4EB2\u548C\u6027\u548C\u6C61\u70B9\u7B49\u7EA6\u675F\u4E2D\u5BFB\u627E\u53EF\u884C\u8282\u70B9\u3002",
+      principle: "\u5148\u6EE1\u8DB3\u786C\u7EA6\u675F\uFF0C\u518D\u5728\u53EF\u884C\u8282\u70B9\u4E2D\u9009\u62E9\uFF1B\u5BB9\u5FCD\u6C61\u70B9\u4E0D\u4EE3\u8868\u4E00\u5B9A\u4F1A\u88AB\u8C03\u5EA6\u3002",
+      tradeoff: "\u4E25\u683C\u7EA6\u675F\u63D0\u9AD8\u653E\u7F6E\u786E\u5B9A\u6027\uFF0C\u4E5F\u7F29\u5C0F\u53EF\u7528\u5BB9\u91CF\u548C\u6545\u969C\u65F6\u7684\u66FF\u4EE3\u7A7A\u95F4\u3002",
+      pitfall: "\u8C03\u5EA6\u4E3B\u8981\u4F9D\u636E\u8D44\u6E90 requests \u4E0E\u7EA6\u675F\uFF0C\u4E0D\u662F\u770B\u5230\u8282\u70B9\u5F53\u524D CPU \u7A7A\u95F2\u5C31\u4E00\u5B9A\u80FD\u653E\u4E0B Pod\u3002",
+      nodes: ["\u672A\u7ED1\u5B9A Pod", "\u8C03\u5EA6\u5668", "\u5019\u9009\u8282\u70B9", "API \u7ED1\u5B9A"],
+      steps: [
+        ["\u8BFB\u53D6\u653E\u7F6E\u9700\u6C42", 0, 1, "UNSCHEDULED POD", "\u5047\u8BBE Pod \u58F0\u660E\u4E86\u8D44\u6E90 requests \u4E0E nodeSelector\uFF0C\u5C1A\u672A\u8BBE\u7F6E nodeName\u3002", "\u7B49\u5F85\u4E00\u6B21\u8C03\u5EA6\u5C1D\u8BD5", "data"],
+        ["\u7B5B\u9009\u53EF\u884C\u8282\u70B9", 1, 2, "FILTER", "\u68C0\u67E5\u8BF7\u6C42\u8D44\u6E90\u3001\u9009\u62E9\u5668\u3001\u6C61\u70B9\u3001\u5377\u7EA6\u675F\u7B49\uFF1B\u5B9E\u9645\u8C03\u5EA6\u6846\u67B6\u8FD8\u6709\u66F4\u591A\u63D2\u4EF6\u4E0E\u9636\u6BB5\u3002", "\u5F97\u5230\u53EF\u884C\u8282\u70B9\u96C6\u5408", "check"],
+        ["\u6BD4\u8F83\u5019\u9009\u504F\u597D", 2, 1, "SCORE", "\u5728\u6EE1\u8DB3\u7EA6\u675F\u7684\u8282\u70B9\u4E2D\u6839\u636E\u914D\u7F6E\u7684\u8BC4\u5206\u7B56\u7565\u505A\u9009\u62E9\uFF0C\u800C\u4E0D\u662F\u7B80\u5355\u9009 CPU \u4F7F\u7528\u7387\u6700\u4F4E\u8005\u3002", "\u9009\u62E9\u4E00\u4E2A\u5019\u9009", "data"],
+        ["\u5199\u5165\u8282\u70B9\u7ED1\u5B9A", 1, 3, "BIND", "\u8C03\u5EA6\u5668\u901A\u8FC7 API \u5B8C\u6210\u7ED1\u5B9A\uFF1B\u5BB9\u5668\u542F\u52A8\u7531\u76EE\u6807\u8282\u70B9\u5904\u7406\uFF0C\u4E0D\u662F\u8C03\u5EA6\u5668\u8FD0\u884C\u955C\u50CF\u3002", "nodeName \u5DF2\u786E\u5B9A", "control"]
+      ],
+      code: ["\u8BFB\u53D6 Pod \u7EA6\u675F\u4E0E requests", "\u8FC7\u6EE4\u4E0D\u6EE1\u8DB3\u786C\u6761\u4EF6\u7684\u8282\u70B9", "\u5BF9\u53EF\u884C\u8282\u70B9\u6253\u5206", "\u901A\u8FC7 API \u7ED1\u5B9A\uFF0C\u7B49\u5F85 kubelet"],
+      example: sh("\u8BFB\u53D6 FailedScheduling \u8BC1\u636E", "\u5C06 POD \u66FF\u6362\u4E3A\u5B9E\u9645\u5F85\u8C03\u5EA6 Pod\uFF1B\u8282\u70B9\u8BE6\u60C5\u53EF\u80FD\u5305\u542B\u96C6\u7FA4\u8FD0\u7EF4\u4FE1\u606F\uFF0C\u4EC5\u5728\u81EA\u5DF1\u5B9E\u9A8C\u96C6\u7FA4\u67E5\u770B\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl get nodes --show-labels
+kubectl describe nodes`, "Events \u8BF4\u660E\u8D44\u6E90\u4E0D\u8DB3\u3001\u9009\u62E9\u5668\u4E0D\u5339\u914D\u6216\u6C61\u70B9\u7B49\u539F\u56E0\uFF1BAllocated resources \u53EF\u4E0E\u5B9E\u65F6\u4F7F\u7528\u7387\u5BF9\u7167\u3002"),
+      sections: [
+        { title: "requests \u51B3\u5B9A\u80FD\u5426\u653E\u4E0B", body: "\u8C03\u5EA6\u628A\u8BF7\u6C42\u8D44\u6E90\u4E0E\u8282\u70B9\u53EF\u5206\u914D\u5BB9\u91CF\u53CA\u5DF2\u6709\u8BF7\u6C42\u6BD4\u8F83\u3002\u8D44\u6E90\u5B9E\u9645\u4F7F\u7528\u7387\u5F88\u4F4E\u4E5F\u53EF\u80FD\u6CA1\u6709\u8DB3\u591F\u672A\u5206\u914D requests\u3002CPU \u548C\u5185\u5B58\u4E4B\u5916\uFF0C\u7AEF\u53E3\u3001\u5377\u3001\u62D3\u6251\u53CA\u5176\u4ED6\u8D44\u6E90\u540C\u6837\u53EF\u80FD\u6210\u4E3A\u786C\u7EA6\u675F\u3002" },
+        { title: "\u786C\u6761\u4EF6\u4E0E\u8F6F\u504F\u597D", body: "nodeSelector \u4E0E required \u4EB2\u548C\u6027\u9650\u5236\u53EF\u884C\u8282\u70B9\uFF1Bpreferred \u4EB2\u548C\u6027\u8868\u8FBE\u504F\u597D\u3002NoSchedule \u6C61\u70B9\u4F1A\u6392\u65A5\u7F3A\u5C11\u76F8\u5E94\u5BB9\u5FCD\u7684 Pod\uFF0C\u800C\u5BB9\u5FCD\u53EA\u53D6\u6D88\u8FD9\u79CD\u6392\u65A5\uFF0C\u5E76\u4E0D\u6307\u5B9A\u76EE\u6807\u8282\u70B9\u3002" },
+        { title: "\u4E0D\u8981\u9760 nodeName \u7ED5\u8FC7\u7406\u89E3", body: "\u76F4\u63A5\u6307\u5B9A nodeName \u4F1A\u7ED5\u8FC7\u5E38\u89C4\u8C03\u5EA6\u9009\u62E9\uFF0C\u4E0D\u5E94\u4F5C\u4E3A\u89E3\u51B3 FailedScheduling \u7684\u901A\u7528\u529E\u6CD5\u3002\u5148\u770B\u4E8B\u4EF6\u3001\u6807\u7B7E\u3001\u53EF\u5206\u914D\u8D44\u6E90\u4E0E\u5B9E\u9645\u914D\u7F6E\uFF1B\u6269\u5BB9\u4E5F\u5FC5\u987B\u6EE1\u8DB3\u6240\u6709\u786C\u7EA6\u675F\u3002" }
+      ],
+      sources: ["scheduling", "taints", "resources"],
+      related: ["resources", "architecture", "pod-debug", "drain"],
+      fault: {
+        name: "\u8282\u70B9\u5F88\u591A\uFF0C\u5374\u6CA1\u6709\u5019\u9009",
+        nodes: ["nodeSelector", "\u8C03\u5EA6\u5668", "\u8282\u70B9\u6807\u7B7E", "Pod \u4E8B\u4EF6"],
+        steps: [
+          ["\u8981\u6C42\u4E0D\u5B58\u5728\u7684\u6807\u7B7E", 0, 1, "disk=ultra", "\u72EC\u7ACB\u573A\u666F\uFF1APod \u8981\u6C42 disk=ultra\uFF0C\u800C\u6240\u6709\u8282\u70B9\u90FD\u6CA1\u6709\u8FD9\u4E2A\u6807\u7B7E\u3002", "\u5B58\u5728\u786C\u6027\u653E\u7F6E\u6761\u4EF6", "control"],
+          ["\u7B5B\u9009\u7ED3\u679C\u4E3A\u7A7A", 1, 2, "NO MATCHING NODE", "\u5373\u4F7F\u8282\u70B9 CPU \u548C\u5185\u5B58\u5145\u8DB3\uFF0C\u4E0D\u6EE1\u8DB3 nodeSelector \u7684\u8282\u70B9\u4E5F\u4E0D\u80FD\u6210\u4E3A\u5019\u9009\u3002", "0 feasible nodes", "check"],
+          ["\u8BB0\u5F55\u5931\u8D25\u4E8B\u4EF6", 1, 3, "FAILED SCHEDULING", "\u8C03\u5EA6\u5668\u62A5\u544A\u539F\u56E0\uFF0CPod \u7EE7\u7EED\u7B49\u5F85\u540E\u7EED\u91CD\u8BD5\uFF1B\u6CA1\u6709\u7ED1\u5B9A\u4FBF\u6CA1\u6709\u76EE\u6807\u8282\u70B9\u542F\u52A8\u5BB9\u5668\u3002", "Pending \xB7 \u65E0 nodeName", "data"],
+          ["\u4FEE\u6B63\u7EA6\u675F\u6765\u6E90", 0, 0, "REVIEW INTENT", "\u5224\u65AD\u786E\u5B9E\u9700\u8981\u8FD9\u7C7B\u8282\u70B9\u8FD8\u662F\u6E05\u5355\u6709\u8BEF\u3002\u4E0D\u8981\u968F\u610F\u7ED9\u8282\u70B9\u8D34\u6807\u7B7E\u4F2A\u88C5\u786C\u4EF6\u80FD\u529B\u3002", "\u5148\u786E\u8BA4\u653E\u7F6E\u610F\u56FE", "local"]
+        ],
+        code: ["\u8BFB FailedScheduling \u4E8B\u4EF6", "\u6BD4\u8F83 nodeSelector \u4E0E\u5B9E\u9645\u8282\u70B9\u6807\u7B7E", "\u6838\u5B9E\u6807\u7B7E\u4EE3\u8868\u7684\u771F\u5B9E\u80FD\u529B", "\u4FEE\u6B63\u9700\u6C42\u6216\u63D0\u4F9B\u5408\u9002\u8282\u70B9"],
+        example: sh("\u5BF9\u7167\u8282\u70B9\u9009\u62E9\u6761\u4EF6", "POD \u4E3A\u5F85\u8C03\u5EA6\u7684\u771F\u5B9E Pod\uFF1B\u8FD9\u91CC\u53EA\u89C2\u5BDF\u6807\u7B7E\uFF0C\u4E0D\u66F4\u6539\u8282\u70B9\u80FD\u529B\u58F0\u660E\u3002", `POD=replace-me
+kubectl -n demo get pod "$POD" -o yaml
+kubectl get nodes -l disk=ultra
+kubectl -n demo describe pod "$POD"`, "\u8282\u70B9\u67E5\u8BE2\u4E3A\u7A7A\u4E14\u4E8B\u4EF6\u63D0\u793A\u9009\u62E9\u5668\u4E0D\u5339\u914D\u65F6\uFF0C\u8D44\u6E90\u6269\u5BB9\u672C\u8EAB\u672A\u5FC5\u89E3\u51B3\u95EE\u9898\u3002")
+      }
+    },
+    {
+      id: "resources",
+      group: 0,
+      title: "\u8D44\u6E90\u8BF7\u6C42\u4E0E\u9650\u5236",
+      en: "REQUESTS & LIMITS",
+      summary: "\u533A\u5206\u8D44\u6E90\u8C03\u5EA6\u9884\u7B97\u4E0E\u8FD0\u884C\u9650\u5236\uFF0C\u89E3\u91CA CPU \u9650\u6D41\u3001\u5185\u5B58\u8D85\u9650\u548C\u8282\u70B9\u538B\u529B\u3002",
+      principle: "requests \u53C2\u4E0E\u8C03\u5EA6\u4E0E\u8D44\u6E90\u5206\u914D\uFF1Blimits \u7EA6\u675F\u8FD0\u884C\u6D88\u8017\uFF0C\u4E24\u8005\u4E0D\u662F\u4E00\u56DE\u4E8B\u3002",
+      tradeoff: "\u8F83\u5927 requests \u4FDD\u7559\u66F4\u591A\u8C03\u5EA6\u9884\u7B97\uFF1B\u8FC7\u5C0F\u4F1A\u589E\u52A0\u7ADE\u4E89\uFF0C\u8FC7\u7D27 limits \u53EF\u80FD\u9020\u6210\u9650\u6D41\u6216\u5185\u5B58\u7EC8\u6B62\u3002",
+      pitfall: "\u5185\u5B58 limit \u4E0D\u662F\u9884\u7559\u5185\u5B58\uFF1B\u5BB9\u5668\u88AB OOM \u6740\u6B7B\u4E0E Pod \u56E0\u8282\u70B9\u538B\u529B\u88AB\u9A71\u9010\u9700\u8981\u5206\u5F00\u8BCA\u65AD\u3002",
+      nodes: ["Pod \u8D44\u6E90\u58F0\u660E", "\u8C03\u5EA6\u9884\u7B97", "\u8282\u70B9 cgroup", "\u5E94\u7528\u8FDB\u7A0B"],
+      steps: [
+        ["\u58F0\u660E\u8D44\u6E90\u9700\u6C42", 0, 1, "REQUEST 100m / 64Mi", "\u5047\u8BBE\u5BB9\u5668\u8BF7\u6C42 100m CPU\u300164Mi \u5185\u5B58\uFF0C\u9650\u5236\u4E3A 500m\u3001128Mi\u3002", "\u8BF7\u6C42\u4E0E\u4E0A\u9650\u660E\u786E", "control"],
+        ["\u901A\u8FC7\u8C03\u5EA6\u68C0\u67E5", 1, 1, "FIT BY REQUESTS", "\u8C03\u5EA6\u5668\u6309\u8BF7\u6C42\u7B49\u6761\u4EF6\u5224\u65AD\u8282\u70B9\u662F\u5426\u53EF\u653E\u7F6E\uFF0C\u4E0D\u80FD\u628A\u7A7A\u95F2\u76D1\u63A7\u503C\u76F4\u63A5\u89C6\u4E3A\u53EF\u5206\u914D\u627F\u8BFA\u3002", "\u8282\u70B9\u53EF\u5BB9\u7EB3 requests", "local"],
+        ["\u843D\u5B9E\u8FD0\u884C\u9650\u5236", 0, 2, "CONFIGURE LIMITS", "\u8282\u70B9\u901A\u8FC7\u8FD0\u884C\u65F6\u548C\u5185\u6838\u673A\u5236\u5B9E\u65BD\u8D44\u6E90\u914D\u7F6E\uFF1BCPU \u548C\u5185\u5B58\u7684\u9650\u5236\u65B9\u5F0F\u4E0D\u540C\u3002", "\u8FD0\u884C\u7EA6\u675F\u751F\u6548", "control"],
+        ["\u5728\u9884\u7B97\u5185\u8FD0\u884C", 2, 3, "RESOURCE USAGE", "\u5E94\u7528\u5B9E\u9645\u4F7F\u7528\u968F\u8D1F\u8F7D\u53D8\u5316\uFF0C\u53EF\u80FD\u9AD8\u4E8E request\uFF0C\u4F46\u4ECD\u53D7\u914D\u7F6E\u3001\u4E89\u7528\u548C\u8282\u70B9\u6761\u4EF6\u7EA6\u675F\u3002", "usage \u4E0E request \u5206\u522B\u89C2\u6D4B", "control"]
+      ],
+      code: ["request \u2192 \u8C03\u5EA6\u9884\u7B97", "CPU limit \u2192 CPU \u65F6\u95F4\u7EA6\u675F", "memory limit \u2192 \u5185\u5B58\u7EA6\u675F", "\u7ED3\u5408 usage\u3001\u4E8B\u4EF6\u548C\u9000\u51FA\u539F\u56E0\u8BCA\u65AD"],
+      example: yaml("\u8D44\u6E90\u8FB9\u754C\u5B8C\u6574\u6E05\u5355", "demo \u5DF2\u5B58\u5728\uFF1B\u542F\u52A8\u540E\u53EF\u7528 describe \u68C0\u67E5\u914D\u7F6E\u3002kubectl top \u8FD8\u9700\u8981\u8D44\u6E90\u6307\u6807 API\u3002", "resources.yaml", `apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo
+  namespace: demo
+spec:
+  containers:
+    - name: web
+      image: nginx:1.28
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 128Mi`, "CPU \u4E3A 0.1 \u6838\u8BF7\u6C42\u30010.5 \u6838\u9650\u5236\uFF1B\u5185\u5B58\u4E3A\u4E8C\u8FDB\u5236\u5355\u4F4D Mi\uFF0C\u4E0D\u662F\u6BEB\u5B57\u8282 m\u3002"),
+      sections: [
+        { title: "CPU \u4E0E\u5185\u5B58\u4E0D\u662F\u540C\u4E00\u79CD\u9650\u5236", body: "CPU \u4E0A\u9650\u5E38\u8868\u73B0\u4E3A\u53EF\u7528 CPU \u65F6\u95F4\u88AB\u9650\u5236\uFF0C\u5E94\u7528\u53EF\u80FD\u53D8\u6162\u3002\u5185\u5B58\u65E0\u6CD5\u50CF CPU \u65F6\u95F4\u4E00\u6837\u6309\u5468\u671F\u6392\u961F\uFF1B\u8D85\u9650\u65F6\u53EF\u80FD\u89E6\u53D1 OOM \u5904\u7406\u3002\u8FD8\u9700\u6392\u67E5\u5E94\u7528\u5185\u5B58\u589E\u957F\u3001\u5DE5\u4F5C\u96C6\u4E0E\u8282\u70B9\u6574\u4F53\u538B\u529B\u3002" },
+        { title: "\u9ED8\u8BA4\u503C\u4F1A\u6539\u53D8\u5B9E\u9645\u58F0\u660E", body: "LimitRange\u3001\u51C6\u5165\u4EE5\u53CA\u53EA\u586B\u5199 limit \u65F6\u7684\u9ED8\u8BA4\u5904\u7406\u53EF\u80FD\u6539\u53D8\u6700\u7EC8 Pod \u7684\u8BF7\u6C42\u3002\u4EE5 API \u4E2D\u5B9E\u9645\u4FDD\u5B58\u7684 Pod spec \u4E3A\u51C6\uFF0C\u800C\u4E0D\u80FD\u53EA\u770B\u672C\u5730\u6A21\u677F\u6216 Helm values\u3002" },
+        { title: "\u8D44\u6E90\u4E5F\u5F71\u54CD HPA", body: "\u57FA\u4E8E CPU \u5229\u7528\u7387\u7684 HPA \u7528 usage \u76F8\u5BF9\u4E8E request \u7684\u6BD4\u4F8B\u3002\u7F3A\u5C11\u76F8\u5173 requests \u4F1A\u4F7F\u8BE5\u5229\u7528\u7387\u6307\u6807\u65E0\u6CD5\u5B9A\u4E49\uFF1B\u8BBE\u7F6E\u4E00\u4E2A\u5F88\u5C0F\u7684 request \u4E5F\u4F1A\u6539\u53D8\u6269\u5BB9\u5224\u65AD\uFF0C\u800C\u4E0D\u662F\u5355\u7EAF\u4F18\u5316\u8C03\u5EA6\u3002" }
+      ],
+      sources: ["resources", "hpa"],
+      related: ["scheduling", "hpa", "pod-debug", "namespace"],
+      fault: {
+        name: "\u5185\u5B58\u8D85\u9650\u5BFC\u81F4\u5BB9\u5668\u7EC8\u6B62",
+        nodes: ["\u5E94\u7528\u5185\u5B58", "cgroup \u4E0A\u9650", "\u5BB9\u5668\u72B6\u6001", "kubelet"],
+        steps: [
+          ["\u5DE5\u4F5C\u96C6\u6301\u7EED\u589E\u5927", 0, 0, "MEMORY GROWTH", "\u72EC\u7ACB\u573A\u666F\uFF1A\u5BB9\u5668\u9650\u5236 128Mi\uFF0C\u5B9E\u9645\u4F7F\u7528\u6301\u7EED\u589E\u957F\uFF1BCPU \u4E0D\u9AD8\u4E0D\u4EE3\u8868\u5185\u5B58\u5065\u5EB7\u3002", "\u5185\u5B58\u63A5\u8FD1\u914D\u7F6E\u4E0A\u9650", "local"],
+          ["\u53D1\u751F\u5185\u5B58\u9650\u5236\u4E8B\u4EF6", 0, 1, "MEMORY LIMIT", "\u5185\u6838\u5728\u5185\u5B58\u538B\u529B\u4E0E\u9650\u5236\u6761\u4EF6\u4E0B\u6267\u884C OOM \u5904\u7406\uFF1B\u6559\u5B66\u573A\u666F\u5047\u8BBE\u8BE5\u5BB9\u5668\u8FDB\u7A0B\u88AB\u6740\u6B7B\u3002", "\u8FDB\u7A0B\u88AB\u7EC8\u6B62", "control"],
+          ["\u8BB0\u5F55\u7EC8\u6B62\u539F\u56E0", 1, 2, "OOMKILLED", "\u5BB9\u5668 lastState \u53EF\u51FA\u73B0 OOMKilled\u3002\u4EC5\u51ED 137 \u9000\u51FA\u7801\u4E0D\u80FD\u6392\u9664\u5176\u4ED6 SIGKILL \u6765\u6E90\u3002", "\u68C0\u67E5 reason \u4E0E\u4E0A\u4E0B\u6587", "data"],
+          ["\u6839\u636E\u7B56\u7565\u5904\u7406\u91CD\u542F", 2, 3, "RESTART POLICY", "\u82E5\u7B56\u7565\u5141\u8BB8\uFF0C\u8282\u70B9\u5C1D\u8BD5\u91CD\u542F\u5BB9\u5668\u3002\u5E94\u5B9A\u4F4D\u5185\u5B58\u589E\u957F\u548C\u5408\u7406\u9884\u7B97\uFF0C\u4E0D\u80FD\u628A\u91CD\u542F\u5F53\u4F5C\u6839\u56E0\u4FEE\u590D\u3002", "\u6062\u590D\u9700\u6301\u7EED\u9A8C\u8BC1", "control"]
+        ],
+        code: ["\u6838\u5BF9 lastState.reason", "\u5BF9\u7167 limits \u4E0E\u5185\u5B58\u89C2\u6D4B", "\u533A\u5206\u5BB9\u5668 OOM \u4E0E\u8282\u70B9\u9A71\u9010", "\u4FEE\u6B63\u5185\u5B58\u884C\u4E3A\u6216\u5408\u7406\u9884\u7B97"],
+        example: sh("\u786E\u8BA4 OOM \u7EBF\u7D22", "POD \u4E3A\u5F02\u5E38 Pod\uFF1Btop \u9700\u8981 Metrics Server\uFF0C\u91C7\u6837\u4E5F\u53EF\u80FD\u9519\u8FC7\u5CF0\u503C\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl -n demo logs "$POD" --previous --tail=100
+kubectl -n demo top pod "$POD" --containers`, "lastState\u3001\u4E8B\u4EF6\u4E0E\u5386\u53F2\u6307\u6807\u5E94\u5171\u540C\u5224\u65AD\uFF1B\u91CD\u542F\u540E\u7684\u5F53\u524D\u5185\u5B58\u4E0D\u80FD\u4EE3\u8868\u5D29\u6E83\u524D\u5CF0\u503C\u3002")
+      }
+    },
+    {
+      id: "probes",
+      group: 0,
+      title: "\u542F\u52A8\u3001\u5C31\u7EEA\u4E0E\u5B58\u6D3B\u63A2\u9488",
+      en: "STARTUP \xB7 READINESS \xB7 LIVENESS",
+      summary: "\u8BA9\u201C\u6B63\u5728\u542F\u52A8\u201D\u201C\u80FD\u63A5\u6D41\u91CF\u201D\u201C\u9700\u8981\u91CD\u542F\u201D\u6210\u4E3A\u4E09\u4E2A\u72EC\u7ACB\u5224\u65AD\u3002",
+      principle: "startup \u4FDD\u62A4\u542F\u52A8\u671F\uFF0Creadiness \u63A7\u5236\u5C31\u7EEA\uFF0Cliveness \u89E6\u53D1\u5BB9\u5668\u6062\u590D\u3002",
+      tradeoff: "\u654F\u611F\u63A2\u9488\u66F4\u5FEB\u53D1\u73B0\u5F02\u5E38\uFF0C\u4E5F\u66F4\u6613\u5728\u6162\u542F\u52A8\u3001\u77AC\u65F6\u6296\u52A8\u6216\u4F9D\u8D56\u6545\u969C\u65F6\u8BEF\u5224\u3002",
+      pitfall: "\u5C31\u7EEA\u5931\u8D25\u672C\u8EAB\u4E0D\u91CD\u542F\u5BB9\u5668\uFF1B\u5B58\u6D3B\u63A2\u9488\u4E0D\u5E94\u56E0\u4E3A\u5171\u4EAB\u4E0B\u6E38\u77ED\u6682\u4E0D\u53EF\u7528\u5C31\u628A\u6240\u6709\u526F\u672C\u53CD\u590D\u91CD\u542F\u3002",
+      nodes: ["kubelet", "startup \u68C0\u67E5", "readiness \u68C0\u67E5", "liveness \u68C0\u67E5"],
+      steps: [
+        ["\u5148\u786E\u8BA4\u542F\u52A8\u5B8C\u6210", 0, 1, "STARTUP PROBE", "\u5047\u8BBE\u5BB9\u5668\u914D\u7F6E\u4E86\u4E09\u79CD\u63A2\u9488\u3002startup \u6210\u529F\u524D\uFF0Creadiness \u4E0E liveness \u4E0D\u4F1A\u5F00\u59CB\u6267\u884C\u3002", "\u542F\u52A8\u671F\u53D7\u72EC\u7ACB\u9884\u7B97\u4FDD\u62A4", "check"],
+        ["\u5F00\u59CB\u68C0\u67E5\u5C31\u7EEA", 0, 2, "READINESS PROBE", "startup \u6210\u529F\u540E\uFF0C\u5C31\u7EEA\u63A2\u9488\u5224\u65AD\u662F\u5426\u80FD\u63A5\u6536\u6D41\u91CF\u3002\u6210\u529F\u8FD8\u9700\u6EE1\u8DB3 Pod \u5176\u4ED6\u5C31\u7EEA\u6761\u4EF6\u3002", "Ready \u6839\u636E\u6761\u4EF6\u66F4\u65B0", "check"],
+        ["\u72EC\u7ACB\u68C0\u67E5\u5B58\u6D3B", 0, 3, "LIVENESS PROBE", "\u5B58\u6D3B\u63A2\u9488\u5224\u65AD\u662F\u5426\u9700\u8981\u901A\u8FC7\u91CD\u542F\u6062\u590D\uFF0C\u4E0E\u662F\u5426\u8FDB\u5165 Service \u5E38\u89C4\u5C31\u7EEA\u540E\u7AEF\u662F\u4E0D\u540C\u95EE\u9898\u3002", "\u8FDB\u7A0B\u5B58\u6D3B\u5065\u5EB7\u5355\u72EC\u5224\u65AD", "check"],
+        ["\u5FAA\u73AF\u89C2\u5BDF\u7ED3\u679C", 0, 0, "PROBE PERIOD", "\u63A2\u9488\u6309\u5468\u671F\u4E0E\u9608\u503C\u8FD0\u884C\u3002Service \u540E\u7AEF\u66F4\u65B0\u5B58\u5728\u4F20\u64AD\u8FC7\u7A0B\uFF0C\u4E0D\u80FD\u627F\u8BFA\u5355\u6B21\u63A2\u9488\u7ACB\u523B\u5207\u65AD\u6240\u6709\u8FDE\u63A5\u3002", "\u9608\u503C\u4E0E\u4F20\u64AD\u5EF6\u8FDF\u5747\u9700\u8003\u8651", "local"]
+      ],
+      code: ["\u82E5\u6709 startup\uFF1A\u5148\u901A\u8FC7\u542F\u52A8\u68C0\u67E5", "readiness \u5931\u8D25 \u2192 \u6807\u8BB0\u4E0D\u5C31\u7EEA", "liveness \u8FBE\u5230\u5931\u8D25\u9608\u503C \u2192 \u7EC8\u6B62\u5BB9\u5668", "\u6309 restartPolicy \u7B49\u6761\u4EF6\u5904\u7406\u91CD\u542F"],
+      example: yaml("\u4E09\u79CD\u63A2\u9488\u7684\u5B8C\u6574\u793A\u4F8B", "demo \u5DF2\u5B58\u5728\uFF0Cnginx:1.28 \u7684 / \u53EF\u7528\uFF1B\u6B64\u4F8B\u6F14\u793A\u4E09\u4E2A\u68C0\u67E5\u7684\u914D\u7F6E\u4F4D\u7F6E\uFF0C\u751F\u4EA7\u7AEF\u70B9\u5E94\u6309\u8BED\u4E49\u5206\u522B\u8BBE\u8BA1\u3002", "probes.yaml", `apiVersion: v1
+kind: Pod
+metadata:
+  name: probe-demo
+  namespace: demo
+spec:
+  containers:
+    - name: web
+      image: nginx:1.28
+      startupProbe:
+        httpGet: {path: /, port: 80}
+        periodSeconds: 5
+        failureThreshold: 30
+      readinessProbe:
+        httpGet: {path: /, port: 80}
+        periodSeconds: 5
+      livenessProbe:
+        httpGet: {path: /, port: 80}
+        periodSeconds: 10
+        failureThreshold: 3`, "startup \u5141\u8BB8\u8F83\u957F\u542F\u52A8\u7A97\u53E3\uFF1B\u63A2\u9488\u547D\u4E2D\u5BB9\u5668\u5E94\u7528\u7AEF\u70B9\uFF0C\u4E0D\u662F\u901A\u8FC7 Service \u68C0\u67E5\u5176\u4ED6\u526F\u672C\u3002"),
+      sections: [
+        { title: "\u5C31\u7EEA\u5F71\u54CD\u6D41\u91CF\u8D44\u683C", body: "readiness \u5931\u8D25\u4F1A\u4F7F\u76F8\u5E94\u5BB9\u5668\u4E0D\u5C31\u7EEA\uFF0C\u5E76\u5F71\u54CD Pod Ready \u4E0E\u5E38\u89C4 Service \u540E\u7AEF\u8D44\u683C\u3002\u4F7F\u7528 publishNotReadyAddresses \u7B49\u7279\u6B8A\u914D\u7F6E\u65F6\u884C\u4E3A\u4E0D\u540C\uFF0C\u65E2\u6709\u8FDE\u63A5\u548C\u66F4\u65B0\u4F20\u64AD\u4E5F\u9700\u8981\u5355\u72EC\u8003\u8651\u3002" },
+        { title: "\u5B58\u6D3B\u4E0D\u662F\u4F9D\u8D56\u5217\u8868", body: "\u5E94\u7528\u6682\u65F6\u65E0\u6CD5\u8BBF\u95EE\u6570\u636E\u5E93\u65F6\uFF0C\u91CD\u542F\u672A\u5FC5\u6709\u7528\uFF0C\u53CD\u800C\u53EF\u80FD\u52A0\u5267\u98CE\u66B4\u3002\u5B58\u6D3B\u7AEF\u70B9\u5E94\u5224\u65AD\u5BB9\u5668\u662F\u5426\u9700\u8981\u91CD\u542F\u6062\u590D\uFF1B\u5C31\u7EEA\u53EF\u7ED3\u5408\u662F\u5426\u80FD\u5904\u7406\u8BF7\u6C42\u505A\u66F4\u4E25\u683C\u5224\u65AD\uFF0C\u4F46\u4E5F\u8981\u9632\u6B62\u5168\u4F53\u6458\u6D41\u3002" },
+        { title: "\u6162\u542F\u52A8\u9700\u8981\u5355\u72EC\u9884\u7B97", body: "startup \u5C06\u521D\u59CB\u5316\u8017\u65F6\u4E0E\u8FD0\u884C\u671F\u5065\u5EB7\u9608\u503C\u5206\u79BB\u3002\u5B83\u6210\u529F\u540E\u4E0D\u518D\u6301\u7EED\u8FD0\u884C\uFF1B\u8FD0\u884C\u671F\u95F4\u4ECD\u9760 readiness \u548C liveness\u3002\u9608\u503C\u8981\u6839\u636E\u5B9E\u9645\u542F\u52A8\u4E0E\u6545\u969C\u5206\u5E03\u8BBE\u7F6E\uFF0C\u5E76\u6301\u7EED\u89C2\u5BDF\u8BEF\u62A5\u3002" }
+      ],
+      sources: ["probes", "lifecycle", "endpoints"],
+      related: ["pod", "service", "deployment", "pod-debug"],
+      fault: {
+        name: "\u5C31\u7EEA\u5931\u8D25\uFF0C\u5BB9\u5668\u4ECD\u5B58\u6D3B",
+        nodes: ["\u5E94\u7528\u5BB9\u5668", "readiness \u7ED3\u679C", "Pod \u6761\u4EF6", "EndpointSlice"],
+        steps: [
+          ["\u5C31\u7EEA\u63A5\u53E3\u8FD4\u56DE\u5931\u8D25", 0, 1, "READINESS FAILED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u8FDB\u7A0B\u8FD8\u5728\u8FD0\u884C\uFF0Creadiness \u8FDE\u7EED\u5931\u8D25\u8FBE\u5230\u9608\u503C\uFF0C\u800C liveness \u4E00\u76F4\u901A\u8FC7\u3002", "\u5BB9\u5668 Running", "data"],
+          ["\u66F4\u65B0 Pod \u6761\u4EF6", 1, 2, "READY=FALSE", "kubelet \u5C06\u5C31\u7EEA\u89C2\u5BDF\u53CD\u6620\u5230 Pod \u72B6\u6001\uFF0C\u4E0D\u56E0\u4E3A\u5355\u7EAF\u5C31\u7EEA\u5931\u8D25\u91CD\u542F\u5BB9\u5668\u3002", "restartCount \u4E0D\u56E0\u6B64\u589E\u52A0", "control"],
+          ["\u7AEF\u70B9\u8D44\u683C\u53D8\u5316", 2, 3, "NOT READY ENDPOINT", "\u5E38\u89C4 selector Service \u7684\u7AEF\u70B9\u5C31\u7EEA\u6761\u4EF6\u76F8\u5E94\u53D8\u5316\uFF0C\u6570\u636E\u9762\u66F4\u65B0\u540E\u4E0D\u518D\u6309\u6B63\u5E38\u5C31\u7EEA\u540E\u7AEF\u53D1\u9001\u65B0\u8BF7\u6C42\u3002", "\u5C31\u7EEA\u540E\u7AEF\u51CF\u5C11", "control"],
+          ["\u4FEE\u590D\u5E94\u7528\u4F9D\u8D56", 0, 0, "DIAGNOSE READINESS", "\u67E5\u770B\u63A2\u9488\u7AEF\u70B9\u4E0E\u4F9D\u8D56\uFF0C\u800C\u4E0D\u662F\u5148\u5220 Pod\u3002\u6062\u590D\u6210\u529F\u540E\u5C31\u7EEA\u72B6\u6001\u4E0E\u6D41\u91CF\u8D44\u683C\u53EF\u91CD\u65B0\u5EFA\u7ACB\u3002", "\u6062\u590D\u9700\u8981\u518D\u6B21\u63A2\u6D4B", "local"]
+        ],
+        code: ["\u8BFB\u53D6 readiness \u4E8B\u4EF6\u4E0E\u72B6\u6001", "\u5BF9\u7167 restartCount \u662F\u5426\u589E\u957F", "\u68C0\u67E5 EndpointSlice.ready", "\u4FEE\u590D\u540E\u89C2\u5BDF Ready \u6062\u590D"],
+        example: sh("\u9A8C\u8BC1\u5C31\u7EEA\u4E0E\u91CD\u542F\u5206\u79BB", "POD \u66FF\u6362\u4E3A Service web \u9009\u4E2D\u7684\u5F02\u5E38 Pod\uFF1B\u89C2\u5BDF\u8F93\u51FA\u800C\u975E\u9884\u8BBE\u4E00\u5B9A\u662F\u63A2\u9488\u95EE\u9898\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl -n demo get endpointslices -l kubernetes.io/service-name=web -o yaml
+kubectl -n demo get pod "$POD" -o wide`, "\u5BF9\u7167 Ready\u3001Restart Count \u4E0E\u7AEF\u70B9 ready\uFF1BRunning/NotReady \u53EF\u4EE5\u540C\u65F6\u5B58\u5728\u3002")
+      }
     }
-  },
-  {
-    "group": 0,
-    "id": "vm",
-    "title": "虚拟内存与 TLB",
-    "en": "VIRTUAL MEMORY",
-    "summary": "用地址翻译隔离进程，同时将有限物理内存映射成可管理的地址空间。",
-    "nodes": [
-      "CPU / MMU",
-      "TLB",
-      "页表",
-      "物理内存"
-    ],
-    "steps": [
-      [
-        "查询地址翻译",
-        0,
-        1,
-        "LOOKUP VPN",
-        "MMU 用虚拟页号查询 TLB，页内偏移保持不变。TLB 缓存页号映射和访问权限；本例采用硬件管理的 TLB。",
-        "VA = VPN + 页内偏移",
-        "check"
+  ];
+
+  // src/lessons/applications.ts
+  var applications = [
+    {
+      id: "deployment",
+      group: 1,
+      title: "Deployment \u4E0E\u6EDA\u52A8\u53D1\u5E03",
+      en: "DEPLOYMENT & ROLLOUT",
+      summary: "\u8FFD\u8E2A Deployment\u3001ReplicaSet \u548C Pod \u7684\u5173\u7CFB\uFF0C\u89C2\u5BDF\u65B0\u65E7\u526F\u672C\u5982\u4F55\u4EA4\u66FF\u3002",
+      principle: "Deployment \u901A\u8FC7 ReplicaSet \u63A8\u8FDB Pod \u6A21\u677F\u66F4\u65B0\uFF1B\u53EF\u7528\u6027\u53D6\u51B3\u4E8E\u7B56\u7565\u3001\u5C31\u7EEA\u548C\u5BB9\u91CF\u3002",
+      tradeoff: "maxSurge \u7528\u989D\u5916\u5BB9\u91CF\u6362\u53D6\u53D1\u5E03\u4F59\u91CF\uFF0CmaxUnavailable \u7528\u53EF\u7528\u526F\u672C\u9884\u7B97\u9650\u5236\u53D1\u5E03\u671F\u95F4\u7684\u4E0B\u964D\u3002",
+      pitfall: "Deployment \u8FDB\u5EA6\u8D85\u65F6\u4F1A\u62A5\u544A\u5931\u8D25\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u56DE\u6EDA\uFF1B\u4E1A\u52A1\u517C\u5BB9\u6027\u548C\u6570\u636E\u8FC1\u79FB\u4E5F\u4E0D\u4F1A\u7531\u5B83\u81EA\u52A8\u4FDD\u8BC1\u3002",
+      nodes: ["Deployment", "\u65B0 ReplicaSet", "\u65E7 ReplicaSet", "Pod \u5C31\u7EEA\u72B6\u6001"],
+      steps: [
+        ["\u53D8\u66F4 Pod \u6A21\u677F", 0, 1, "NEW TEMPLATE", "\u5047\u8BBE RollingUpdate Deployment \u4ECE v1 \u66F4\u65B0\u5230\u53EF\u5DE5\u4F5C\u7684 v2\u3002\u6A21\u677F\u53D8\u5316\u89E6\u53D1\u65B0 ReplicaSet\u3002", "revision \u589E\u52A0", "control"],
+        ["\u5728\u9884\u7B97\u5185\u6269\u65B0\u526F\u672C", 1, 3, "SCALE UP NEW RS", "\u63A7\u5236\u5668\u9075\u5B88 surge \u4E0E unavailable \u9884\u7B97\uFF0C\u65B0 Pod \u8FD8\u9700\u7ECF\u8FC7\u8C03\u5EA6\u3001\u542F\u52A8\u4E0E\u5C31\u7EEA\u3002", "\u65B0\u526F\u672C\u9010\u6E10 Ready", "control"],
+        ["\u9010\u6B65\u7F29\u65E7\u526F\u672C", 0, 2, "SCALE DOWN OLD RS", "\u5728\u5141\u8BB8\u7684\u53EF\u7528\u6027\u9884\u7B97\u5185\u7F29\u51CF\u65E7 ReplicaSet\uFF1B\u4E0D\u662F\u5148\u5220\u5149\u65E7 Pod \u518D\u7B49\u5F85\u65B0\u5E94\u7528\u3002", "\u65B0\u65E7\u526F\u672C\u5171\u5B58", "control"],
+        ["\u9A8C\u8BC1\u53D1\u5E03\u7ED3\u679C", 3, 0, "ROLLOUT PROGRESS", "\u72B6\u6001\u8FBE\u5230\u53D1\u5E03\u6761\u4EF6\u540E\u4ECD\u5E94\u505A\u8BF7\u6C42\u6210\u529F\u7387\u3001\u5EF6\u8FDF\u4E0E\u4E1A\u52A1\u9A8C\u6536\u3002\u56FE\u4E2D\u56DB\u6B65\u538B\u7F29\u4E86\u591A\u6B21\u63A7\u5236\u5FAA\u73AF\u3002", "\u63A7\u5236\u5668\u5B8C\u6210 \u2260 \u4E1A\u52A1\u5DF2\u9A8C\u6536", "data"]
       ],
-      [
-        "TLB 未命中后遍历",
-        0,
-        2,
-        "PAGE WALK",
-        "TLB 未命中时，硬件页表遍历器读取页表。这里找到合法、已驻留且允许本次访问的映射；TLB 未命中本身不等于缺页。",
-        "PTE 有效 · present = 1",
-        "check"
+      code: ["\u66F4\u65B0 spec.template", "\u521B\u5EFA\u6216\u9009\u62E9\u65B0 ReplicaSet", "\u6309 maxSurge / maxUnavailable \u8C03\u6574\u526F\u672C", "\u89C2\u5BDF rollout \u4E0E\u4E1A\u52A1\u6307\u6807"],
+      example: yaml("\u53EF\u8FD0\u884C\u7684\u6EDA\u52A8\u66F4\u65B0\u6E05\u5355", "demo \u5DF2\u5B58\u5728\uFF1B\u8BE5\u6E05\u5355\u5B9A\u4E49 demo/web\uFF0C\u53EF\u4E0E\u5165\u95E8\u5B9E\u9A8C\u5BF9\u9F50\u3002\u4FEE\u6539\u955C\u50CF\u7248\u672C\u624D\u4F1A\u4EA7\u751F\u6A21\u677F\u4FEE\u8BA2\u3002", "deployment.yaml", `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: demo
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels: {app: web}
+  template:
+    metadata:
+      labels: {app: web}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.28
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 128Mi}
+          readinessProbe:
+            httpGet: {path: /, port: 80}`, "\u4E24\u4E2A\u526F\u672C\u4E3A\u76EE\u6807\uFF1B\u53D1\u5E03\u53EF\u80FD\u9700\u8981\u7B2C\u4E09\u4E2A Pod \u7684\u6682\u65F6\u5BB9\u91CF\uFF0C\u7EC8\u6B62\u4E2D\u7684 Pod \u4E5F\u53EF\u80FD\u6682\u65F6\u5360\u7528\u8D44\u6E90\u3002"),
+      sections: [
+        { title: "\u6A21\u677F\u4FEE\u8BA2\u4E0E\u526F\u672C\u6570\u4E0D\u540C", body: "\u6539\u53D8 Pod \u6A21\u677F\u4F1A\u89E6\u53D1 rollout\uFF0C\u5355\u7EAF\u4FEE\u6539 replicas \u5C5E\u4E8E\u6269\u7F29\u5BB9\u3002\u5386\u53F2 ReplicaSet \u8BA9\u90E8\u5206\u56DE\u6EDA\u6210\u4E3A\u53EF\u80FD\uFF0C\u4F46\u4FDD\u7559\u6570\u91CF\u548C\u5916\u90E8\u914D\u7F6E\u4F1A\u5F71\u54CD\u7ED3\u679C\uFF1B\u56DE\u6EDA\u6A21\u677F\u4E0D\u4F1A\u56DE\u6EDA\u5916\u90E8\u6570\u636E\u5E93\u6570\u636E\u3002" },
+        { title: "\u5C31\u7EEA\u662F\u53D1\u5E03\u95E8\u69DB\u4E4B\u4E00", body: "\u53EF\u7528\u526F\u672C\u5224\u65AD\u4E0E\u5C31\u7EEA\u3001minReadySeconds \u7B49\u6761\u4EF6\u6709\u5173\u3002\u63A2\u9488\u5982\u679C\u53EA\u68C0\u67E5\u8FDB\u7A0B\u5B58\u5728\uFF0C\u63A7\u5236\u5668\u53EF\u80FD\u8BA4\u4E3A\u53D1\u5E03\u6210\u529F\uFF0C\u800C\u771F\u5B9E\u8BF7\u6C42\u5DF2\u7ECF\u5931\u8D25\u3002\u7B56\u7565\u548C\u5065\u5EB7\u68C0\u67E5\u9700\u8981\u6839\u636E\u5E94\u7528\u884C\u4E3A\u5171\u540C\u8BBE\u8BA1\u3002" },
+        { title: "\u8FDB\u5EA6\u5931\u8D25\u540E\u7684\u52A8\u4F5C", body: "ProgressDeadlineExceeded \u662F\u9700\u8981\u8C03\u67E5\u7684\u6761\u4EF6\u3002\u5148\u67E5\u65B0 ReplicaSet\u3001Pod \u4E8B\u4EF6\u3001\u955C\u50CF\u548C\u5C31\u7EEA\uFF0C\u518D\u51B3\u5B9A\u4FEE\u6B63\u6216\u663E\u5F0F\u56DE\u6EDA\u3002\u81EA\u52A8\u5316\u53D1\u5E03\u5E73\u53F0\u53EF\u4EE5\u52A0\u7B56\u7565\uFF0C\u4F46\u5B83\u4E0D\u662F Deployment \u9ED8\u8BA4\u4FDD\u8BC1\u3002" }
       ],
-      [
-        "缓存有效翻译",
-        2,
-        1,
-        "FILL VPN→PFN",
-        "页表项中的物理页框号及权限被填入 TLB。页表描述映射，不把页面内容传送到 TLB。",
-        "TLB 保存 VPN→PFN 与权限",
-        "data"
-      ],
-      [
-        "使用物理地址访问",
-        0,
-        3,
-        "ACCESS PA",
-        "MMU 将 PFN 与原页内偏移组成物理地址，完成内存访问。后续 TLB 命中可跳过页表遍历，但仍要检查访问权限。",
-        "物理地址已生成 · 访问获准",
-        "request"
-      ]
-    ],
-    "principle": "地址空间隔离依赖页表、权限与正确的 TLB 管理。",
-    "tradeoff": "大页可降低 TLB 压力，但增大分配粒度，并可能浪费内存。",
-    "pitfall": "TLB 未命中不等于缺页。缺页也不一定读磁盘，还可能是按需分配或写时复制。",
-    "code": [
-      "translation = tlb.lookup(vpn)",
-      "if missing: translation = walkPageTable(vpn)",
-      "if !translation.valid || !translation.present || !permitted:",
-      "  return trapAndRetryOrFail()",
-      "tlb.cacheValidTranslation(translation)",
-      "return access(translation.pfn, offset)"
-    ],
-    "sources": [
-      "tlb_notes",
-      "fault_notes"
-    ],
-    "related": [
-      "cache",
-      "schedule"
-    ],
-    "fault": {
-      "name": "合法页尚未驻留",
-      "nodes": [
-        "CPU / MMU",
-        "页表",
-        "内核缺页处理",
-        "物理页"
-      ],
-      "steps": [
-        [
-          "发现页面不在内存",
-          0,
-          1,
-          "PRESENT = 0",
-          "CPU 访问一个合法匿名映射中的尚未分配页面；TLB 未命中后，页表遍历发现当前没有可用的驻留页映射。此例不是非法地址访问。",
-          "映射合法 · 尚无驻留物理页",
-          "check"
+      sources: ["deployment", "probes"],
+      related: ["reconcile", "probes", "hpa", "drain"],
+      fault: {
+        name: "\u65B0\u7248\u672C\u4E00\u76F4\u4E0D\u5C31\u7EEA",
+        nodes: ["Deployment", "\u65B0 ReplicaSet", "\u65B0 Pod", "\u65E7 ReplicaSet"],
+        steps: [
+          ["\u65B0\u7248\u672C\u5F00\u59CB\u53D1\u5E03", 0, 1, "ROLLOUT START", "\u72EC\u7ACB\u573A\u666F\uFF1Areplicas=2\u3001maxSurge=1\u3001maxUnavailable=0\uFF0C\u65B0\u6A21\u677F\u4F7F\u7528\u9519\u8BEF\u7684 readiness \u8DEF\u5F84\u3002", "\u5141\u8BB8\u589E\u52A0\u4E00\u4E2A\u65B0 Pod", "control"],
+          ["\u65B0 Pod \u5C31\u7EEA\u5931\u8D25", 1, 2, "READY=FALSE", "\u955C\u50CF\u80FD\u542F\u52A8\u4F46\u63A2\u9488\u5931\u8D25\uFF0C\u65B0 Pod \u4E0D\u6EE1\u8DB3\u53EF\u7528\u6761\u4EF6\u3002", "\u66F4\u65B0\u526F\u672C\u5DF2\u521B\u5EFA\u4F46\u4E0D\u53EF\u7528", "control"],
+          ["\u65E7\u526F\u672C\u4FDD\u6301\u9884\u7B97", 0, 3, "KEEP AVAILABLE OLD PODS", "\u5728\u6B64\u573A\u666F\u7684\u9884\u7B97\u4E0E\u65E7 Pod \u5065\u5EB7\u6761\u4EF6\u4E0B\uFF0C\u63A7\u5236\u5668\u65E0\u6CD5\u7EE7\u7EED\u7F29\u65E7\u526F\u672C\u6765\u5B8C\u6210\u66F4\u65B0\u3002", "\u53D1\u5E03\u505C\u6EDE \xB7 \u65E7\u526F\u672C\u4ECD\u670D\u52A1", "control"],
+          ["\u62A5\u544A\u5E76\u8BCA\u65AD\u8FDB\u5EA6", 0, 0, "PROGRESS DEADLINE", "\u8D85\u8FC7\u914D\u7F6E\u7684\u8FDB\u5EA6\u65F6\u9650\u540E\u4F1A\u62A5\u544A\u6761\u4EF6\uFF0C\u4E0D\u4F1A\u81EA\u884C\u56DE\u6EDA\u3002\u5148\u4FDD\u7559\u4E8B\u4EF6\u4E0E\u7248\u672C\uFF0C\u518D\u505A\u660E\u786E\u4FEE\u6B63\u3002", "\u9700\u8981\u4EBA\u4E3A\u6216\u53D1\u5E03\u5E73\u53F0\u51B3\u7B56", "local"]
         ],
-        [
-          "进入内核处理",
-          0,
-          2,
-          "PAGE FAULT",
-          "硬件触发缺页异常，进入内核。内核检查地址范围与访问权限，再决定是否可以补齐映射；非法访问可能终止任务。",
-          "原指令暂停 · 内核验证映射",
-          "control"
-        ],
-        [
-          "分配并准备物理页",
-          2,
-          3,
-          "ALLOC / ZERO",
-          "本例由内核分配并清零物理页，然后安装页表映射，因此不必读取磁盘。若页面来自后备存储，则可能需要 I/O 并阻塞当前线程。",
-          "物理页已准备 · PTE 已更新",
-          "data"
-        ],
-        [
-          "返回并重试指令",
-          2,
-          0,
-          "RETRY",
-          "映射与必要的 TLB 状态处理完成后返回，重新执行触发缺页的指令。只有成功处理的缺页才能沿此路径继续。",
-          "重试翻译与访问 · 并非所有缺页都可恢复",
-          "control"
-        ]
+        code: ["\u8BFB\u53D6 Deployment conditions", "\u68C0\u67E5\u65B0 RS \u4E0E Pod readiness", "\u6838\u5BF9 revision \u4E0E\u6A21\u677F\u5DEE\u5F02", "\u4FEE\u6B63\u6A21\u677F\u6216\u663E\u5F0F\u56DE\u6EDA"],
+        example: sh("\u68C0\u67E5\u53D1\u5E03\u5361\u5728\u54EA\u4E2A\u4FEE\u8BA2", "\u5DF2\u5B58\u5728 demo/web\uFF1B\u547D\u4EE4\u5747\u4E3A\u89C2\u5BDF\uFF0C\u4E0D\u6267\u884C\u56DE\u6EDA\u3002", `kubectl -n demo rollout status deployment/web --timeout=30s
+kubectl -n demo rollout history deployment/web
+kubectl -n demo describe deployment web
+kubectl -n demo get pods -l app=web -o wide`, "\u8D85\u65F6\u53EA\u662F\u89C2\u5BDF\u7A97\u53E3\u7ED3\u675F\uFF1B\u7ED3\u5408 conditions\u3001\u4E8B\u4EF6\u548C revision \u786E\u8BA4\u53D1\u5E03\u72B6\u6001\u3002")
+      }
+    },
+    {
+      id: "statefulset",
+      group: 1,
+      title: "StatefulSet \u4E0E\u7A33\u5B9A\u8EAB\u4EFD",
+      en: "STATEFULSET & IDENTITY",
+      summary: "\u7406\u89E3\u7A33\u5B9A\u5E8F\u53F7\u3001\u7F51\u7EDC\u8EAB\u4EFD\u548C\u5377\u58F0\u660E\uFF0C\u533A\u5206\u8EAB\u4EFD\u7BA1\u7406\u4E0E\u6570\u636E\u5E93\u590D\u5236\u3002",
+      principle: "StatefulSet \u7BA1\u7406\u7A33\u5B9A\u8EAB\u4EFD\uFF1B\u6570\u636E\u590D\u5236\u3001\u4E3B\u4ECE\u9009\u4E3E\u4E0E\u5907\u4EFD\u4ECD\u7531\u5E94\u7528\u6216\u4E13\u95E8\u7CFB\u7EDF\u8D1F\u8D23\u3002",
+      tradeoff: "\u6709\u5E8F\u521B\u5EFA\u548C\u7A33\u5B9A\u5B58\u50A8\u4FBF\u4E8E\u72B6\u6001\u7CFB\u7EDF\u7BA1\u7406\uFF0C\u4E5F\u53EF\u80FD\u8BA9\u524D\u4E00\u4E2A\u5B9E\u4F8B\u7684\u4E0D\u5C31\u7EEA\u963B\u585E\u540E\u7EED\u8FDB\u5EA6\u3002",
+      pitfall: "\u540C\u540D Pod \u91CD\u5EFA\u4E0D\u7B49\u4E8E\u6570\u636E\u4E00\u5B9A\u5B89\u5168\uFF1BPVC \u4FDD\u7559\u7B56\u7565\u3001PV \u56DE\u6536\u7B56\u7565\u4E0E\u540E\u7AEF\u6570\u636E\u4FDD\u62A4\u5FC5\u987B\u5206\u522B\u6838\u5BF9\u3002",
+      nodes: ["StatefulSet", "Headless Service", "Pod web-0", "PVC / PV"],
+      steps: [
+        ["\u58F0\u660E\u7A33\u5B9A\u8EAB\u4EFD", 0, 1, "SERVICE NAME", "\u5047\u8BBE Headless Service \u5DF2\u521B\u5EFA\uFF0CStatefulSet \u6307\u5411\u5B83\u6765\u5EFA\u7ACB\u7A33\u5B9A\u7684\u7F51\u7EDC\u547D\u540D\u57FA\u7840\u3002", "\u547D\u540D\u4E0E\u53D1\u73B0\u5173\u7CFB\u660E\u786E", "control"],
+        ["\u521B\u5EFA\u6709\u5E8F\u5B9E\u4F8B", 0, 2, "ORDINAL 0", "\u9ED8\u8BA4 OrderedReady \u4ECE\u8F83\u5C0F\u5E8F\u53F7\u5F00\u59CB\u63A8\u8FDB\uFF0CPod \u540D\u5E26\u5E8F\u53F7\u3002\u53EF\u4EE5\u914D\u7F6E\u5176\u4ED6\u7BA1\u7406\u7B56\u7565\uFF0C\u4E0D\u80FD\u4E00\u6982\u800C\u8BBA\u3002", "\u5B9E\u4F8B\u540D\u7A33\u5B9A \xB7 UID \u53EF\u53D8\u5316", "control"],
+        ["\u7ED1\u5B9A\u5B9E\u4F8B\u5377", 2, 3, "CLAIM PER ORDINAL", "\u6709 volumeClaimTemplates \u65F6\uFF0C\u5B9E\u4F8B\u5173\u8054\u72EC\u7ACB PVC\uFF1B\u5377\u80FD\u5426\u4F9B\u7ED9\u548C\u6302\u8F7D\u53D6\u51B3\u4E8E\u5B58\u50A8\u73AF\u5883\u3002", "\u8EAB\u4EFD\u4E0E\u5377\u58F0\u660E\u5173\u8054", "control"],
+        ["\u5E94\u7528\u81EA\u884C\u7BA1\u7406\u6570\u636E", 2, 2, "APPLICATION RESPONSIBILITY", "\u7A33\u5B9A\u8EAB\u4EFD\u652F\u6301\u5E94\u7528\u642D\u5EFA\u6210\u5458\u5173\u7CFB\uFF0C\u4F46\u4E0D\u4F1A\u81EA\u52A8\u914D\u7F6E\u6570\u636E\u5E93\u526F\u672C\u3001\u9009\u4E3B\u6216\u4E00\u81F4\u6027\u534F\u8BAE\u3002", "\u5E94\u7528\u6570\u636E\u8BED\u4E49\u4ECD\u9700\u5B9E\u73B0", "local"]
       ],
-      "code": [
-        "onPageFault(address, access):",
-        "  require validMappingAndPermission(address, access)",
-        "  frame = allocateAndZeroPage() // 本例：匿名按需分配",
-        "  installPTEAndMaintainTLB(address, frame)",
-        "  returnAndRetryFaultingInstruction()"
-      ]
+      code: ["\u521B\u5EFA governing Headless Service", "\u4E3A Pod \u5206\u914D\u7A33\u5B9A ordinal", "\u6309\u6A21\u677F\u5173\u8054\u6BCF\u5B9E\u4F8B PVC", "\u7531\u5E94\u7528\u8D1F\u8D23\u590D\u5236\u4E0E\u6062\u590D"],
+      example: yaml("\u4E0D\u4F9D\u8D56\u5B58\u50A8\u63D2\u4EF6\u7684\u8EAB\u4EFD\u5B9E\u9A8C", "demo \u5DF2\u5B58\u5728\uFF1B\u8BE5\u5B8C\u6574\u6E05\u5355\u4E13\u95E8\u89C2\u5BDF\u8EAB\u4EFD\uFF0C\u4E0D\u58F0\u660E\u6301\u4E45\u5377\uFF0C\u4E5F\u4E0D\u628A nginx \u89E3\u91CA\u4E3A\u6570\u636E\u5E93\u3002", "statefulset.yaml", `apiVersion: v1
+kind: Service
+metadata:
+  name: stable-web
+  namespace: demo
+spec:
+  clusterIP: None
+  selector: {app: stable-web}
+  ports:
+    - port: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stable-web
+  namespace: demo
+spec:
+  serviceName: stable-web
+  replicas: 2
+  selector:
+    matchLabels: {app: stable-web}
+  template:
+    metadata:
+      labels: {app: stable-web}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.28
+          readinessProbe:
+            httpGet: {path: /, port: 80}`, "\u5E94\u770B\u5230 stable-web-0 \u548C stable-web-1\uFF1B\u7A33\u5B9A\u7F51\u7EDC\u8EAB\u4EFD\u7684\u89E3\u6790\u8FD8\u4F9D\u8D56 DNS \u4E0E\u5C31\u7EEA\u7B49\u6761\u4EF6\u3002"),
+      sections: [
+        { title: "\u540D\u5B57\u7A33\u5B9A\uFF0C\u5B9E\u4F8B\u4ECD\u4F1A\u66FF\u6362", body: "Pod \u66FF\u6362\u540E\u5E8F\u53F7\u548C\u540D\u79F0\u53EF\u4FDD\u6301\uFF0CUID\u3001IP \u548C\u8282\u70B9\u4ECD\u53EF\u80FD\u6539\u53D8\u3002\u5E94\u7528\u5E94\u901A\u8FC7\u7A33\u5B9A\u8EAB\u4EFD\u4E0E\u53D1\u73B0\u673A\u5236\u8BC6\u522B\u6210\u5458\uFF0C\u800C\u4E0D\u662F\u6C38\u4E45\u8BB0\u5F55\u4E00\u6B21\u5206\u914D\u7684 IP\u3002Headless Service \u4E0D\u63D0\u4F9B\u666E\u901A ClusterIP \u8D1F\u8F7D\u5747\u8861\u5165\u53E3\u3002" },
+        { title: "\u4FDD\u7559\u4E0D\u7B49\u4E8E\u5907\u4EFD", body: "PVC \u9ED8\u8BA4\u4FDD\u7559\u8BED\u4E49\u4E0E\u53EF\u914D\u7F6E\u7684 StatefulSet PVC \u4FDD\u7559\u7B56\u7565\u9700\u8981\u6838\u5BF9\u3002PV \u7684 Retain/Delete \u53C8\u662F\u53E6\u4E00\u5C42\uFF0C\u6700\u7EC8\u540E\u7AEF\u5377\u662F\u5426\u5B58\u5728\u53CA\u80FD\u5426\u6062\u590D\u9700\u6309\u5B58\u50A8\u7CFB\u7EDF\u9A8C\u8BC1\u3002" },
+        { title: "\u5E8F\u53F7\u4E0D\u662F\u590D\u5236\u534F\u8BAE", body: "web-0 \u4E0D\u4F1A\u5929\u7136\u6210\u4E3A\u5B89\u5168\u7684\u6570\u636E\u5E93\u4E3B\u8282\u70B9\u3002\u987A\u5E8F\u542F\u52A8\u53EA\u80FD\u5E2E\u52A9\u4F9D\u8D56\u521D\u59CB\u5316\uFF1B\u5E94\u7528\u6210\u5458\u53D1\u73B0\u3001\u5199\u5165\u6743\u9650\u3001\u4EF2\u88C1\u3001\u540C\u6B65\u548C\u6062\u590D\u4ECD\u9700\u72EC\u7ACB\u8BBE\u8BA1\uFF0C\u901A\u5E38\u7531\u6570\u636E\u5E93\u672C\u8EAB\u6216 Operator \u5B9E\u73B0\u3002" }
+      ],
+      sources: ["statefulset", "storage", "dns"],
+      related: ["storage", "dns", "deployment", "backup-upgrade"],
+      fault: {
+        name: "\u9996\u4E2A\u5B9E\u4F8B\u4E0D\u5C31\u7EEA\uFF0C\u540E\u7EED\u7B49\u5F85",
+        nodes: ["OrderedReady", "Pod ordinal 0", "\u5C31\u7EEA\u6761\u4EF6", "Pod ordinal 1"],
+        steps: [
+          ["\u6309\u9ED8\u8BA4\u987A\u5E8F\u521B\u5EFA", 0, 1, "CREATE ORDINAL 0", "\u72EC\u7ACB\u573A\u666F\uFF1A\u65B0\u7684 StatefulSet \u4F7F\u7528\u9ED8\u8BA4 OrderedReady\uFF0C\u5E8F\u53F7 0 \u56E0\u542F\u52A8\u914D\u7F6E\u9519\u8BEF\u65E0\u6CD5\u5C31\u7EEA\u3002", "\u7B2C\u4E00\u4E2A Pod \u5DF2\u521B\u5EFA", "control"],
+          ["\u68C0\u67E5\u5148\u524D\u5B9E\u4F8B", 0, 2, "WAIT FOR READY", "\u9ED8\u8BA4\u521B\u5EFA\u6D41\u7A0B\u8981\u6C42\u524D\u4E00\u4E2A\u5B9E\u4F8B\u8FBE\u5230\u8FD0\u884C\u548C\u5C31\u7EEA\u6761\u4EF6\u540E\u518D\u521B\u5EFA\u540E\u7EED\u5B9E\u4F8B\u3002", "\u5148\u524D\u5C31\u7EEA\u6761\u4EF6\u672A\u6EE1\u8DB3", "check"],
+          ["\u540E\u7EED\u5B9E\u4F8B\u672A\u63A8\u8FDB", 3, 3, "WAITING FOR PREDECESSOR", "\u5E8F\u53F7 1 \u53EF\u80FD\u5C1A\u672A\u521B\u5EFA\uFF0C\u8FD9\u4E0D\u540C\u4E8E\u5B83\u5DF2\u7ECF\u5B58\u5728\u4F46\u8C03\u5EA6 Pending\u3002", "\u540E\u7EED\u521B\u5EFA\u53D7\u963B", "local"],
+          ["\u5904\u7406\u6700\u65E9\u7684\u963B\u585E\u70B9", 1, 1, "FIX FIRST FAILURE", "\u5148\u67E5\u5E8F\u53F7 0 \u7684\u4E8B\u4EF6\u3001\u65E5\u5FD7\u3001\u63A2\u9488\u548C\u5377\uFF1B\u6539\u4E3A Parallel \u4E0D\u662F\u4FEE\u590D\u5E94\u7528\u4F9D\u8D56\u7684\u901A\u7528\u7B54\u6848\u3002", "\u8BCA\u65AD\u987A\u5E8F\u7531\u7BA1\u7406\u7B56\u7565\u51B3\u5B9A", "local"]
+        ],
+        code: ["\u786E\u8BA4 podManagementPolicy", "\u5B9A\u4F4D\u6700\u65E9\u672A\u5C31\u7EEA\u5E8F\u53F7", "\u68C0\u67E5\u5B83\u7684\u4E8B\u4EF6\u4E0E\u4F9D\u8D56", "\u4FEE\u590D\u540E\u89C2\u5BDF\u540E\u7EED\u521B\u5EFA"],
+        example: sh("\u68C0\u67E5\u6709\u5E8F\u521B\u5EFA\u8FDB\u5EA6", "\u5DF2\u5E94\u7528\u8EAB\u4EFD\u5B9E\u9A8C\u6E05\u5355\uFF1B\u5982\u679C\u6240\u6709\u526F\u672C\u5065\u5EB7\uFF0C\u6B64\u547D\u4EE4\u53EA\u663E\u793A\u6B63\u5E38\u72B6\u6001\u3002", `kubectl -n demo get statefulset stable-web -o yaml
+kubectl -n demo get pods -l app=stable-web
+kubectl -n demo describe pod stable-web-0`, "\u5BF9\u7167 podManagementPolicy\u3001readyReplicas \u4E0E\u9996\u4E2A Pod \u7684\u4E8B\u4EF6\u3002")
+      }
+    },
+    {
+      id: "daemonset",
+      group: 1,
+      title: "DaemonSet \u4E0E\u8282\u70B9\u670D\u52A1",
+      en: "DAEMONSET",
+      summary: "\u4E3A\u7B26\u5408\u6761\u4EF6\u7684\u8282\u70B9\u90E8\u7F72\u4E00\u4EFD\u5B88\u62A4\u5DE5\u4F5C\u8D1F\u8F7D\uFF0C\u7406\u89E3\u8C03\u5EA6\u6761\u4EF6\u5982\u4F55\u6539\u53D8\u8986\u76D6\u8303\u56F4\u3002",
+      principle: "DaemonSet \u9762\u5411\u7B26\u5408\u6761\u4EF6\u7684\u8282\u70B9\u96C6\u5408\uFF0C\u526F\u672C\u76EE\u6807\u6765\u81EA\u8282\u70B9\u8D44\u683C\u800C\u975E\u4E00\u4E2A\u56FA\u5B9A replicas \u503C\u3002",
+      tradeoff: "\u8282\u70B9\u7EA7\u8986\u76D6\u9002\u5408\u65E5\u5FD7\u4EE3\u7406\u7B49\u670D\u52A1\uFF0C\u4F46\u6BCF\u589E\u52A0\u4E00\u4E2A\u8282\u70B9\u4E5F\u4F1A\u589E\u52A0\u5E38\u9A7B\u8D44\u6E90\u548C\u7EF4\u62A4\u8D1F\u62C5\u3002",
+      pitfall: "DaemonSet \u4E0D\u662F\u65E0\u6761\u4EF6\u5728\u6BCF\u4E2A\u8282\u70B9\u8FD0\u884C\uFF1B\u6807\u7B7E\u3001\u6C61\u70B9\u5BB9\u5FCD\u3001\u8D44\u6E90\u548C\u6A21\u677F\u7EA6\u675F\u4ECD\u4F1A\u5F71\u54CD\u7ED3\u679C\u3002",
+      nodes: ["DaemonSet", "\u7B26\u5408\u6761\u4EF6\u8282\u70B9", "\u5B88\u62A4 Pod", "\u8282\u70B9\u65B0\u589E\u4E8B\u4EF6"],
+      steps: [
+        ["\u8BC6\u522B\u8282\u70B9\u8D44\u683C", 0, 1, "ELIGIBLE NODES", "\u5047\u8BBE\u6A21\u677F\u9009\u62E9 Linux \u8282\u70B9\u5E76\u5177\u6709\u5408\u9002\u5BB9\u5FCD\u3002\u8282\u70B9\u8D44\u683C\u4E0E\u662F\u5426\u80FD\u6700\u7EC8\u6210\u529F\u8FD0\u884C\u4ECD\u5E94\u5206\u5F00\u89C2\u5BDF\u3002", "\u76EE\u6807\u8282\u70B9\u96C6\u5408\u5DF2\u786E\u5B9A", "check"],
+        ["\u4E3A\u76EE\u6807\u8282\u70B9\u5EFA Pod", 0, 2, "CREATE DAEMON POD", "\u63A7\u5236\u5668\u4E3A\u9700\u8981\u8986\u76D6\u7684\u8282\u70B9\u521B\u5EFA\u76F8\u5E94 Pod\uFF0C\u5E76\u901A\u8FC7\u8282\u70B9\u4EB2\u548C\u6027\u7B49\u673A\u5236\u7EA6\u675F\u76EE\u6807\u3002", "\u6BCF\u76EE\u6807\u8282\u70B9\u4E00\u4EFD\u5E38\u89C4\u526F\u672C", "control"],
+        ["\u8282\u70B9\u53D8\u5316\u88AB\u89C2\u5BDF", 3, 0, "NEW NODE", "\u7B26\u5408\u6761\u4EF6\u7684\u65B0\u8282\u70B9\u8FDB\u5165\u96C6\u7FA4\u540E\uFF0C\u63A7\u5236\u5668\u4F1A\u91CD\u65B0\u8BA1\u7B97\u9700\u8981\u8986\u76D6\u7684\u8282\u70B9\u3002", "\u76EE\u6807\u96C6\u5408\u53EF\u80FD\u589E\u52A0", "data"],
+        ["\u6301\u7EED\u6838\u5BF9\u8986\u76D6", 0, 0, "DESIRED / READY", "\u6BD4\u8F83 desired\u3001current\u3001ready\u3001available \u7B49\u72B6\u6001\uFF1B\u6709 Pod \u4E0D\u4EE3\u8868\u5B88\u62A4\u670D\u52A1\u5DF2\u7ECF\u5065\u5EB7\u3002", "\u8986\u76D6\u4E0E\u5065\u5EB7\u5206\u522B\u89C2\u6D4B", "local"]
+      ],
+      code: ["\u8BFB\u53D6\u8282\u70B9\u4E0E\u6A21\u677F\u7EA6\u675F", "\u4E3A\u7F3A\u5C11\u5B88\u62A4 Pod \u7684\u5408\u683C\u8282\u70B9\u521B\u5EFA", "\u8C03\u5EA6\u5668\u4E0E kubelet \u63A8\u8FDB\u8FD0\u884C", "\u6301\u7EED\u6BD4\u8F83 desired / ready"],
+      example: yaml("\u975E\u7279\u6743\u5B88\u62A4 Pod \u5B9E\u9A8C", "demo \u5DF2\u5B58\u5728\u4E14\u6709 Linux \u8282\u70B9\uFF1B\u53EA\u662F\u6F14\u793A\u6BCF\u8282\u70B9\u90E8\u7F72\uFF0C\u4E0D\u63D0\u4F9B\u771F\u5B9E\u65E5\u5FD7\u91C7\u96C6\uFF0C\u4E5F\u4E0D\u6302\u8F7D\u5BBF\u4E3B\u673A\u8DEF\u5F84\u3002", "daemonset.yaml", `apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-demo
+  namespace: demo
+spec:
+  selector:
+    matchLabels: {app: node-demo}
+  template:
+    metadata:
+      labels: {app: node-demo}
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: agent
+          image: busybox:1.37
+          command: [sh, -c, 'while true; do date; sleep 30; done']
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}`, "\u89C2\u5BDF DESIRED \u548C READY\uFF1B\u6709\u672A\u5BB9\u5FCD\u6C61\u70B9\u6216\u8D44\u6E90\u4E0D\u8DB3\u7684\u8282\u70B9\u4E0D\u4FDD\u8BC1\u80FD\u8FD0\u884C\u8BE5 Pod\u3002"),
+      sections: [
+        { title: "\u63A7\u5236\u5668\u4E0E\u8C03\u5EA6\u5668\u5206\u5DE5", body: "DaemonSet \u63A7\u5236\u5668\u521B\u5EFA\u9488\u5BF9\u76EE\u6807\u8282\u70B9\u7684 Pod\uFF0C\u9ED8\u8BA4\u8C03\u5EA6\u5668\u8D1F\u8D23\u5B8C\u6210\u653E\u7F6E\u6D41\u7A0B\u3002\u4E0D\u80FD\u56E0\u6B64\u8BA4\u4E3A\u6240\u6709 DaemonSet \u90FD\u7ED5\u8FC7\u8C03\u5EA6\u5668\u3002\u8282\u70B9\u9009\u62E9\u3001\u4EB2\u548C\u6027\u53CA\u5BB9\u5FCD\u51B3\u5B9A\u8986\u76D6\u8D44\u683C\u548C\u8FD0\u884C\u6761\u4EF6\u3002" },
+        { title: "\u6BCF\u4E2A\u8282\u70B9\u7684\u6210\u672C", body: "\u65E5\u5FD7\u3001\u76D1\u63A7\u548C\u7F51\u7EDC\u4EE3\u7406\u901A\u5E38\u5E38\u9A7B\u8282\u70B9\u3002\u628A\u6BCF\u4EFD Pod \u7684 requests \u4E58\u4EE5\u8282\u70B9\u6570\u624D\u80FD\u4F30\u8BA1\u603B\u6210\u672C\uFF1B\u6279\u91CF\u66F4\u65B0\u65F6\u8FD8\u5E94\u5173\u6CE8\u670D\u52A1\u672C\u8EAB\u662F\u5426\u627F\u62C5\u96C6\u7FA4\u7F51\u7EDC\u6216\u65E5\u5FD7\u7B49\u5173\u952E\u804C\u8D23\u3002" },
+        { title: "\u6392\u7A7A\u65F6\u7684\u7279\u6B8A\u5904\u7406", body: "\u5E38\u89C4 drain \u9700\u8981\u663E\u5F0F\u5904\u7406 DaemonSet \u7BA1\u7406\u7684 Pod\uFF1B--ignore-daemonsets \u5141\u8BB8\u7EE7\u7EED\u6392\u7A7A\u5176\u4ED6 Pod\uFF0C\u5E76\u4E0D\u8868\u793A\u5220\u9664\u4E86\u8FD9\u4E9B\u5B88\u62A4 Pod\u3002\u8282\u70B9\u7EF4\u62A4\u524D\u5E94\u6E05\u695A\u54EA\u4E9B\u670D\u52A1\u5C06\u968F\u8282\u70B9\u505C\u6B62\u3002" }
+      ],
+      sources: ["daemonset", "drain", "taints"],
+      related: ["scheduling", "observability", "drain"],
+      fault: {
+        name: "\u4E13\u7528\u8282\u70B9\u6CA1\u6709\u88AB\u8986\u76D6",
+        nodes: ["\u4E13\u7528\u8282\u70B9\u6C61\u70B9", "DaemonSet \u6A21\u677F", "\u76EE\u6807 Pod", "\u72B6\u6001\u89C2\u5BDF"],
+        steps: [
+          ["\u8282\u70B9\u5E26\u4E13\u7528\u6C61\u70B9", 0, 0, "DEDICATED=OPS:NOSCHEDULE", "\u72EC\u7ACB\u573A\u666F\uFF1A\u8282\u70B9\u6709\u81EA\u5B9A\u4E49 NoSchedule \u6C61\u70B9\uFF0C\u6A21\u677F\u6CA1\u6709\u5BF9\u5E94\u5BB9\u5FCD\u3002\u81EA\u52A8\u6DFB\u52A0\u7684\u90E8\u5206\u5BB9\u5FCD\u4E0D\u6DB5\u76D6\u4EFB\u610F\u81EA\u5B9A\u4E49\u6C61\u70B9\u3002", "\u8282\u70B9\u6709\u6392\u65A5\u6761\u4EF6", "local"],
+          ["\u5BF9\u7167\u5BB9\u5FCD\u914D\u7F6E", 1, 0, "TOLERATION MISSING", "DaemonSet \u4ECD\u9700\u6EE1\u8DB3\u76F8\u5173\u6C61\u70B9\u6761\u4EF6\uFF0C\u4E0D\u80FD\u4EC5\u56E0\u4E3A\u5B83\u662F\u5B88\u62A4\u5DE5\u4F5C\u8D1F\u8F7D\u5C31\u5047\u8BBE\u8986\u76D6\u5168\u90E8\u8282\u70B9\u3002", "\u76EE\u6807\u8986\u76D6\u53D7\u7EA6\u675F", "check"],
+          ["\u8BE5\u8282\u70B9\u65E0\u8FD0\u884C\u5B9E\u4F8B", 2, 2, "NOT RUNNING HERE", "\u6839\u636E\u8D44\u683C\u548C\u72B6\u6001\uFF0C\u53EF\u80FD\u4E0D\u5C5E\u4E8E\u671F\u671B\u96C6\u5408\u6216\u5BF9\u5E94 Pod \u65E0\u6CD5\u8C03\u5EA6\uFF1B\u5E94\u4ECE\u8282\u70B9\u6761\u4EF6\u548C Pod \u4E8B\u4EF6\u5206\u522B\u786E\u8BA4\u3002", "\u7F3A\u53E3\u5C1A\u672A\u89E3\u91CA", "local"],
+          ["\u6838\u5BF9\u8BBE\u8BA1\u610F\u56FE", 3, 1, "REVIEW COVERAGE", "\u5148\u5224\u65AD\u8BE5\u670D\u52A1\u662F\u5426\u786E\u5B9E\u5E94\u8BE5\u8FD0\u884C\u5728\u4E13\u7528\u8282\u70B9\uFF0C\u518D\u5BF9\u6E90\u6A21\u677F\u589E\u52A0\u7CBE\u786E\u5BB9\u5FCD\uFF1B\u4E0D\u5E94\u76F2\u76EE\u5BB9\u5FCD\u5168\u90E8\u6C61\u70B9\u3002", "\u8986\u76D6\u7B56\u7565\u9700\u8981\u660E\u786E", "check"]
+        ],
+        code: ["\u67E5\u770B\u8282\u70B9 taints", "\u67E5\u770B DaemonSet tolerations", "\u68C0\u67E5 desired \u8986\u76D6\u4E0E Pod Events", "\u6309\u804C\u8D23\u4FEE\u6B63\u6A21\u677F"],
+        example: sh("\u68C0\u67E5\u8986\u76D6\u5DEE\u5F02", "\u5DF2\u5E94\u7528 node-demo \u793A\u4F8B\uFF1B\u8282\u70B9\u6C61\u70B9\u4E0E Pod \u662F\u5426\u5B58\u5728\u9700\u540C\u65F6\u68C0\u67E5\u3002", `kubectl -n demo get daemonset node-demo -o wide
+kubectl -n demo get pods -l app=node-demo -o wide
+kubectl -n demo get daemonset node-demo -o yaml
+kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints`, "\u5BF9\u7167\u8282\u70B9\u8303\u56F4\u3001\u5BB9\u5FCD\u4E0E\u5B9E\u9645 Pod \u7684 NODE \u5217\uFF0C\u533A\u5206\u8D44\u683C\u4E0E\u8FD0\u884C\u5931\u8D25\u3002")
+      }
+    },
+    {
+      id: "jobs",
+      group: 1,
+      title: "Job \u4E0E CronJob",
+      en: "BATCH & SCHEDULED JOBS",
+      summary: "\u4E3A\u4F1A\u7ED3\u675F\u7684\u4EFB\u52A1\u9009\u62E9\u63A7\u5236\u5668\uFF0C\u5E76\u628A\u91CD\u8BD5\u3001\u5B9A\u65F6\u8C03\u5EA6\u4E0E\u4E1A\u52A1\u5E42\u7B49\u4E00\u8D77\u8003\u8651\u3002",
+      principle: "Job \u8FFD\u8E2A\u4EFB\u52A1\u5B8C\u6210\uFF0CCronJob \u6309\u8BA1\u5212\u521B\u5EFA Job\uFF1B\u4E1A\u52A1\u526F\u4F5C\u7528\u5FC5\u987B\u5BB9\u5FCD\u91CD\u590D\u6267\u884C\u3002",
+      tradeoff: "\u81EA\u52A8\u91CD\u8BD5\u63D0\u9AD8\u5B8C\u6210\u673A\u4F1A\uFF0C\u4E5F\u53EF\u80FD\u91CD\u590D\u8C03\u7528\u5916\u90E8\u7CFB\u7EDF\uFF1B\u7981\u6B62\u5E76\u53D1\u4F1A\u51CF\u5C11\u91CD\u53E0\uFF0C\u4F46\u53EF\u80FD\u8DF3\u8FC7\u8BA1\u5212\u3002",
+      pitfall: "Job \u548C CronJob \u90FD\u4E0D\u63D0\u4F9B\u4E1A\u52A1\u201C\u6070\u597D\u4E00\u6B21\u201D\u4FDD\u8BC1\uFF0CForbid \u4E5F\u4E0D\u662F\u6240\u6709\u4EFB\u52A1\u5171\u4EAB\u7684\u5168\u5C40\u4E92\u65A5\u9501\u3002",
+      nodes: ["CronJob \u8BA1\u5212", "Job \u5BF9\u8C61", "\u4EFB\u52A1 Pod", "\u5B8C\u6210\u72B6\u6001"],
+      steps: [
+        ["\u5230\u8FBE\u8BA1\u5212\u65F6\u95F4", 0, 1, "CREATE JOB", "\u5047\u8BBE CronJob \u672A\u6682\u505C\uFF0C\u8BA1\u5212\u4E0E\u5E76\u53D1\u7B56\u7565\u5141\u8BB8\uFF0C\u63A7\u5236\u5668\u521B\u5EFA\u4E00\u4E2A Job\u3002\u8C03\u5EA6\u4E0D\u662F\u786C\u5B9E\u65F6\u4FDD\u8BC1\u3002", "\u672C\u6B21\u8FD0\u884C\u6709\u72EC\u7ACB Job", "control"],
+        ["\u521B\u5EFA\u4EFB\u52A1 Pod", 1, 2, "RUN BATCH POD", "Job \u6309\u5E76\u884C\u5EA6\u548C\u5B8C\u6210\u6761\u4EF6\u63A8\u8FDB Pod\uFF0C\u8282\u70B9\u8FD0\u884C\u5BB9\u5668\u6267\u884C\u4EFB\u52A1\u3002", "\u4EFB\u52A1\u6B63\u5728\u6267\u884C", "control"],
+        ["\u62A5\u544A\u6267\u884C\u7ED3\u679C", 2, 3, "EXIT SUCCESS", "\u5047\u8BBE\u4EFB\u52A1\u6210\u529F\u9000\u51FA\uFF0C\u63A7\u5236\u5668\u89C2\u5BDF Pod \u6210\u529F\u5E76\u7D2F\u8BA1\u5B8C\u6210\u6570\u91CF\u3002", "\u6210\u529F\u6B21\u6570\u589E\u52A0", "data"],
+        ["\u6EE1\u8DB3\u5B8C\u6210\u6761\u4EF6", 3, 1, "COMPLETE", "\u8FBE\u5230 Job \u914D\u7F6E\u7684\u6210\u529F\u6761\u4EF6\u540E\uFF0C\u4EFB\u52A1\u7ED3\u675F\u3002\u4FDD\u7559\u5386\u53F2\u6216\u6E05\u7406\u7531\u5386\u53F2\u9650\u5236\u4E0E TTL \u7B49\u8BBE\u7F6E\u51B3\u5B9A\u3002", "Job \u5B8C\u6210", "control"]
+      ],
+      code: ["CronJob\uFF1A\u8BA1\u5212 \u2192 Job", "Job\uFF1A\u521B\u5EFA\u4EFB\u52A1 Pod", "\u5931\u8D25\u6309\u7B56\u7565\u91CD\u8BD5", "\u4E1A\u52A1\u7528\u7A33\u5B9A\u952E\u53BB\u91CD\u6216\u5E42\u7B49"],
+      example: yaml("\u4E00\u4E2A\u4F1A\u5B8C\u6210\u7684 Job", "demo \u5DF2\u5B58\u5728\uFF1B\u547D\u4EE4\u53EA\u8F93\u51FA\u65F6\u95F4\uFF0C\u4E0D\u4EA7\u751F\u5916\u90E8\u4E1A\u52A1\u526F\u4F5C\u7528\u3002", "job.yaml", `apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clock-once
+  namespace: demo
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: clock
+          image: busybox:1.37
+          command: [sh, -c, 'date; echo completed']`, "kubectl -n demo logs job/clock-once \u8BFB\u53D6\u8F93\u51FA\uFF1B\u4EFB\u52A1\u6210\u529F\u540E Pod \u663E\u793A Completed \u662F\u6B63\u5E38\u73B0\u8C61\u3002"),
+      sections: [
+        { title: "\u4EFB\u52A1\u4F1A\u7ED3\u675F", body: "Deployment \u9002\u5408\u6301\u7EED\u8FD0\u884C\u7684\u670D\u52A1\uFF0CJob \u9002\u5408\u6709\u5B8C\u6210\u6761\u4EF6\u7684\u6279\u5904\u7406\u3002restartPolicy \u548C backoffLimit \u7B49\u5171\u540C\u5F71\u54CD\u5931\u8D25\u65F6\u7684\u884C\u4E3A\u3002\u8BA1\u6570\u548C\u5931\u8D25\u7B56\u7565\u5B58\u5728\u7EC6\u8282\uFF0C\u4E0D\u5E94\u628A backoffLimit \u7B80\u5316\u4E3A\u6070\u597D\u6267\u884C\u56FA\u5B9A\u6B21\u6570\u3002" },
+        { title: "\u5E76\u53D1\u7B56\u7565\u7684\u8303\u56F4", body: "CronJob \u7684 Allow\u3001Forbid \u548C Replace \u5BF9\u8BE5 CronJob \u521B\u5EFA\u7684 Job \u751F\u6548\uFF0C\u4E0D\u7EA6\u675F\u53E6\u4E00\u4E2A CronJob \u6216\u4EBA\u4E3A\u53D1\u8D77\u7684\u4EFB\u52A1\u3002\u65F6\u533A\u3001\u6682\u505C\u4E0E startingDeadlineSeconds \u7B49\u5F71\u54CD\u8BA1\u5212\u89E3\u91CA\u548C\u8865\u8C03\u5EA6\u3002" },
+        { title: "\u91CD\u590D\u6267\u884C\u5FC5\u987B\u53EF\u627F\u53D7", body: "\u5728\u5931\u8D25\u3001\u63A7\u5236\u5668\u91CD\u8BD5\u6216\u8C03\u5EA6\u8FB9\u754C\u4E0B\uFF0C\u4EFB\u52A1\u9700\u8981\u6309\u53EF\u80FD\u91CD\u590D\u6267\u884C\u8BBE\u8BA1\u3002\u6263\u6B3E\u3001\u53D1\u4FE1\u6216\u8FC1\u79FB\u6570\u636E\u5E94\u4F7F\u7528\u4E1A\u52A1\u5E42\u7B49\u952E\u3001\u4E8B\u52A1\u6216\u53EF\u68C0\u67E5\u7684\u5B8C\u6210\u8BB0\u5F55\uFF0C\u4E0D\u80FD\u53EA\u4F9D\u8D56 Pod \u540D\u79F0\u53BB\u91CD\u3002" }
+      ],
+      sources: ["jobs", "cronjob"],
+      related: ["pod", "reconcile", "config", "observability"],
+      fault: {
+        name: "\u4EFB\u52A1\u5931\u8D25\u540E\u53C8\u6267\u884C\u4E00\u6B21",
+        nodes: ["\u9996\u6B21\u4EFB\u52A1 Pod", "\u5916\u90E8\u4E1A\u52A1\u72B6\u6001", "Job \u63A7\u5236\u5668", "\u91CD\u8BD5 Pod"],
+        steps: [
+          ["\u5148\u5199\u5165\u4E1A\u52A1\u7ED3\u679C", 0, 1, "SIDE EFFECT COMMITTED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u4EFB\u52A1\u5148\u6210\u529F\u5199\u5165\u5916\u90E8\u7CFB\u7EDF\uFF0C\u968F\u540E\u5728\u62A5\u544A\u6210\u529F\u524D\u9000\u51FA\u5931\u8D25\u3002", "\u4E1A\u52A1\u5DF2\u53D1\u751F\u4E00\u6B21\u526F\u4F5C\u7528", "data"],
+          ["\u89C2\u5BDF\u5230 Pod \u5931\u8D25", 0, 2, "POD FAILED", "Job \u53EA\u80FD\u6309\u89C2\u5BDF\u5230\u7684\u4EFB\u52A1\u72B6\u6001\u51B3\u5B9A\u540E\u7EED\u52A8\u4F5C\uFF0C\u65E0\u6CD5\u77E5\u9053\u4EFB\u610F\u5916\u90E8\u5199\u5165\u662F\u5426\u5B8C\u6210\u3002", "Job \u5C1A\u672A\u6EE1\u8DB3\u5B8C\u6210\u6761\u4EF6", "data"],
+          ["\u521B\u5EFA\u91CD\u8BD5\u5B9E\u4F8B", 2, 3, "RETRY POD", "\u5047\u8BBE\u5931\u8D25\u9884\u7B97\u5141\u8BB8\u4E14\u4F7F\u7528 Never\uFF0C\u63A7\u5236\u5668\u521B\u5EFA\u65B0\u7684 Pod \u91CD\u8BD5\u3002", "\u76F8\u540C\u4E1A\u52A1\u53EF\u80FD\u518D\u6B21\u6267\u884C", "control"],
+          ["\u7528\u4E1A\u52A1\u952E\u5224\u65AD\u91CD\u590D", 3, 1, "IDEMPOTENCY CHECK", "\u4EFB\u52A1\u5E94\u4F7F\u7528\u7A33\u5B9A\u4E1A\u52A1\u8EAB\u4EFD\u548C\u539F\u5B50\u53BB\u91CD\u7B49\u673A\u5236\u3002\u8FD9\u91CC\u53EA\u5C55\u793A\u68C0\u67E5\u5173\u7CFB\uFF0C\u4E0D\u5BA3\u79F0 Kubernetes \u5DF2\u63D0\u4F9B\u53BB\u91CD\u3002", "\u9700\u8981\u5E94\u7528\u4FDD\u8BC1\u5E42\u7B49", "check"]
+        ],
+        code: ["\u4EFB\u52A1\u6267\u884C\u524D\u786E\u5B9A\u7A33\u5B9A\u4E1A\u52A1\u952E", "\u539F\u5B50\u8BB0\u5F55\u4E1A\u52A1\u6548\u679C\u4E0E\u5B8C\u6210\u72B6\u6001", "\u91CD\u8BD5\u8BFB\u53D6\u5DF2\u6709\u7ED3\u679C", "\u907F\u514D\u91CD\u590D\u526F\u4F5C\u7528"],
+        example: sh("\u67E5\u770B\u5931\u8D25\u4E0E\u91CD\u8BD5\u5B9E\u4F8B", "\u5DF2\u5B58\u5728 Job\uFF1B\u5C06 clock-once \u6362\u6210\u9700\u8981\u8C03\u67E5\u7684 Job\u3002\u6210\u529F\u7684\u793A\u4F8B\u53EF\u80FD\u53EA\u6709\u4E00\u4E2A Pod\u3002", `kubectl -n demo describe job clock-once
+kubectl -n demo get pods -l batch.kubernetes.io/job-name=clock-once
+kubectl -n demo logs job/clock-once --tail=100`, "\u6309 Job \u6807\u7B7E\u627E\u5173\u8054 Pod\uFF1B\u9700\u8981\u65F6\u5206\u522B\u8BFB\u53D6\u6BCF\u4E2A Pod \u65E5\u5FD7\uFF0C\u5355\u4EFD\u65E5\u5FD7\u4E0D\u4EE3\u8868\u6240\u6709\u5C1D\u8BD5\u3002")
+      }
+    },
+    {
+      id: "config",
+      group: 1,
+      title: "ConfigMap \u4E0E Secret",
+      en: "CONFIGURATION & SECRETS",
+      summary: "\u628A\u914D\u7F6E\u4E0E\u955C\u50CF\u5206\u79BB\uFF0C\u7406\u89E3\u73AF\u5883\u53D8\u91CF\u3001\u6295\u5C04\u5377\u548C\u673A\u5BC6\u5B58\u50A8\u7684\u4E0D\u540C\u8FB9\u754C\u3002",
+      principle: "\u914D\u7F6E\u5BF9\u8C61\u3001\u6CE8\u5165\u65B9\u5F0F\u548C\u5E94\u7528\u91CD\u8F7D\u662F\u4E09\u5C42\uFF1B\u66F4\u65B0\u5BF9\u8C61\u4E0D\u4F1A\u81EA\u52A8\u91CD\u542F\u6216\u91CD\u8F7D\u6240\u6709\u5E94\u7528\u3002",
+      tradeoff: "\u5916\u7F6E\u914D\u7F6E\u4FBF\u4E8E\u53D8\u66F4\u4E0E\u590D\u7528\uFF0C\u4E5F\u9700\u8981\u7248\u672C\u3001\u53D1\u5E03\u8054\u52A8\u548C\u6743\u9650\u7BA1\u7406\uFF0C\u907F\u514D\u914D\u7F6E\u4E0E\u4EE3\u7801\u9519\u914D\u3002",
+      pitfall: "Secret \u7684 base64 \u4E0D\u662F\u52A0\u5BC6\uFF1B\u9ED8\u8BA4\u73AF\u5883\u53D8\u91CF\u4E0D\u968F\u5BF9\u8C61\u66F4\u65B0\u800C\u53D8\u5316\uFF0CsubPath \u6302\u8F7D\u4E5F\u4E0D\u4F1A\u81EA\u52A8\u6536\u5230\u66F4\u65B0\u3002",
+      nodes: ["\u914D\u7F6E\u5BF9\u8C61", "kubelet", "\u5BB9\u5668\u6CE8\u5165", "\u5E94\u7528\u8BFB\u53D6"],
+      steps: [
+        ["\u521B\u5EFA\u914D\u7F6E\u5BF9\u8C61", 0, 0, "CONFIGMAP / SECRET", "\u5047\u8BBE demo \u5185\u5DF2\u521B\u5EFA ConfigMap\uFF1B\u5B83\u4FDD\u5B58\u975E\u673A\u5BC6\u914D\u7F6E\uFF0CSecret \u7528\u4E8E\u6709\u6743\u9650\u7BA1\u7406\u8981\u6C42\u7684\u654F\u611F\u6570\u636E\u3002", "\u5BF9\u8C61\u4F4D\u4E8E API \u4E2D", "local"],
+        ["\u8282\u70B9\u8BFB\u53D6\u914D\u7F6E", 0, 1, "RESOLVE REFERENCE", "Pod \u5F15\u7528\u540C\u4E00\u547D\u540D\u7A7A\u95F4\u7684\u5BF9\u8C61\uFF0C\u8282\u70B9\u6309\u914D\u7F6E\u51C6\u5907\u73AF\u5883\u53D8\u91CF\u6216\u5377\u3002", "\u5F15\u7528\u5FC5\u987B\u5B58\u5728\u6216\u5141\u8BB8\u7F3A\u7701", "data"],
+        ["\u6CE8\u5165\u8FD0\u884C\u73AF\u5883", 1, 2, "ENV OR VOLUME", "\u73AF\u5883\u53D8\u91CF\u5728\u5BB9\u5668\u521B\u5EFA\u65F6\u8BBE\u7F6E\uFF1B\u666E\u901A\u6295\u5C04\u5377\u66F4\u65B0\u4F1A\u7ECF\u8FC7\u4F20\u64AD\uFF0C\u800C\u975E\u540C\u6B65\u5373\u65F6\u3002", "\u6CE8\u5165\u65B9\u5F0F\u5F71\u54CD\u66F4\u65B0\u884C\u4E3A", "control"],
+        ["\u5E94\u7528\u4F7F\u7528\u914D\u7F6E", 2, 3, "APPLICATION READ", "\u5E94\u7528\u662F\u5426\u91CD\u65B0\u8BFB\u53D6\u6587\u4EF6\u6216\u7F13\u5B58\u503C\u53D6\u51B3\u4E8E\u5E94\u7528\u81EA\u5DF1\u3002\u6302\u8F7D\u5185\u5BB9\u66F4\u65B0\u4E0D\u7B49\u4E8E\u4E1A\u52A1\u914D\u7F6E\u5DF2\u751F\u6548\u3002", "\u9700\u9A8C\u8BC1\u5B9E\u9645\u751F\u6548\u503C", "data"]
+      ],
+      code: ["\u5BF9\u8C61\uFF1A\u4FDD\u5B58\u914D\u7F6E", "Pod\uFF1A\u58F0\u660E env \u6216 volume \u5F15\u7528", "\u8282\u70B9\uFF1A\u6309\u65B9\u5F0F\u6CE8\u5165", "\u5E94\u7528\uFF1A\u81EA\u884C\u8BFB\u53D6\u4E0E\u91CD\u8F7D"],
+      example: yaml("\u73AF\u5883\u53D8\u91CF\u4E0E\u5377\u5BF9\u7167\u5B9E\u9A8C", "demo \u5DF2\u5B58\u5728\uFF1B\u4EC5\u4F7F\u7528\u65E0\u654F\u611F\u4FE1\u606F\u7684\u6F14\u793A ConfigMap\u3002", "config.yaml", `apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: demo
+data:
+  MODE: learning
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-reader
+  namespace: demo
+spec:
+  containers:
+    - name: reader
+      image: busybox:1.37
+      command: [sh, -c, 'while true; do echo "$MODE"; cat /config/MODE; sleep 10; done']
+      env:
+        - name: MODE
+          valueFrom:
+            configMapKeyRef: {name: app-config, key: MODE}
+      volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+  volumes:
+    - name: config
+      configMap: {name: app-config}`, "\u4E24\u4EFD\u503C\u8D77\u521D\u76F8\u540C\uFF1B\u66F4\u65B0 ConfigMap \u540E\u6587\u4EF6\u53EF\u5EF6\u8FDF\u66F4\u65B0\uFF0C\u5DF2\u8FD0\u884C\u5BB9\u5668\u7684 MODE \u73AF\u5883\u53D8\u91CF\u4FDD\u6301\u539F\u503C\u3002"),
+      sections: [
+        { title: "\u66F4\u65B0\u4F20\u64AD\u4E0E\u91CD\u8F7D", body: "\u666E\u901A ConfigMap/Secret \u6295\u5C04\u5377\u53EF\u7ECF\u8FC7 kubelet \u540C\u6B65\u4E0E\u7F13\u5B58\u4F20\u64AD\u66F4\u65B0\uFF0C\u5E94\u7528\u4ECD\u9700\u91CD\u65B0\u8BFB\u53D6\u3002\u73AF\u5883\u53D8\u91CF\u901A\u5E38\u9700\u8981\u65B0\u5EFA\u5BB9\u5668\u624D\u80FD\u53D6\u5F97\u65B0\u503C\uFF1BsubPath \u6302\u8F7D\u4E0D\u4F1A\u6536\u5230\u81EA\u52A8\u66F4\u65B0\u3002" },
+        { title: "Secret \u4ECD\u9700\u4FDD\u62A4", body: "Secret \u7F16\u7801\u4E0D\u4EE3\u8868\u52A0\u5BC6\u3002\u9759\u6001\u52A0\u5BC6\u914D\u7F6E\u3001\u6700\u5C0F RBAC\u3001\u8282\u70B9\u4E0E\u5E94\u7528\u8BBF\u95EE\u6743\u9650\u4EE5\u53CA\u5916\u90E8\u673A\u5BC6\u7CFB\u7EDF\u5171\u540C\u5F71\u54CD\u4FDD\u62A4\u6548\u679C\u3002\u907F\u514D\u628A\u771F\u5B9E Secret \u5185\u5BB9\u5199\u8FDB Git\u3001\u65E5\u5FD7\u3001\u622A\u56FE\u6216\u6392\u969C\u8F93\u51FA\u3002" },
+        { title: "\u914D\u7F6E\u4E5F\u9700\u8981\u53D1\u5E03\u7B56\u7565", body: "\u540C\u4E00\u53EF\u53D8 ConfigMap \u66F4\u65B0\u53EF\u80FD\u5F71\u54CD\u591A\u4E2A\u5E94\u7528\u3002\u7248\u672C\u5316\u540D\u79F0\u3001\u4E0D\u53EF\u53D8\u5BF9\u8C61\u6216\u6A21\u677F\u6821\u9A8C\u548C\u7B49\u65B9\u5F0F\u53EF\u4EE5\u628A\u914D\u7F6E\u4E0E\u53D1\u5E03\u5173\u8054\uFF0C\u4F46\u90FD\u9700\u8981\u56E2\u961F\u7EA6\u5B9A\u4E0E\u6E05\u7406\u7B56\u7565\uFF1BKubernetes \u4E0D\u81EA\u52A8\u5224\u65AD\u4E1A\u52A1\u517C\u5BB9\u6027\u3002" }
+      ],
+      sources: ["configmap", "secrets"],
+      related: ["deployment", "rbac", "pod-debug", "api"],
+      fault: {
+        name: "\u5BF9\u8C61\u66F4\u65B0\u4E86\uFF0C\u73AF\u5883\u53D8\u91CF\u6CA1\u53D8",
+        nodes: ["\u65B0 ConfigMap", "\u8FD0\u884C\u4E2D\u5BB9\u5668", "\u73AF\u5883\u53D8\u91CF", "\u6295\u5C04\u6587\u4EF6"],
+        steps: [
+          ["\u66F4\u65B0\u914D\u7F6E\u5BF9\u8C61", 0, 0, "MODE=UPDATED", "\u72EC\u7ACB\u573A\u666F\uFF1AConfigMap MODE \u4ECE learning \u6539\u4E3A updated\uFF0C\u5BB9\u5668\u5DF2\u7ECF\u8FD0\u884C\u3002", "API \u5BF9\u8C61\u5DF2\u53D8\u66F4", "local"],
+          ["\u5BF9\u7167\u6CE8\u5165\u65B9\u5F0F", 1, 2, "ENV SNAPSHOT", "\u8BE5\u5BB9\u5668\u7684\u73AF\u5883\u53D8\u91CF\u5728\u521B\u5EFA\u65F6\u5DF2\u786E\u5B9A\uFF0C\u4E0D\u4F1A\u56E0 ConfigMap \u66F4\u65B0\u81EA\u52A8\u6539\u53D8\u3002", "env \u4ECD\u4E3A learning", "check"],
+          ["\u5377\u8DEF\u5F84\u7A0D\u540E\u66F4\u65B0", 0, 3, "EVENTUAL PROJECTION", "\u5047\u8BBE\u4F7F\u7528\u666E\u901A\u5B8C\u6574\u5377\u6302\u8F7D\u800C\u975E subPath\uFF0C\u6587\u4EF6\u4F1A\u5728\u540E\u7EED\u540C\u6B65\u4E2D\u66F4\u65B0\uFF0C\u4F20\u64AD\u65F6\u95F4\u4F9D\u914D\u7F6E\u800C\u5F02\u3002", "\u6587\u4EF6\u53EF\u80FD\u5148\u540E\u53D8\u66F4", "data"],
+          ["\u9A8C\u8BC1\u5E94\u7528\u8BFB\u53D6", 1, 1, "RELOAD OR RECREATE", "\u786E\u8BA4\u5E94\u7528\u8BFB\u53D6\u7684\u662F env \u8FD8\u662F\u6587\u4EF6\uFF0C\u518D\u9009\u62E9\u91CD\u8F7D\u6216\u901A\u8FC7\u63A7\u5236\u5668\u91CD\u5EFA\uFF1B\u88F8 Pod \u6CA1\u6709 rollout restart\u3002", "\u66F4\u65B0\u7B56\u7565\u7531\u6CE8\u5165\u65B9\u5F0F\u51B3\u5B9A", "local"]
+        ],
+        code: ["\u8BFB\u53D6\u6E90\u5BF9\u8C61\u65B0\u503C", "\u786E\u8BA4 env / volume / subPath", "\u9A8C\u8BC1\u8FD0\u884C\u4E2D\u5E94\u7528\u5B9E\u9645\u8BFB\u53D6\u8DEF\u5F84", "\u6309\u5E94\u7528\u65B9\u5F0F\u91CD\u8F7D\u6216\u91CD\u65B0\u521B\u5EFA"],
+        example: sh("\u6BD4\u8F83\u914D\u7F6E\u5BF9\u8C61\u4E0E\u5BB9\u5668\u8F93\u51FA", "\u5DF2\u5E94\u7528 config.yaml\uFF1B\u6B64\u5904\u53EA\u8BFB\u53D6\u975E\u673A\u5BC6 ConfigMap\uFF0C\u4E0D\u6253\u5370 Secret\u3002", `kubectl -n demo get configmap app-config -o yaml
+kubectl -n demo logs config-reader --tail=20
+kubectl -n demo get pod config-reader -o yaml`, "\u5BF9\u7167 MODE \u73AF\u5883\u6CE8\u5165\u3001\u6587\u4EF6\u6302\u8F7D\u4E0E\u65E5\u5FD7\uFF1B\u672A\u66F4\u65B0\u5BF9\u8C61\u65F6\u4E24\u8005\u5E94\u76F8\u540C\u3002")
+      }
+    },
+    {
+      id: "service",
+      group: 1,
+      title: "Service \u4E0E EndpointSlice",
+      en: "SERVICE & ENDPOINTSLICE",
+      summary: "\u7528\u7A33\u5B9A\u670D\u52A1\u5165\u53E3\u8FDE\u63A5\u53EF\u66FF\u6362\u7684 Pod\uFF0C\u8FFD\u8E2A\u9009\u62E9\u5668\u3001\u7AEF\u70B9\u6761\u4EF6\u4E0E\u6570\u636E\u9762\u3002",
+      principle: "Service \u63D0\u4F9B\u7A33\u5B9A\u62BD\u8C61\uFF0CEndpointSlice \u63CF\u8FF0\u540E\u7AEF\uFF1B\u6570\u636E\u9762\u636E\u6B64\u5B9E\u73B0\u6D41\u91CF\u8F6C\u53D1\u3002",
+      tradeoff: "\u7A33\u5B9A\u5165\u53E3\u9690\u85CF Pod \u66F4\u66FF\uFF0C\u4E5F\u589E\u52A0\u670D\u52A1\u53D1\u73B0\u548C\u8F6C\u53D1\u72B6\u6001\u7684\u4F20\u64AD\u73AF\u8282\u3002",
+      pitfall: "Service \u5BF9\u8C61\u4E0D\u8D1F\u8D23\u8FD0\u884C\u5E94\u7528\uFF1B\u6709 ClusterIP \u6216 DNS \u8BB0\u5F55\u4E5F\u4E0D\u4FDD\u8BC1\u5B58\u5728\u53EF\u7528\u7AEF\u70B9\u3002",
+      nodes: ["\u5BA2\u6237\u7AEF Pod", "Service \u6570\u636E\u9762", "EndpointSlice", "\u5C31\u7EEA\u540E\u7AEF Pod"],
+      steps: [
+        ["\u8BF7\u6C42\u7A33\u5B9A\u5165\u53E3", 0, 1, "CONNECT CLUSTERIP", "\u5047\u8BBE\u666E\u901A ClusterIP Service \u9009\u62E9 demo \u5185\u7684\u5065\u5EB7 Pod\uFF0C\u5BA2\u6237\u7AEF\u53D1\u51FA\u65B0\u8FDE\u63A5\u3002", "\u76EE\u6807\u662F\u670D\u52A1\u5730\u5740\u4E0E\u7AEF\u53E3", "request"],
+        ["\u4F9D\u636E\u7AEF\u70B9\u914D\u7F6E", 2, 1, "ENDPOINT CONFIG", "kube-proxy \u6216\u66FF\u4EE3\u5B9E\u73B0\u6839\u636E Service \u4E0E EndpointSlice \u914D\u7F6E\u8F6C\u53D1\u89C4\u5219\u3002\u8FD9\u662F\u63A7\u5236\u5173\u7CFB\uFF0C\u4E0D\u662F\u9010\u8BF7\u6C42\u67E5\u8BE2 API\u3002", "\u6570\u636E\u9762\u5DF2\u6709\u540E\u7AEF\u89C6\u56FE", "control"],
+        ["\u8F6C\u53D1\u5230\u76EE\u6807\u7AEF\u53E3", 1, 3, "FORWARD TARGETPORT", "\u6570\u636E\u9762\u9009\u62E9\u53EF\u7528\u540E\u7AEF\u5E76\u6309\u76EE\u6807\u7AEF\u53E3\u8F6C\u53D1\uFF1B\u5177\u4F53\u5B9E\u73B0\u4E0E\u4F1A\u8BDD\u884C\u4E3A\u7531\u6570\u636E\u9762\u548C\u914D\u7F6E\u51B3\u5B9A\u3002", "\u5E94\u7528\u6536\u5230\u8BF7\u6C42", "request"],
+        ["\u89C2\u5BDF\u540E\u7AEF\u53D8\u66F4", 3, 2, "READINESS / LIFECYCLE", "Pod \u751F\u547D\u5468\u671F\u548C\u5C31\u7EEA\u7684\u89C2\u5BDF\u901A\u8FC7\u76F8\u5173\u63A7\u5236\u5668\u53CD\u6620\u5230 EndpointSlice\uFF1B\u56FE\u4E2D\u538B\u7F29\u4E86\u72B6\u6001\u4E0A\u62A5\u73AF\u8282\u3002", "\u540E\u7AEF\u89C6\u56FE\u6301\u7EED\u66F4\u65B0", "control"]
+      ],
+      code: ["selector \u2192 Pod \u96C6\u5408", "Pod \u6761\u4EF6 \u2192 EndpointSlice", "Service + endpoints \u2192 \u6570\u636E\u9762\u89C4\u5219", "\u5BA2\u6237\u7AEF\u8FDE\u63A5 \u2192 \u540E\u7AEF targetPort"],
+      example: yaml("\u4E0E\u5165\u95E8 Deployment \u5BF9\u5E94\u7684 Service", "demo/web Pod \u7684\u6807\u7B7E\u4E3A app=web\uFF0Cnginx \u76D1\u542C 80\uFF1B\u4E0D\u521B\u5EFA\u516C\u7F51\u8D1F\u8F7D\u5747\u8861\u3002", "service.yaml", `apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: demo
+spec:
+  type: ClusterIP
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80`, "\u96C6\u7FA4\u5185\u4EE5 web.demo.svc \u7684 80 \u7AEF\u53E3\u8BBF\u95EE\uFF0C\u5B9E\u9645\u57DF\u540E\u7F00\u53D6\u51B3\u4E8E\u96C6\u7FA4\u914D\u7F6E\u3002"),
+      sections: [
+        { title: "port \u4E0E targetPort", body: "port \u662F Service \u63A5\u53D7\u8FDE\u63A5\u7684\u7AEF\u53E3\uFF0CtargetPort \u6307\u5411\u540E\u7AEF\u5E94\u7528\u76D1\u542C\u7684\u7AEF\u53E3\u6216\u547D\u540D\u7AEF\u53E3\u3002\u58F0\u660E containerPort \u4E0D\u4F1A\u8BA9\u7A0B\u5E8F\u81EA\u52A8\u76D1\u542C\uFF1B\u9700\u8981\u4ECE\u5E94\u7528\u76D1\u542C\u5730\u5740\u548C\u5B9E\u9645\u534F\u8BAE\u6838\u67E5\u3002" },
+        { title: "EndpointSlice \u662F\u540E\u7AEF\u89C6\u56FE", body: "\u5E38\u89C1\u5E26 selector \u7684 Service \u7531\u63A7\u5236\u5668\u7EF4\u62A4 EndpointSlice\uFF0C\u5176\u4E2D\u5305\u542B\u5730\u5740\u548C ready\u3001serving\u3001terminating \u7B49\u6761\u4EF6\u3002\u65E0 selector Service\u3001Headless Service \u53CA\u7279\u6B8A\u53D1\u5E03\u914D\u7F6E\u5177\u6709\u4E0D\u540C\u8BED\u4E49\uFF0C\u4E0D\u80FD\u5957\u7528\u4E00\u4E2A\u56FA\u5B9A\u6D41\u7A0B\u3002" },
+        { title: "\u4E0D\u8981\u628A API \u5F53\u4F5C\u4E1A\u52A1\u4EE3\u7406", body: "\u8F6C\u53D1\u901A\u5E38\u7531\u8282\u70B9\u89C4\u5219\u6216\u66FF\u4EE3\u6570\u636E\u9762\u5B8C\u6210\uFF0C\u4E0D\u662F\u6BCF\u4E2A\u8BF7\u6C42\u90FD\u8BBF\u95EE API Server\u3002\u6570\u636E\u9762\u53EF\u80FD\u7528 iptables\u3001IPVS\u3001nftables \u6216 eBPF \u7B49\u65B9\u6848\uFF0C\u8BFE\u7A0B\u4E0D\u5C06\u5176\u4E2D\u4E00\u79CD\u5B9E\u73B0\u7B49\u540C\u4E8E Service \u7684\u5168\u90E8\u5B9A\u4E49\u3002" }
+      ],
+      sources: ["service", "endpoints", "architecture"],
+      related: ["labels", "probes", "dns", "service-debug"],
+      fault: {
+        name: "\u7AEF\u70B9\u6709\u4E86\uFF0C\u76EE\u6807\u7AEF\u53E3\u9519\u4E86",
+        nodes: ["\u5BA2\u6237\u7AEF", "Service port 80", "targetPort 8080", "\u5E94\u7528\u76D1\u542C 80"],
+        steps: [
+          ["DNS \u4E0E\u5165\u53E3\u6B63\u5E38", 0, 1, "CONNECT SERVICE", "\u72EC\u7ACB\u573A\u666F\uFF1AService \u80FD\u89E3\u6790\uFF0CPod \u5DF2\u5C31\u7EEA\uFF0C\u4F46 Service targetPort \u9519\u586B\u6210 8080\u3002", "\u5165\u53E3\u5B58\u5728", "request"],
+          ["\u6309\u9519\u8BEF\u7AEF\u53E3\u8F6C\u53D1", 1, 2, "FORWARD :8080", "\u8F6C\u53D1\u914D\u7F6E\u53EA\u6309\u58F0\u660E\u6620\u5C04\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u63A2\u6D4B\u5E76\u6539\u6210 nginx \u5B9E\u9645\u7AEF\u53E3\u3002", "\u76EE\u6807\u7AEF\u53E3\u4E0D\u6B63\u786E", "request"],
+          ["\u7AEF\u53E3\u4E0D\u63D0\u4F9B\u670D\u52A1", 2, 3, "NO LISTENER", "\u8BE5 Pod \u7684 8080 \u6CA1\u6709\u76D1\u542C\uFF0C\u53EF\u80FD\u770B\u5230\u62D2\u7EDD\u8FDE\u63A5\u6216\u8D85\u65F6\uFF0C\u5177\u4F53\u53D6\u51B3\u4E8E\u7F51\u7EDC\u8DEF\u5F84\u3002", "\u5E94\u7528\u672A\u6536\u5230\u6709\u6548 HTTP \u8BF7\u6C42", "reject"],
+          ["\u9010\u5C42\u6838\u5BF9\u914D\u7F6E", 1, 3, "COMPARE PORTS", "\u5BF9\u7167 Service port\u3001targetPort\u3001EndpointSlice \u7AEF\u53E3\u4E0E\u8FDB\u7A0B\u76D1\u542C\uFF0C\u907F\u514D\u628A\u7AEF\u53E3\u9519\u8BEF\u8BEF\u8BCA\u4E3A DNS\u3002", "\u6839\u56E0\u5728\u7AEF\u53E3\u6620\u5C04", "check"]
+        ],
+        code: ["\u5148\u786E\u8BA4 ready endpoints", "\u6838\u5BF9 Service targetPort", "\u786E\u8BA4\u5E94\u7528\u771F\u5B9E\u76D1\u542C\u7AEF\u53E3", "\u4FEE\u6B63\u58F0\u660E\u5E76\u91CD\u6D4B"],
+        example: sh("\u68C0\u67E5\u670D\u52A1\u4E0E\u7AEF\u70B9\u7AEF\u53E3", "\u5DF2\u5E94\u7528\u5165\u95E8\u5B9E\u9A8C\uFF1B\u82E5\u914D\u7F6E\u6B63\u786E\u5219\u8F93\u51FA\u5E94\u4E00\u81F4\u3002", `kubectl -n demo get service web -o yaml
+kubectl -n demo get endpointslices -l kubernetes.io/service-name=web -o yaml
+kubectl -n demo logs deployment/web --tail=30`, "EndpointSlice \u7684 ports \u5E94\u4E0E\u5E94\u7528\u5B9E\u9645\u76D1\u542C\u543B\u5408\uFF1B\u5E94\u7528\u65E5\u5FD7\u65E0\u8BF7\u6C42\u4E5F\u53EF\u63D0\u793A\u8BF7\u6C42\u672A\u62B5\u8FBE\u3002")
+      }
+    },
+    {
+      id: "dns",
+      group: 1,
+      title: "\u96C6\u7FA4 DNS \u4E0E\u670D\u52A1\u53D1\u73B0",
+      en: "CLUSTER DNS",
+      summary: "\u4ECE\u77ED\u540D\u79F0\u4E0E\u547D\u540D\u7A7A\u95F4\u51FA\u53D1\uFF0C\u7406\u89E3\u670D\u52A1\u8BB0\u5F55\u3001\u641C\u7D22\u57DF\u548C Headless \u89E3\u6790\u3002",
+      principle: "DNS \u89E3\u51B3\u540D\u79F0\u5230\u8BB0\u5F55\u7684\u53D1\u73B0\u95EE\u9898\uFF0C\u4E0D\u80FD\u66FF\u4EE3\u7AEF\u70B9\u5065\u5EB7\u6216\u8FDE\u901A\u6027\u68C0\u67E5\u3002",
+      tradeoff: "\u77ED\u540D\u79F0\u4FBF\u4E8E\u540C\u7A7A\u95F4\u8C03\u7528\uFF0C\u8DE8\u7A7A\u95F4\u4E0E\u81EA\u5B9A\u4E49\u96C6\u7FA4\u57DF\u5219\u9700\u8981\u66F4\u660E\u786E\u7684\u540D\u79F0\u548C\u914D\u7F6E\u3002",
+      pitfall: "web \u9ED8\u8BA4\u5728\u8C03\u7528\u65B9\u547D\u540D\u7A7A\u95F4\u67E5\u627E\uFF1Bcluster.local \u53EA\u662F\u5E38\u89C1\u96C6\u7FA4\u57DF\uFF0C\u4E0D\u662F\u6240\u6709\u96C6\u7FA4\u7684\u5FC5\u7136\u914D\u7F6E\u3002",
+      nodes: ["\u5BA2\u6237\u7AEF Pod", "DNS \u641C\u7D22\u57DF", "\u96C6\u7FA4 DNS", "Service \u8BB0\u5F55"],
+      steps: [
+        ["\u5E94\u7528\u8BF7\u6C42\u77ED\u540D\u79F0", 0, 1, "LOOKUP WEB", "\u5047\u8BBE\u8C03\u7528\u65B9\u4E5F\u5728 demo\uFF0C\u4F7F\u7528\u9ED8\u8BA4\u96C6\u7FA4 DNS \u7B56\u7565\u67E5\u8BE2 web\u3002", "\u67E5\u8BE2\u4E0A\u4E0B\u6587\u6765\u81EA Pod", "request"],
+        ["\u89E3\u6790\u641C\u7D22\u57DF", 1, 2, "WEB.DEMO.SVC", "\u89E3\u6790\u5668\u6309\u914D\u7F6E\u7684 search\u3001ndots \u7B49\u751F\u6210\u5019\u9009\u67E5\u8BE2\uFF1B\u5B9E\u9645\u987A\u5E8F\u53D6\u51B3\u4E8E\u89E3\u6790\u5668\u548C resolv.conf\u3002", "\u8865\u5168\u670D\u52A1\u547D\u540D\u7A7A\u95F4", "request"],
+        ["\u67E5\u8BE2\u670D\u52A1\u8BB0\u5F55", 2, 3, "SERVICE DNS RECORD", "\u666E\u901A ClusterIP Service \u5E38\u8FD4\u56DE\u670D\u52A1 IP\uFF1BHeadless \u7684\u8BB0\u5F55\u8BED\u4E49\u4E0D\u540C\u3002", "\u5F97\u5230\u5BF9\u5E94\u8BB0\u5F55", "check"],
+        ["\u8FD4\u56DE\u89E3\u6790\u7ED3\u679C", 2, 0, "DNS ANSWER", "\u5E94\u7528\u5F97\u5230\u5730\u5740\u540E\u518D\u5EFA\u7ACB\u7F51\u7EDC\u8FDE\u63A5\uFF0CDNS \u89E3\u6790\u6210\u529F\u4E0D\u4F1A\u8BC1\u660E HTTP \u8BF7\u6C42\u6216\u540E\u7AEF\u5065\u5EB7\u3002", "\u53D1\u73B0\u5B8C\u6210 \xB7 \u8FDE\u901A\u6027\u53E6\u67E5", "data"]
+      ],
+      code: ["\u77ED\u540D\u6309\u8C03\u7528\u65B9\u641C\u7D22\u57DF\u89E3\u91CA", "\u666E\u901A Service \u2192 \u670D\u52A1 IP \u8BB0\u5F55", "Headless \u2192 \u540E\u7AEF\u76F8\u5173\u8BB0\u5F55", "\u89E3\u6790\u540E\u518D\u9A8C\u8BC1\u670D\u52A1\u8BBF\u95EE"],
+      example: sh("\u5728 Pod \u5185\u68C0\u67E5\u89E3\u6790", "\u5B9E\u9A8C\u96C6\u7FA4\u80FD\u62C9\u53D6 busybox:1.37 \u4E14\u5141\u8BB8\u521B\u5EFA Pod\uFF1B\u547D\u4EE4\u7ED3\u675F\u540E\u81EA\u52A8\u5220\u9664\u4E34\u65F6 Pod\u3002", `kubectl -n demo run dns-check --rm -i --restart=Never --image=busybox:1.37 -- sh -c 'cat /etc/resolv.conf; nslookup web; nslookup web.demo.svc'`, "\u6838\u5BF9 search \u57DF\u548C nameserver\uFF1B\u5982\u679C\u670D\u52A1\u5B58\u5728\uFF0C\u67E5\u8BE2\u5E94\u5F97\u5230\u8BB0\u5F55\u3002\u7F51\u7EDC\u7B56\u7565\u53EF\u80FD\u5F71\u54CD DNS \u8BF7\u6C42\u3002"),
+      sections: [
+        { title: "\u77ED\u540D\u4E0E\u8DE8\u7A7A\u95F4\u8C03\u7528", body: "\u540C\u7A7A\u95F4\u53EF\u4F7F\u7528 web\uFF0C\u8DE8\u7A7A\u95F4\u53EF\u4EE5\u4F7F\u7528 web.demo \u7B49\u5F62\u5F0F\uFF0C\u5B8C\u6574\u57DF\u540D\u9700\u6309\u96C6\u7FA4\u5B9E\u9645\u57DF\u8865\u5168\u3002\u5148\u5728\u8C03\u7528\u65B9\u5BB9\u5668\u67E5\u770B resolv.conf\uFF0C\u907F\u514D\u628A\u672C\u673A\u6216\u53E6\u4E00\u547D\u540D\u7A7A\u95F4\u7684\u89E3\u6790\u7ED3\u679C\u5F53\u4F5C\u5E94\u7528\u73AF\u5883\u3002" },
+        { title: "\u666E\u901A\u4E0E\u65E0\u5934\u670D\u52A1", body: "ClusterIP Service \u628A\u670D\u52A1\u53D1\u73B0\u4E0E\u540E\u7AEF\u66FF\u6362\u5206\u79BB\u3002Headless Service \u4E0D\u5206\u914D\u5E38\u89C4 ClusterIP\uFF0CDNS \u53EF\u76F4\u63A5\u63D0\u4F9B\u540E\u7AEF\u5730\u5740\uFF0C\u5E94\u7528\u9700\u8981\u7406\u89E3\u591A\u5730\u5740\u3001\u7F13\u5B58\u548C\u53D8\u5316\uFF1B\u5C31\u7EEA\u53D1\u5E03\u914D\u7F6E\u4E5F\u4F1A\u5F71\u54CD\u8BB0\u5F55\u3002" },
+        { title: "\u89E3\u6790\u94FE\u4E5F\u6709\u4F9D\u8D56", body: "CoreDNS \u7B49\u96C6\u7FA4 DNS \u5B9E\u73B0\u4F9D\u8D56\u81EA\u8EAB Pod\u3001Service\u3001\u914D\u7F6E\u4E0E\u7F51\u7EDC\u3002\u5982\u679C\u542F\u7528\u51FA\u7AD9\u9694\u79BB\uFF0C\u5E94\u540C\u65F6\u8003\u8651 DNS \u7684 UDP/TCP \u8BBF\u95EE\u548C\u5B9E\u9645 DNS \u8DEF\u5F84\uFF0C\u5305\u62EC\u53EF\u80FD\u5B58\u5728\u7684\u8282\u70B9\u672C\u5730 DNS\u3002" }
+      ],
+      sources: ["dns", "service", "debugservice"],
+      related: ["service", "statefulset", "network-policy", "service-debug"],
+      fault: {
+        name: "\u8DE8\u7A7A\u95F4\u4ECD\u4F7F\u7528\u77ED\u540D\u79F0",
+        nodes: ["frontend Pod", "web.frontend", "web.demo", "DNS \u54CD\u5E94"],
+        steps: [
+          ["\u8C03\u7528\u65B9\u4F4D\u4E8E frontend", 0, 1, "LOOKUP WEB", "\u72EC\u7ACB\u573A\u666F\uFF1A\u670D\u52A1\u53EA\u5B58\u5728 demo\uFF0C\u800C\u5E94\u7528\u4F4D\u4E8E frontend \u5E76\u67E5\u8BE2\u77ED\u540D web\u3002", "\u9ED8\u8BA4\u641C\u7D22\u8C03\u7528\u65B9\u7A7A\u95F4", "request"],
+          ["\u5F53\u524D\u7A7A\u95F4\u6CA1\u6709\u670D\u52A1", 1, 1, "NAME NOT FOUND", "\u5019\u9009 web.frontend \u4E0D\u5BF9\u5E94\u76EE\u6807\u670D\u52A1\uFF1B\u82E5\u8BE5\u7A7A\u95F4\u6709\u540C\u540D\u670D\u52A1\uFF0C\u8FD8\u53EF\u80FD\u8BBF\u95EE\u9519\u8BEF\u5BF9\u8C61\u3002", "\u540D\u79F0\u5B58\u5728\u6B67\u4E49", "local"],
+          ["\u660E\u786E\u76EE\u6807\u547D\u540D\u7A7A\u95F4", 0, 2, "LOOKUP WEB.DEMO", "\u4F7F\u7528\u542B\u76EE\u6807\u547D\u540D\u7A7A\u95F4\u7684\u540D\u79F0\uFF0C\u4E14\u6309\u5B9E\u9645\u96C6\u7FA4\u57DF\u548C\u89E3\u6790\u5668\u914D\u7F6E\u9A8C\u8BC1\u89E3\u6790\u7ED3\u679C\u3002", "\u76EE\u6807\u8EAB\u4EFD\u5DF2\u660E\u786E", "request"],
+          ["\u5206\u5F00\u68C0\u67E5\u8FDE\u63A5", 3, 0, "RESOLVE THEN CONNECT", "\u6210\u529F\u53D6\u5F97\u6B63\u786E\u8BB0\u5F55\u540E\u4ECD\u9700\u68C0\u67E5\u7AEF\u53E3\u3001\u7AEF\u70B9\u548C\u7F51\u7EDC\u7B56\u7565\uFF1B\u4E0D\u80FD\u636E\u6B64\u627F\u8BFA\u53EF\u8BBF\u95EE\u3002", "DNS \u53EA\u662F\u6392\u67E5\u4E00\u5C42", "data"]
+        ],
+        code: ["\u786E\u8BA4\u8C03\u7528\u65B9 namespace", "\u67E5\u770B resolv.conf \u7684 search", "\u4F7F\u7528\u5E26\u76EE\u6807 namespace \u7684\u670D\u52A1\u540D", "\u5BF9\u7167\u7ED3\u679C\u518D\u68C0\u67E5 TCP/HTTP"],
+        example: sh("\u6838\u5BF9\u670D\u52A1\u6240\u5728\u7A7A\u95F4", "demo/web Service \u5B58\u5728\uFF1B\u6B64\u547D\u4EE4\u4E0D\u521B\u5EFA frontend \u547D\u540D\u7A7A\u95F4\uFF0C\u53EA\u68C0\u67E5\u76EE\u6807\u3002", `kubectl get services -A
+kubectl -n demo get service web
+kubectl -n demo run dns-cross-check --rm -i --restart=Never --image=busybox:1.37 -- nslookup web.demo.svc`, "\u5148\u786E\u8BA4\u670D\u52A1\u6240\u5728\u7A7A\u95F4\uFF0C\u518D\u4ECE\u5B9E\u9645\u8C03\u7528\u65B9\u73AF\u5883\u91CD\u590D\u89E3\u6790\uFF0C\u907F\u514D\u5728\u9519\u8BEF\u7A7A\u95F4\u9A8C\u8BC1\u3002")
+      }
+    },
+    {
+      id: "ingress",
+      group: 1,
+      title: "Ingress \u4E0E Gateway API",
+      en: "HTTP ROUTING & GATEWAYS",
+      summary: "\u628A\u5165\u53E3\u89C4\u5219\u3001\u63A7\u5236\u5668\u5B9E\u73B0\u4E0E Service \u540E\u7AEF\u5206\u5F00\uFF0C\u7406\u89E3\u57DF\u540D\u548C\u8DEF\u5F84\u5982\u4F55\u751F\u6548\u3002",
+      principle: "\u8DEF\u7531\u8D44\u6E90\u662F\u58F0\u660E\uFF1B\u5FC5\u987B\u6709\u5BF9\u5E94\u63A7\u5236\u5668\u548C\u6570\u636E\u9762\u624D\u4F1A\u5B9E\u9645\u5904\u7406\u5916\u90E8\u6D41\u91CF\u3002",
+      tradeoff: "\u96C6\u4E2D\u5165\u53E3\u4FBF\u4E8E TLS \u548C\u8DEF\u7531\u7BA1\u7406\uFF0C\u4E5F\u9700\u8981\u660E\u786E\u63A7\u5236\u5668\u80FD\u529B\u3001\u8DEF\u7531\u5F52\u5C5E\u4E0E\u53D8\u66F4\u6743\u9650\u3002",
+      pitfall: "\u521B\u5EFA Ingress \u4E0D\u4F1A\u81EA\u52A8\u5B89\u88C5\u63A7\u5236\u5668\uFF1BGateway API \u662F\u6269\u5C55 API\uFF0C\u96C6\u7FA4\u9700\u5B89\u88C5\u76F8\u5E94 CRD \u548C\u5B9E\u73B0\u3002",
+      nodes: ["HTTP \u5BA2\u6237\u7AEF", "\u5165\u53E3\u6570\u636E\u9762", "\u8DEF\u7531\u89C4\u5219", "Service \u540E\u7AEF"],
+      steps: [
+        ["\u58F0\u660E Host \u4E0E Path", 2, 1, "PROGRAM ROUTE", "\u5047\u8BBE\u5DF2\u5B89\u88C5\u4E14\u914D\u7F6E\u5339\u914D\u7684 Ingress \u63A7\u5236\u5668\uFF0C\u89C4\u5219\u6307\u5411 demo/web Service\u3002", "\u63A7\u5236\u5668\u89C2\u5BDF\u5E76\u7F16\u7A0B\u5165\u53E3", "control"],
+        ["\u8BF7\u6C42\u5230\u8FBE\u5165\u53E3", 0, 1, "HOST: WEB.EXAMPLE.TEST", "\u5BA2\u6237\u7AEF\u901A\u8FC7\u5B9E\u9645\u5165\u53E3\u5730\u5740\u8BBF\u95EE\uFF0CHTTP Host \u4E0E\u89C4\u5219\u5339\u914D\uFF1BDNS \u6307\u5411\u548C\u5165\u53E3\u53EF\u8FBE\u9700\u53E6\u5916\u914D\u7F6E\u3002", "\u5165\u53E3\u5DF2\u63A5\u6536\u8BF7\u6C42", "request"],
+        ["\u5339\u914D\u8DEF\u7531\u6761\u4EF6", 1, 2, "MATCH HOST / PATH", "\u6B64\u5904\u8868\u793A\u8DEF\u7531\u51B3\u7B56\u5173\u7CFB\uFF0C\u5E76\u975E\u6BCF\u6B21\u8BF7\u6C42\u5411 API \u67E5\u8BE2\u89C4\u5219\uFF1B\u5B9E\u9645\u8F6C\u53D1\u4F9D\u5B9E\u73B0\u3002", "\u5339\u914D\u540E\u7AEF\u670D\u52A1", "check"],
+        ["\u5411\u540E\u7AEF\u8F6C\u53D1", 1, 3, "PROXY HTTP", "\u5165\u53E3\u6570\u636E\u9762\u628A\u6D41\u91CF\u4EA4\u7ED9\u540E\u7AEF\u670D\u52A1\u76F8\u5173\u8DEF\u5F84\uFF0C\u6700\u7EC8\u5E94\u7528\u80FD\u5426\u5904\u7406\u8FD8\u9700\u7AEF\u70B9\u548C\u7F51\u7EDC\u6761\u4EF6\u3002", "\u5230\u8FBE\u540E\u7AEF\u5904\u7406\u8DEF\u5F84", "request"]
+      ],
+      code: ["\u5B89\u88C5\u5E76\u9009\u62E9\u5165\u53E3\u63A7\u5236\u5668", "\u58F0\u660E IngressClass \u6216 GatewayClass", "\u914D\u7F6E\u8DEF\u7531\u3001DNS \u4E0E TLS", "\u6838\u5BF9 status \u4E0E\u5B9E\u9645 HTTP \u8BF7\u6C42"],
+      example: yaml("\u6807\u51C6 Ingress \u89C4\u5219", "\u5DF2\u5B89\u88C5 ingressClassName=nginx \u7684\u517C\u5BB9\u63A7\u5236\u5668\uFF0Cdemo/web Service \u5B58\u5728\u3002\u793A\u4F8B\u57DF\u540D\u4E0D\u914D\u7F6E\u771F\u5B9E DNS\u3002", "ingress.yaml", `apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  namespace: demo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: web.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {number: 80}`, "\u53EA\u6709\u5339\u914D\u7684\u63A7\u5236\u5668\u5904\u7406\u89C4\u5219\u540E\u624D\u53EF\u80FD\u751F\u6548\uFF1B\u5148\u6838\u5BF9\u5B9E\u9645\u63A7\u5236\u5668\u652F\u6301\u4E0E\u5165\u53E3\u5730\u5740\u3002"),
+      sections: [
+        { title: "\u89C4\u5219\u4E0E\u5B9E\u73B0", body: "Ingress \u4E3B\u8981\u8868\u8FBE HTTP(S) \u8DEF\u7531\uFF0CIngressClass \u5173\u8054\u5B9E\u73B0\uFF1B\u6CE8\u89E3\u548C\u9AD8\u7EA7\u884C\u4E3A\u5E38\u5177\u6709\u63A7\u5236\u5668\u5DEE\u5F02\u3002Ingress API \u5DF2\u51BB\u7ED3\uFF0C\u65B0\u80FD\u529B\u4E3B\u8981\u5728 Gateway API \u6F14\u8FDB\uFF0C\u51BB\u7ED3\u5E76\u4E0D\u7B49\u4E8E\u5DF2\u4ECE Kubernetes \u5220\u9664\u3002" },
+        { title: "Gateway \u7684\u89D2\u8272\u5212\u5206", body: "Gateway API \u7528 GatewayClass\u3001Gateway\u3001HTTPRoute \u7B49\u8D44\u6E90\u5212\u5206\u57FA\u7840\u8BBE\u65BD\u3001\u5165\u53E3\u548C\u5E94\u7528\u8DEF\u7531\u804C\u8D23\u3002CRD\u3001\u63A7\u5236\u5668\u3001\u652F\u6301\u7684\u6269\u5C55\u4E0E\u8DE8\u547D\u540D\u7A7A\u95F4\u6388\u6743\u90FD\u9700\u8981\u660E\u786E\uFF0C\u4E0D\u80FD\u53EA\u590D\u5236\u4E00\u4E2A HTTPRoute \u5C31\u5047\u8BBE\u53EF\u7528\u3002" },
+        { title: "\u6309\u6D41\u91CF\u8DEF\u5F84\u6392\u67E5", body: "\u5165\u53E3\u5730\u5740\u548C Host\u3001TLS\u3001\u8DEF\u5F84\u5339\u914D\u3001\u63A7\u5236\u5668\u65E5\u5FD7\u3001\u540E\u7AEF Service\u3001\u7AEF\u70B9\u4E0E\u5E94\u7528\u9010\u5C42\u68C0\u67E5\u3002\u5165\u53E3\u8FD4\u56DE 404\u3001502 \u6216\u8D85\u65F6\u901A\u5E38\u53CD\u6620\u4E0D\u540C\u73AF\u8282\uFF0C\u4F46\u5177\u4F53\u9519\u8BEF\u7801\u5FC5\u987B\u7ED3\u5408\u63A7\u5236\u5668\u5B9E\u73B0\u5224\u65AD\u3002" }
+      ],
+      sources: ["ingress", "gateway", "service"],
+      related: ["service", "dns", "rbac", "service-debug"],
+      fault: {
+        name: "\u89C4\u5219\u5B58\u5728\uFF0C\u6CA1\u4EBA\u5904\u7406",
+        nodes: ["Ingress \u5BF9\u8C61", "IngressClass", "\u63A7\u5236\u5668\u5B9E\u4F8B", "\u5165\u53E3\u72B6\u6001"],
+        steps: [
+          ["API \u63A5\u53D7\u8DEF\u7531", 0, 0, "INGRESS CREATED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u96C6\u7FA4\u652F\u6301 Ingress \u8D44\u6E90\uFF0C\u4F46\u6CA1\u6709\u5B89\u88C5\u5339\u914D\u7684\u63A7\u5236\u5668\u3002\u5BF9\u8C61\u521B\u5EFA\u6210\u529F\u3002", "\u58F0\u660E\u5B58\u5728", "local"],
+          ["\u68C0\u67E5\u7C7B\u7684\u5F52\u5C5E", 0, 1, "CLASS REFERENCE", "ingressClassName \u6307\u5411\u4E00\u4E2A\u5B9E\u73B0\u7EA6\u5B9A\uFF0C\u4E0D\u80FD\u901A\u8FC7\u540D\u5B57\u81EA\u52A8\u4E0B\u8F7D\u5E76\u8FD0\u884C\u90A3\u4E2A\u5B9E\u73B0\u3002", "\u7F3A\u5C11\u5B9E\u9645\u6267\u884C\u7EC4\u4EF6", "check"],
+          ["\u6CA1\u6709\u63A7\u5236\u5668\u63A8\u8FDB", 2, 2, "NO RECONCILER", "\u6CA1\u6709\u5339\u914D\u63A7\u5236\u5668\u5C31\u6CA1\u6709\u9884\u671F\u7684\u6570\u636E\u9762\u7F16\u7A0B\u8FC7\u7A0B\uFF0CAPI Server \u4E0D\u4F1A\u627F\u62C5\u5165\u53E3\u4EE3\u7406\u3002", "\u89C4\u5219\u672A\u53D8\u6210\u5165\u53E3\u80FD\u529B", "local"],
+          ["\u6838\u5B9E\u800C\u975E\u53CD\u590D apply", 3, 1, "CHECK IMPLEMENTATION", "\u68C0\u67E5\u7C7B\u3001\u63A7\u5236\u5668\u548C\u72B6\u6001\uFF1B\u53CD\u590D\u63D0\u4EA4\u76F8\u540C\u89C4\u5219\u4E0D\u80FD\u8865\u9F50\u7F3A\u5931\u7EC4\u4EF6\u3002\u72B6\u6001\u4E3A\u7A7A\u4E5F\u9700\u7ED3\u5408\u5B9E\u73B0\u5224\u65AD\u3002", "\u5148\u6EE1\u8DB3\u5B9E\u73B0\u524D\u63D0", "check"]
+        ],
+        code: ["\u68C0\u67E5 IngressClass", "\u786E\u8BA4\u5BF9\u5E94\u63A7\u5236\u5668\u5B9E\u9645\u8FD0\u884C", "\u68C0\u67E5\u63A7\u5236\u5668\u9009\u62E9\u89C4\u5219\u4E0E\u4E8B\u4EF6", "\u518D\u9A8C\u8BC1\u5165\u53E3\u5730\u5740\u548C Host"],
+        example: sh("\u68C0\u67E5\u5165\u53E3\u524D\u63D0", "\u5DF2\u6709 demo/web Ingress\uFF1Bget pods -A \u9700\u8981\u76F8\u5E94\u6743\u9650\uFF0C\u63A7\u5236\u5668\u540D\u79F0\u4E0E\u547D\u540D\u7A7A\u95F4\u4F9D\u5B89\u88C5\u65B9\u5F0F\u800C\u5F02\u3002", `kubectl get ingressclass
+kubectl -n demo describe ingress web
+kubectl get pods -A
+kubectl api-resources --api-group=gateway.networking.k8s.io`, "\u6700\u540E\u4E00\u6761\u5E2E\u52A9\u786E\u8BA4 Gateway API \u8D44\u6E90\u662F\u5426\u5DF2\u5B89\u88C5\uFF0C\u4E0D\u610F\u5473\u7740\u67D0\u4E2A\u5B9E\u73B0\u5DF2\u5DE5\u4F5C\u3002")
+      }
+    },
+    {
+      id: "storage",
+      group: 1,
+      title: "PV\u3001PVC \u4E0E\u52A8\u6001\u5B58\u50A8",
+      en: "PERSISTENT STORAGE",
+      summary: "\u7528\u58F0\u660E\u7533\u8BF7\u6301\u4E45\u5B58\u50A8\uFF0C\u5206\u6E05\u7ED1\u5B9A\u3001\u4F9B\u7ED9\u3001\u6302\u8F7D\u4E0E\u6570\u636E\u751F\u547D\u5468\u671F\u3002",
+      principle: "PVC \u662F\u7533\u8BF7\uFF0CPV \u662F\u5B58\u50A8\u8D44\u6E90\uFF0CStorageClass \u63CF\u8FF0\u4F9B\u7ED9\u65B9\u5F0F\uFF1B\u6570\u636E\u4FDD\u62A4\u53E6\u884C\u8BBE\u8BA1\u3002",
+      tradeoff: "\u52A8\u6001\u4F9B\u7ED9\u964D\u4F4E\u4EBA\u5DE5\u7BA1\u7406\u6210\u672C\uFF0C\u4E5F\u4F9D\u8D56\u9A71\u52A8\u3001\u62D3\u6251\u3001\u914D\u989D\u548C\u540E\u7AEF\u80FD\u529B\u3002",
+      pitfall: "PVC Pending \u4E0D\u4E00\u5B9A\u662F\u6545\u969C\uFF1BWaitForFirstConsumer \u4F1A\u7B49\u5F85\u6D88\u8D39\u65B9\u8C03\u5EA6\u3002ReadWriteOnce \u4E5F\u4E0D\u7B49\u4E8E\u53EA\u80FD\u88AB\u4E00\u4E2A Pod \u4F7F\u7528\u3002",
+      nodes: ["Pod / PVC", "\u5B58\u50A8\u63A7\u5236\u5668", "PV / \u540E\u7AEF\u5377", "\u8282\u70B9\u6302\u8F7D"],
+      steps: [
+        ["\u7533\u8BF7\u6240\u9700\u5B58\u50A8", 0, 1, "CLAIM 1Gi RWO", "\u5047\u8BBE\u5DF2\u6709\u53EF\u7528\u9ED8\u8BA4 StorageClass\uFF0C\u5E94\u7528\u8BF7\u6C42 1Gi\u3002\u5177\u4F53\u9A71\u52A8\u80FD\u5426\u4F9B\u7ED9\u53D6\u51B3\u4E8E\u73AF\u5883\u3002", "PVC \u7B49\u5F85\u7ED1\u5B9A\u6216\u6D88\u8D39\u8005", "request"],
+        ["\u4F9B\u7ED9\u5E76\u7ED1\u5B9A", 1, 2, "PROVISION / BIND", "\u63A7\u5236\u5668\u9009\u62E9\u5DF2\u6709 PV \u6216\u8C03\u7528\u4F9B\u7ED9\u5668\u521B\u5EFA\u540E\u7AEF\u5377\u3002\u5EF6\u8FDF\u7ED1\u5B9A\u6A21\u5F0F\u4F1A\u7ED3\u5408\u6D88\u8D39\u65B9\u7684\u8C03\u5EA6\u7EA6\u675F\u3002", "PVC \u4E0E PV \u5173\u8054", "control"],
+        ["\u8282\u70B9\u51C6\u5907\u6302\u8F7D", 2, 3, "ATTACH / MOUNT", "\u9700\u8981\u65F6\u8FDB\u884C\u6302\u63A5\u4E0E\u6302\u8F7D\uFF1BCSI \u7B49\u9A71\u52A8\u8D1F\u8D23\u76F8\u5E94\u6B65\u9AA4\uFF0C\u5E76\u975E Bound \u5C31\u4EE3\u8868\u6302\u8F7D\u5DF2\u6210\u529F\u3002", "\u6302\u8F7D\u4ECD\u53EF\u80FD\u5931\u8D25", "control"],
+        ["\u5E94\u7528\u8BBF\u95EE\u76EE\u5F55", 3, 0, "VOLUME READY", "\u8282\u70B9\u51C6\u5907\u597D\u5377\u540E\u5BB9\u5668\u53EF\u4F7F\u7528\u6302\u8F7D\u76EE\u5F55\uFF1B\u6301\u4E45\u6027\u4E0D\u66FF\u4EE3\u5E94\u7528\u4E00\u81F4\u6027\u3001\u5907\u4EFD\u4E0E\u6062\u590D\u6F14\u7EC3\u3002", "\u6570\u636E\u8DEF\u5F84\u53EF\u7528", "control"]
+      ],
+      code: ["Pod \u5F15\u7528 PVC", "PVC \u6309 StorageClass \u7ED1\u5B9A PV", "\u9A71\u52A8\u4E0E\u8282\u70B9\u51C6\u5907\u5377", "\u5E94\u7528\u5199\u5165\uFF1B\u53E6\u505A\u5907\u4EFD\u548C\u6062\u590D\u9A8C\u8BC1"],
+      example: yaml("PVC \u6D88\u8D39\u5B9E\u9A8C", "\u9700\u8981\u652F\u6301 ReadWriteOnce \u7684\u9ED8\u8BA4 StorageClass \u4E0E\u53EF\u7528\u9A71\u52A8\uFF1B\u6CA1\u6709\u9ED8\u8BA4\u7C7B\u65F6\u9700\u9009\u62E9\u771F\u5B9E storageClassName\u3002\u6B64\u5B9E\u9A8C\u4F1A\u7533\u8BF7\u540E\u7AEF\u5B58\u50A8\u3002", "storage.yaml", `apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-demo
+  namespace: demo
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-reader
+  namespace: demo
+spec:
+  containers:
+    - name: reader
+      image: busybox:1.37
+      command: [sh, -c, 'date >> /data/runs; cat /data/runs; sleep 3600']
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-demo`, "\u6B63\u5E38\u60C5\u51B5\u4E0B PVC Bound\u3001Pod \u6302\u8F7D\u8FD0\u884C\uFF1B\u5220\u9664 PVC \u524D\u5148\u68C0\u67E5 PV \u56DE\u6536\u7B56\u7565\u548C\u540E\u7AEF\u6570\u636E\u5904\u7406\u89C4\u5219\u3002"),
+      sections: [
+        { title: "\u4ECE\u58F0\u660E\u5230\u6302\u8F7D\u6709\u591A\u4E2A\u73AF\u8282", body: "PVC Pending \u5148\u67E5\u7C7B\u3001\u4E8B\u4EF6\u3001\u5BB9\u91CF\u548C\u7ED1\u5B9A\u6A21\u5F0F\uFF1BPVC Bound \u4F46 Pod \u672A\u542F\u52A8\u8FD8\u53EF\u80FD\u5361\u5728\u5377\u6302\u63A5\u3001\u62D3\u6251\u6216\u6587\u4EF6\u7CFB\u7EDF\u6302\u8F7D\u3002PV \u662F\u96C6\u7FA4\u4F5C\u7528\u57DF\u8D44\u6E90\uFF0CPVC \u4E0E\u6D88\u8D39 Pod \u5173\u8054\u5728\u547D\u540D\u7A7A\u95F4\u5185\u3002" },
+        { title: "\u8BBF\u95EE\u6A21\u5F0F\u4E0E\u5E94\u7528\u4E92\u65A5", body: "ReadWriteOnce \u901A\u5E38\u9650\u5236\u5355\u8282\u70B9\u8BFB\u5199\u6302\u8F7D\uFF0C\u4E0D\u7B49\u4E8E\u53EA\u5141\u8BB8\u4E00\u4E2A Pod\u3002ReadWriteOncePod \u5BF9\u5355 Pod \u7EA6\u675F\u6709\u989D\u5916\u652F\u6301\u6761\u4EF6\u3002\u8BBF\u95EE\u6A21\u5F0F\u4E0D\u80FD\u66FF\u4EE3\u6570\u636E\u5E93\u9501\u3001\u4E1A\u52A1\u6240\u6709\u6743\u6216\u6587\u4EF6\u7CFB\u7EDF\u4E00\u81F4\u6027\u8BBE\u8BA1\u3002" },
+        { title: "\u56DE\u6536\u3001\u5FEB\u7167\u4E0E\u5907\u4EFD", body: "Retain \u4E0E Delete \u5F71\u54CD PVC \u91CA\u653E\u540E PV \u548C\u540E\u7AEF\u5377\u7684\u5904\u7406\u3002\u540E\u7AEF\u5FEB\u7167\u6216\u6301\u4E45\u5377\u5E76\u4E0D\u5929\u7136\u63D0\u4F9B\u5E94\u7528\u4E00\u81F4\u7684\u5907\u4EFD\uFF0C\u8FD8\u9700\u8003\u8651\u65E5\u5FD7\u3001\u6062\u590D\u70B9\u3001\u4F9D\u8D56\u987A\u5E8F\u548C\u5B9E\u9645\u6062\u590D\u6D4B\u8BD5\u3002" }
+      ],
+      sources: ["storage", "storageclass"],
+      related: ["statefulset", "scheduling", "pod-debug", "backup-upgrade"],
+      fault: {
+        name: "\u7B49\u5F85\u6D88\u8D39\u8005\uFF0C\u8FD8\u662F\u4F9B\u7ED9\u5931\u8D25",
+        nodes: ["Pending PVC", "StorageClass", "\u6D88\u8D39 Pod", "\u4F9B\u7ED9\u5668\u4E8B\u4EF6"],
+        steps: [
+          ["PVC \u663E\u793A Pending", 0, 0, "PVC PENDING", "\u72EC\u7ACB\u573A\u666F\uFF1AStorageClass \u4F7F\u7528 WaitForFirstConsumer\uFF0C\u5F53\u524D\u5C1A\u672A\u521B\u5EFA\u6D88\u8D39\u5B83\u7684 Pod\u3002", "\u672A\u7ED1\u5B9A\u4E0D\u4E00\u5B9A\u5F02\u5E38", "local"],
+          ["\u68C0\u67E5\u7ED1\u5B9A\u6A21\u5F0F", 0, 1, "WAIT FOR FIRST CONSUMER", "\u5EF6\u8FDF\u7ED1\u5B9A\u5E0C\u671B\u7ED3\u5408\u6D88\u8D39\u65B9\u8C03\u5EA6\u9700\u6C42\u9009\u62E9\u6B63\u786E\u62D3\u6251\uFF0C\u4E0D\u5E94\u53EA\u7B49\u5F85 PVC \u7ACB\u523B\u53D8 Bound\u3002", "\u6309\u8BBE\u8BA1\u7B49\u5F85\u6D88\u8D39\u65B9", "check"],
+          ["\u63D0\u4F9B\u6D88\u8D39\u8005\u4E0A\u4E0B\u6587", 2, 1, "POD CONSTRAINTS", "\u521B\u5EFA\u6B63\u786E\u5F15\u7528\u7684 Pod \u540E\uFF0C\u8C03\u5EA6\u4E0E\u4F9B\u7ED9\u6D41\u7A0B\u518D\u7ED3\u5408\u62D3\u6251\u63A8\u8FDB\uFF1B\u8FD9\u91CC\u4E0D\u4FDD\u8BC1\u4F9B\u7ED9\u4E00\u5B9A\u6210\u529F\u3002", "\u5177\u5907\u540E\u7EED\u63A8\u8FDB\u6761\u4EF6", "control"],
+          ["\u6309\u4E8B\u4EF6\u5206\u8FA8\u9519\u8BEF", 3, 3, "PROVISIONING EVIDENCE", "\u82E5\u4ECD\u65E0\u8FDB\u5C55\uFF0C\u68C0\u67E5\u6D88\u8D39 Pod\u3001PVC \u4E0E\u9A71\u52A8\u4E8B\u4EF6\uFF0C\u533A\u5206\u6B63\u5E38\u7B49\u5F85\u3001\u8C03\u5EA6\u65E0\u89E3\u548C\u540E\u7AEF\u5931\u8D25\u3002", "\u4F9D\u636E\u8BC1\u636E\u5206\u7C7B", "local"]
+        ],
+        code: ["\u8BFB\u53D6 PVC Events", "\u6838\u5BF9 volumeBindingMode", "\u786E\u8BA4\u6D88\u8D39 Pod \u5DF2\u521B\u5EFA\u4E14\u6B63\u786E\u5F15\u7528", "\u518D\u68C0\u67E5\u9A71\u52A8\u4E0E\u62D3\u6251\u9519\u8BEF"],
+        example: sh("\u68C0\u67E5\u5B58\u50A8\u7ED1\u5B9A\u4E0E\u6D88\u8D39\u65B9", "\u5DF2\u5E94\u7528 storage.yaml\uFF1BStorageClass \u548C PV \u4E3A\u96C6\u7FA4\u4F5C\u7528\u57DF\u8D44\u6E90\u3002", `kubectl -n demo describe pvc data-demo
+kubectl get storageclass -o yaml
+kubectl -n demo describe pod volume-reader
+kubectl get pv`, "WaitForFirstConsumer \u63D0\u793A\u53EF\u80FD\u662F\u6B63\u5E38\u9636\u6BB5\uFF1BFailedMount \u4E0E ProvisioningFailed \u6307\u5411\u4E0D\u540C\u73AF\u8282\u3002")
+      }
     }
-  },
-  {
-    "group": 0,
-    "id": "pipeline",
-    "title": "流水线与投机执行",
-    "en": "PIPELINE & SPECULATION",
-    "summary": "重叠多个指令的执行阶段，并在分支结果确定之前预测后续工作。",
-    "nodes": [
-      "取指 / 预测",
-      "译码 / 发射",
-      "执行单元",
-      "按序提交"
-    ],
-    "steps": [
-      [
-        "预测控制流",
-        0,
-        1,
-        "PREDICT A",
-        "分支预测器选择路径 A，使取指与译码能够继续。预测允许先做工作，并不保证结果最终可以提交。",
-        "预测路径 A · 尚未验证",
-        "control"
+  ];
+
+  // src/lessons/operations.ts
+  var operations = [
+    {
+      id: "network-policy",
+      group: 2,
+      title: "NetworkPolicy \u7F51\u7EDC\u9694\u79BB",
+      en: "NETWORK POLICY",
+      summary: "\u4ECE\u6D41\u91CF\u4E24\u7AEF\u5224\u65AD\u5165\u7AD9\u4E0E\u51FA\u7AD9\u662F\u5426\u5141\u8BB8\uFF0C\u8BC6\u522B\u7B56\u7565\u53E0\u52A0\u548C\u7F51\u7EDC\u63D2\u4EF6\u7684\u804C\u8D23\u3002",
+      principle: "\u5BF9\u53D7\u9694\u79BB\u65B9\u5411\uFF0C\u5141\u8BB8\u89C4\u5219\u53D6\u5E76\u96C6\uFF1B\u4E00\u6B21\u8FDE\u63A5\u8FD8\u9700\u540C\u65F6\u6EE1\u8DB3\u6E90\u7AEF\u51FA\u7AD9\u4E0E\u76EE\u6807\u5165\u7AD9\u3002",
+      tradeoff: "\u9ED8\u8BA4\u62D2\u7EDD\u7F29\u5C0F\u901A\u4FE1\u9762\uFF0C\u4E5F\u8981\u6C42\u51C6\u786E\u7EF4\u62A4 DNS\u3001\u76D1\u63A7\u548C\u5E94\u7528\u4F9D\u8D56\u7684\u653E\u884C\u89C4\u5219\u3002",
+      pitfall: "\u521B\u5EFA\u7B56\u7565\u4E0D\u4FDD\u8BC1\u7F51\u7EDC\u9694\u79BB\u5DF2\u7ECF\u751F\u6548\uFF0C\u5FC5\u987B\u6709\u652F\u6301 NetworkPolicy \u7684\u7F51\u7EDC\u5B9E\u73B0\uFF1B\u89C4\u5219\u4E5F\u4E0D\u662F\u6309\u6587\u4EF6\u5148\u540E\u8986\u76D6\u3002",
+      nodes: ["\u6765\u6E90 Pod", "\u51FA\u7AD9\u89C4\u5219", "\u5165\u7AD9\u89C4\u5219", "\u76EE\u6807 Pod"],
+      steps: [
+        ["\u660E\u786E\u901A\u4FE1\u53CC\u65B9", 0, 1, "SOURCE EGRESS", "\u5047\u8BBE CNI \u652F\u6301\u5E76\u6267\u884C\u7B56\u7565\uFF0C\u6765\u6E90 Pod \u5DF2\u88AB\u51FA\u7AD9\u7B56\u7565\u9009\u4E2D\u3002\u5148\u5224\u65AD\u51FA\u7AD9\u65B9\u5411\u7684\u5141\u8BB8\u96C6\u5408\u3002", "\u68C0\u67E5\u6E90\u7AEF\u51FA\u7AD9", "check"],
+        ["\u68C0\u67E5\u76EE\u6807\u65B9\u5411", 2, 3, "DESTINATION INGRESS", "\u76EE\u6807 Pod \u82E5\u88AB\u5165\u7AD9\u7B56\u7565\u9694\u79BB\uFF0C\u5219\u5339\u914D\u5B83\u7684\u6240\u6709\u5165\u7AD9\u5141\u8BB8\u89C4\u5219\u53D6\u5E76\u96C6\u3002", "\u68C0\u67E5\u76EE\u6807\u5165\u7AD9", "check"],
+        ["\u4E24\u7AEF\u6761\u4EF6\u5747\u6EE1\u8DB3", 1, 2, "BOTH DIRECTIONS ALLOW", "\u6559\u5B66\u573A\u666F\u5047\u8BBE\u4E24\u7AEF\u90FD\u5141\u8BB8\uFF0C\u4E14\u534F\u8BAE\u4E0E\u76EE\u6807\u7AEF\u53E3\u5339\u914D\u3002\u4EFB\u4E00\u7AEF\u4E0D\u5141\u8BB8\u90FD\u4F1A\u963B\u6B62\u8FDE\u63A5\u3002", "\u7B56\u7565\u5C42\u5141\u8BB8\u8FDE\u63A5", "check"],
+        ["\u5EFA\u7ACB\u5E94\u7528\u8FDE\u63A5", 0, 3, "CONNECT", "\u7B56\u7565\u5141\u8BB8\u53EA\u662F\u6761\u4EF6\u4E4B\u4E00\uFF0C\u5E94\u7528\u76D1\u542C\u3001Service\u3001\u8DEF\u7531\u548C\u57FA\u7840\u7F51\u7EDC\u4ECD\u9700\u6B63\u5E38\u3002", "\u8BF7\u6C42\u5230\u8FBE\u76EE\u6807", "request"]
       ],
-      [
-        "发射并重叠执行",
-        1,
-        2,
-        "ISSUE",
-        "相互独立的指令可重叠执行；数据依赖、资源冲突和访存限制并行。本例采用具有按序提交机制的乱序处理器。",
-        "多条指令在途 · 结果仍可被丢弃",
-        "control"
+      code: ["\u5224\u65AD\u53CC\u65B9\u662F\u5426\u5728\u76F8\u5173\u65B9\u5411\u88AB\u9694\u79BB", "\u6E90\u7AEF\u5141\u8BB8 = \u6240\u6709\u9002\u7528 egress \u89C4\u5219\u5E76\u96C6", "\u76EE\u6807\u5141\u8BB8 = \u6240\u6709\u9002\u7528 ingress \u89C4\u5219\u5E76\u96C6", "\u4E24\u7AEF\u5141\u8BB8\u4E14\u7F51\u7EDC\u6B63\u5E38 \u2192 \u53EF\u8FDE\u63A5"],
+      example: yaml("\u53EA\u9694\u79BB web \u7684\u5165\u7AD9", "\u9700\u8981\u652F\u6301 NetworkPolicy \u7684 CNI\u3002demo \u4E2D app=web \u4E3A\u76EE\u6807\uFF0Capp=client \u4E3A\u5141\u8BB8\u6765\u6E90\uFF1B\u4EC5\u9650\u5236\u5165\u7AD9\uFF0C\u672A\u9650\u5236\u51FA\u7AD9\u3002", "network-policy.yaml", `apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-from-client
+  namespace: demo
+spec:
+  podSelector:
+    matchLabels: {app: web}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: client}
+      ports:
+        - protocol: TCP
+          port: 80`, "\u540C namespace \u7684 client \u6807\u7B7E Pod \u53EF\u8BBF\u95EE web \u7684 TCP/80\uFF1B\u5176\u4ED6\u9002\u7528\u7B56\u7565\u4ECD\u53EF\u80FD\u989D\u5916\u653E\u884C\uFF0C\u9700\u505A\u5141\u8BB8\uFF0F\u62D2\u7EDD\u53CC\u5411\u6D4B\u8BD5\u3002"),
+      sections: [
+        { title: "\u65B9\u5411\u4E0E\u96C6\u5408", body: "\u9ED8\u8BA4\u6CA1\u6709\u76F8\u5173\u7B56\u7565\u9694\u79BB\u65F6\uFF0C\u8BE5\u65B9\u5411\u901A\u5E38\u4E0D\u53D7 NetworkPolicy \u9650\u5236\u3002\u4E00\u65E6\u88AB\u8BE5\u65B9\u5411\u7684\u7B56\u7565\u9009\u4E2D\uFF0C\u5C31\u6309\u6240\u6709\u9002\u7528\u7B56\u7565\u5141\u8BB8\u89C4\u5219\u7684\u5E76\u96C6\u51B3\u5B9A\uFF1B\u7A7A\u89C4\u5219\u96C6\u5E76\u4E0D\u8986\u76D6\u53E6\u4E00\u6761\u5141\u8BB8\u89C4\u5219\u3002" },
+        { title: "\u9009\u62E9\u5668\u7684\u4F5C\u7528\u57DF", body: "\u5355\u72EC podSelector \u7684\u6765\u6E90\u8303\u56F4\u662F\u7B56\u7565\u6240\u5728\u547D\u540D\u7A7A\u95F4\u3002namespaceSelector \u4E0E podSelector \u5199\u5728\u540C\u4E00\u4E2A from \u5143\u7D20\u4E2D\u8868\u793A\u7EC4\u5408\u6761\u4EF6\uFF0C\u5199\u6210\u4E24\u4E2A\u5143\u7D20\u5219\u662F\u53E6\u4E00\u79CD\u5E76\u96C6\u5173\u7CFB\uFF0C\u5FC5\u987B\u5BA1\u67E5 YAML \u5C42\u7EA7\u3002" },
+        { title: "\u7528\u5B9E\u9645\u6D41\u91CF\u9A8C\u8BC1", body: "\u68C0\u67E5 CNI \u80FD\u529B\u3001Pod \u6807\u7B7E\u3001\u547D\u540D\u7A7A\u95F4\u6807\u7B7E\u548C DNS \u8DEF\u5F84\uFF0C\u7136\u540E\u5206\u522B\u4ECE\u5141\u8BB8\u6765\u6E90\u4E0E\u4E0D\u5141\u8BB8\u6765\u6E90\u6D4B\u8BD5\u3002NetworkPolicy \u4E0D\u662F HTTP \u8DEF\u5F84\u9274\u6743\uFF0C\u4E0D\u80FD\u66FF\u4EE3 RBAC\u3001TLS \u6216\u5E94\u7528\u8BA4\u8BC1\u3002" }
       ],
-      [
-        "完成并验证预测",
-        2,
-        3,
-        "RESULT / RESOLVE",
-        "执行单元得到结果并验证分支。本例预测正确，结果等待较早指令完成及提交条件满足。",
-        "预测正确 · 尚未提交",
-        "data"
-      ],
-      [
-        "按序提交架构状态",
-        3,
-        3,
-        "RETIRE",
-        "常见乱序处理器按程序顺序提交已满足条件的指令，支持精确异常。存储对其他核心何时可见，还受存储缓冲与内存序约束。",
-        "本线程架构状态已提交",
-        "local"
-      ]
-    ],
-    "principle": "执行可以提前，架构状态的提交必须满足程序语义。",
-    "tradeoff": "更深流水线和更大执行窗口提高潜在吞吐，也增加错预测与恢复成本。",
-    "pitfall": "撤销未提交的架构状态，不意味着所有微架构痕迹都被清除。",
-    "code": [
-      "predictAndFetch(branch)",
-      "issueReadyInstructions()",
-      "executeAndResolve()",
-      "if predictionWrong: squashYoungerAndRedirect()",
-      "retireReadyInstructionsInProgramOrder()"
-    ],
-    "sources": [
-      "cpu_notes",
-      "arch"
-    ],
-    "related": [
-      "cache",
-      "sync",
-      "measure"
-    ],
-    "fault": {
-      "name": "分支预测错误",
-      "nodes": [
-        "取指 / 预测",
-        "译码 / 发射",
-        "执行单元",
-        "按序提交"
-      ],
-      "steps": [
-        [
-          "预测走路径 A",
-          0,
-          1,
-          "PREDICT A",
-          "分支尚未求值，预测器选择路径 A，沿该路径继续取指和译码。",
-          "预测 A · 分支结果未知",
-          "control"
+      sources: ["network", "labels"],
+      related: ["labels", "namespace", "dns", "service-debug"],
+      fault: {
+        name: "\u653E\u884C\u5165\u7AD9\uFF0C\u51FA\u7AD9\u4ECD\u62D2\u7EDD",
+        nodes: ["\u5BA2\u6237\u7AEF Pod", "\u5BA2\u6237\u7AEF\u51FA\u7AD9", "\u670D\u52A1\u7AEF\u5165\u7AD9", "\u670D\u52A1\u7AEF Pod"],
+        steps: [
+          ["\u6765\u6E90\u5DF2\u88AB\u51FA\u7AD9\u9694\u79BB", 0, 1, "EGRESS ISOLATED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u6765\u6E90\u88AB default-deny egress \u9009\u4E2D\uFF0C\u672A\u5141\u8BB8\u8BBF\u95EE\u76EE\u6807\u670D\u52A1\u3002", "\u6E90\u7AEF\u51FA\u7AD9\u4E0D\u5141\u8BB8", "check"],
+          ["\u76EE\u6807\u5165\u7AD9\u5141\u8BB8", 2, 3, "INGRESS ALLOWED", "\u76EE\u6807\u7B56\u7565\u786E\u5B9E\u5141\u8BB8\u6765\u6E90\u6807\u7B7E\uFF0C\u4F46\u53EA\u914D\u7F6E\u8FD9\u4E00\u7AEF\u65E0\u6CD5\u8986\u76D6\u6765\u6E90\u51FA\u7AD9\u9650\u5236\u3002", "\u76EE\u6807\u5165\u7AD9\u6761\u4EF6\u6EE1\u8DB3", "check"],
+          ["\u8FDE\u63A5\u65E0\u6CD5\u62B5\u8FBE", 0, 3, "BLOCKED IN PATH", "\u51FA\u7AD9\u8DEF\u5F84\u4E0D\u6EE1\u8DB3\u89C4\u5219\uFF0C\u6559\u5B66\u56FE\u793A\u628A\u4F20\u8F93\u753B\u4E3A\u4E2D\u65AD\uFF1B\u5177\u4F53\u4E22\u5F03\u4F4D\u7F6E\u7531\u7F51\u7EDC\u5B9E\u73B0\u51B3\u5B9A\u3002", "\u76EE\u6807\u672A\u6536\u5230\u8FDE\u63A5", "lost"],
+          ["\u6838\u5BF9\u4E24\u7AEF\u4E0E DNS", 1, 2, "CHECK BOTH POLICIES", "\u68C0\u67E5\u53CC\u65B9\u9002\u7528\u7B56\u7565\u96C6\u5408\u4E0E\u771F\u5B9E\u4F9D\u8D56\u7AEF\u53E3\uFF1B\u82E5\u4F7F\u7528\u670D\u52A1\u540D\uFF0C\u8FD8\u9700\u8981\u5141\u8BB8\u5BF9\u5E94 DNS \u8DEF\u5F84\u3002", "\u4FEE\u6B63\u5B8C\u6574\u901A\u4FE1\u610F\u56FE", "check"]
         ],
-        [
-          "执行预测路径",
-          1,
-          2,
-          "SPECULATE A",
-          "比该分支年轻的指令沿路径 A 开始执行；这些结果仍是推测性的，尚不能成为已提交架构状态。",
-          "路径 A 的年轻指令在途",
-          "control"
-        ],
-        [
-          "发现实际应走 B",
-          2,
-          0,
-          "SQUASH / REDIRECT B",
-          "分支求值表明应走 B。处理器丢弃错误路径上尚未提交的年轻指令，恢复正确取指位置；已提交的较早指令不回滚。",
-          "错误路径被丢弃 · 重定向到 B",
-          "control"
-        ],
-        [
-          "重新填充正确路径",
-          0,
-          1,
-          "REFETCH B",
-          "从路径 B 重新取指并填充流水线。已经消耗的时间无法收回，缓存等微架构痕迹也不保证全部消失。",
-          "开始正确路径 · 仍须执行后按序提交",
-          "control"
-        ]
+        code: ["\u68C0\u67E5 source egress", "\u68C0\u67E5 destination ingress", "\u6838\u5BF9\u7AEF\u53E3\u3001\u6807\u7B7E\u4E0E DNS", "\u5141\u8BB8\u4E0E\u62D2\u7EDD\u6765\u6E90\u5206\u522B\u9A8C\u8BC1"],
+        example: sh("\u68C0\u67E5\u4E24\u7AEF\u7684\u7B56\u7565\u8303\u56F4", "demo \u4E2D\u5B58\u5728\u5F85\u67E5\u7B56\u7565\uFF1B\u6B64\u547D\u4EE4\u53EA\u8BFB\u5B9A\u4E49\uFF0C\u5B9E\u9645\u9A8C\u8BC1\u9700\u4ECE\u53CC\u65B9\u76F8\u5173 Pod \u53D1\u8D77\u8FDE\u63A5\u3002", `kubectl -n demo get networkpolicy
+kubectl -n demo describe networkpolicy
+kubectl -n demo get pods --show-labels
+kubectl get namespaces --show-labels`, "\u4E0D\u80FD\u4EC5\u51ED\u7B56\u7565\u5B58\u5728\u5224\u5B9A\u6709\u6548\uFF1B\u7ED3\u5408 CNI \u80FD\u529B\u4E0E\u5B9E\u9645\u8FDE\u63A5\u6D4B\u8BD5\u786E\u8BA4\u3002")
+      }
+    },
+    {
+      id: "rbac",
+      group: 2,
+      title: "RBAC \u4E0E\u6700\u5C0F\u6743\u9650",
+      en: "ROLE-BASED ACCESS CONTROL",
+      summary: "\u56F4\u7ED5\u4E3B\u4F53\u3001\u52A8\u4F5C\u3001\u8D44\u6E90\u548C\u4F5C\u7528\u57DF\u5224\u65AD\u6388\u6743\uFF0C\u628A\u53EA\u8BFB\u9700\u6C42\u4E0E\u7BA1\u7406\u5458\u6743\u9650\u5206\u5F00\u3002",
+      principle: "\u89D2\u8272\u5B9A\u4E49\u5141\u8BB8\u52A8\u4F5C\uFF0C\u7ED1\u5B9A\u628A\u52A8\u4F5C\u6388\u4E88\u4E3B\u4F53\uFF1B\u8BA4\u8BC1\u8EAB\u4EFD\u4E0E\u6388\u6743\u8303\u56F4\u5206\u522B\u5224\u65AD\u3002",
+      tradeoff: "\u7CBE\u786E\u6388\u6743\u964D\u4F4E\u6743\u9650\u9762\uFF0C\u4E5F\u589E\u52A0\u89D2\u8272\u7EF4\u62A4\u548C\u6392\u969C\u6210\u672C\uFF1B\u901A\u914D\u6743\u9650\u867D\u7136\u7701\u4E8B\u4F46\u96BE\u4EE5\u5BA1\u67E5\u3002",
+      pitfall: "RoleBinding \u5F15\u7528 ClusterRole \u65F6\uFF0C\u901A\u5E38\u53EA\u5728\u8BE5\u7ED1\u5B9A\u7684\u547D\u540D\u7A7A\u95F4\u6388\u4E88\u5BF9\u5E94\u547D\u540D\u7A7A\u95F4\u8D44\u6E90\u6743\u9650\uFF1B\u4E0D\u4F1A\u56E0\u6B64\u53D8\u6210\u5168\u5C40\u7BA1\u7406\u5458\u3002",
+      nodes: ["\u8BF7\u6C42\u8EAB\u4EFD", "API \u6388\u6743", "\u89D2\u8272\u89C4\u5219", "\u89D2\u8272\u7ED1\u5B9A"],
+      steps: [
+        ["\u8BC6\u522B\u8BF7\u6C42\u4E3B\u4F53", 0, 1, "AUTHENTICATED SUBJECT", "\u5047\u8BBE\u8BA4\u8BC1\u5DF2\u7ECF\u6210\u529F\u3002\u8BF7\u6C42\u5305\u542B\u52A8\u8BCD\u3001API \u7EC4\u3001\u8D44\u6E90\u548C\u547D\u540D\u7A7A\u95F4\u7B49\u6388\u6743\u5C5E\u6027\u3002", "\u8EAB\u4EFD\u5DF2\u77E5 \xB7 \u6743\u9650\u5F85\u5224", "request"],
+        ["\u5339\u914D\u6388\u6743\u7ED1\u5B9A", 3, 1, "SUBJECT / SCOPE", "RBAC \u6388\u6743\u6839\u636E\u9002\u7528\u7ED1\u5B9A\u628A\u4E3B\u4F53\u4E0E\u89C4\u5219\u8054\u7CFB\u8D77\u6765\uFF1B\u8BA4\u8BC1\u6210\u529F\u4E0D\u610F\u5473\u7740\u80FD\u8BFB\u4EFB\u610F\u8D44\u6E90\u3002", "\u67E5\u627E\u9002\u7528\u6388\u6743", "control"],
+        ["\u6838\u5BF9\u8D44\u6E90\u4E0E\u52A8\u4F5C", 1, 2, "VERB / RESOURCE", "\u4F8B\u5982 get pods \u4E0E get pods/log \u662F\u4E0D\u540C\u8D44\u6E90\u6743\u9650\u3002RBAC \u7684\u5141\u8BB8\u89C4\u5219\u662F\u7D2F\u52A0\u7684\u3002", "\u7CBE\u786E\u5339\u914D\u6743\u9650", "check"],
+        ["\u5141\u8BB8\u7EE7\u7EED\u5904\u7406", 1, 0, "AUTHORIZED", "\u5047\u8BBE\u6388\u6743\u5339\u914D\uFF0C\u8BF7\u6C42\u7EE7\u7EED\u8FDB\u5165\u540E\u7EED\u5904\u7406\uFF1B\u51C6\u5165\u3001\u914D\u989D\u548C\u8D44\u6E90\u6821\u9A8C\u4ECD\u53EF\u80FD\u62D2\u7EDD\u5199\u64CD\u4F5C\u3002", "\u6388\u6743\u901A\u8FC7 \u2260 \u6240\u6709\u68C0\u67E5\u901A\u8FC7", "data"]
       ],
-      "code": [
-        "prediction = predict(branch)",
-        "executeYoungerInstructions(prediction)",
-        "if resolve(branch) != prediction:",
-        "  squashUnretiredYoungerInstructions()",
-        "  redirectFetch(correctPC)",
-        "retireReadyInstructionsInProgramOrder()"
-      ]
+      code: ["\u8BA4\u8BC1\uFF1A\u662F\u8C01", "\u6388\u6743\uFF1A\u80FD\u5BF9\u4EC0\u4E48\u505A\u4EC0\u4E48", "\u51C6\u5165\uFF1A\u672C\u6B21\u5199\u5165\u662F\u5426\u7B26\u5408\u7B56\u7565", "\u6301\u7EED\u5BA1\u67E5\u6700\u5C0F\u6743\u9650"],
+      example: yaml("\u547D\u540D\u7A7A\u95F4\u5185\u7684 Pod \u53EA\u8BFB\u89D2\u8272", "\u9700\u8981\u5728 demo \u521B\u5EFA ServiceAccount\u3001Role \u4E0E RoleBinding \u7684\u6743\u9650\uFF1B\u4E0D\u6388\u4E88 Secret \u6216\u65E5\u5FD7\u8BFB\u53D6\u6743\u9650\u3002", "rbac.yaml", `apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-reader
+  namespace: demo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: demo
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader
+  namespace: demo
+subjects:
+  - kind: ServiceAccount
+    name: pod-reader
+    namespace: demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-reader`, "\u89D2\u8272\u53EA\u5141\u8BB8\u8BFB\u53D6 demo \u7684 Pod \u5BF9\u8C61\uFF1B\u5176\u4ED6\u7ED1\u5B9A\u4ECD\u53EF\u80FD\u989D\u5916\u6388\u4E88\u8BE5\u4E3B\u4F53\u6743\u9650\u3002"),
+      sections: [
+        { title: "\u89D2\u8272\u4E0E\u7ED1\u5B9A", body: "Role \u5C5E\u4E8E\u547D\u540D\u7A7A\u95F4\uFF0CClusterRole \u53EF\u63CF\u8FF0\u96C6\u7FA4\u7EA7\u6216\u53EF\u590D\u7528\u89C4\u5219\u3002RoleBinding \u5728\u672C\u7A7A\u95F4\u7ED1\u5B9A\u89D2\u8272\uFF0CClusterRoleBinding \u63D0\u4F9B\u96C6\u7FA4\u7EA7\u7ED1\u5B9A\u3002\u5E94\u4ECE\u4E3B\u4F53\u5B9E\u9645\u62E5\u6709\u7684\u6240\u6709\u7ED1\u5B9A\u5224\u65AD\u6700\u7EC8\u80FD\u529B\u3002" },
+        { title: "\u6743\u9650\u7EC6\u8282\u4E0D\u80FD\u9760\u731C", body: "get\u3001list\u3001watch\u3001create\u3001patch \u7B49\u662F\u4E0D\u540C\u52A8\u4F5C\uFF1Bpods/log\u3001pods/exec \u7B49\u5B50\u8D44\u6E90\u9700\u8981\u76F8\u5E94\u89C4\u5219\u3002\u521B\u5EFA Pod \u7684\u6743\u9650\u4E5F\u53EF\u80FD\u95F4\u63A5\u83B7\u5F97\u5DE5\u4F5C\u8D1F\u8F7D\u8EAB\u4EFD\u548C\u5377\u6570\u636E\uFF0C\u56E0\u6B64\u4E0D\u80FD\u53EA\u770B\u4E00\u6761\u89C4\u5219\u7684\u540D\u5B57\u3002" },
+        { title: "\u5148\u9A8C\u8BC1\u518D\u52A0\u6743", body: "\u7528 auth can-i \u5BF9\u5177\u4F53\u52A8\u4F5C\u548C\u4F5C\u7528\u57DF\u68C0\u67E5\u3002--as \u9700\u8981\u6A21\u62DF\u8EAB\u4EFD\u6743\u9650\uFF1B\u82E5\u88AB\u62D2\u7EDD\uFF0C\u8981\u533A\u5206\u662F\u4E0D\u80FD\u6A21\u62DF\u8FD8\u662F\u76EE\u6807\u52A8\u4F5C\u4E0D\u5141\u8BB8\u3002\u4E0D\u8981\u4E3A\u4E00\u4E2A\u53EA\u8BFB\u9519\u8BEF\u76F4\u63A5\u6388\u4E88 cluster-admin\u3002" }
+      ],
+      sources: ["rbac", "secrets"],
+      related: ["namespace", "pod-security", "config", "api"],
+      fault: {
+        name: "\u80FD\u8BFB Pod\uFF0C\u4E0D\u80FD\u8BFB\u65E5\u5FD7",
+        nodes: ["pod-reader \u8EAB\u4EFD", "pods \u5BF9\u8C61", "pods/log \u5B50\u8D44\u6E90", "API \u6388\u6743"],
+        steps: [
+          ["Pod \u67E5\u8BE2\u901A\u8FC7", 0, 1, "GET POD ALLOWED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u4E3B\u4F53\u4EC5\u5177\u6709 pods \u7684 get/list/watch \u6743\u9650\uFF0C\u6CA1\u6709\u5176\u4ED6\u6388\u4E88\u3002", "\u53EF\u8BFB Pod \u72B6\u6001", "request"],
+          ["\u8BF7\u6C42\u65E5\u5FD7\u5B50\u8D44\u6E90", 0, 2, "GET PODS/LOG", "\u8BFB\u53D6\u65E5\u5FD7\u8D70 pods/log\uFF0C\u800C\u4E0D\u662F\u76F4\u63A5\u8BFB\u53D6 Pod \u5BF9\u8C61\u4E2D\u7684\u4E00\u6BB5\u5B57\u6BB5\u3002", "\u9700\u8981\u5355\u72EC\u6388\u6743\u52A8\u4F5C", "request"],
+          ["\u6388\u6743\u672A\u547D\u4E2D", 3, 0, "403 FORBIDDEN", "\u89C4\u5219\u7F3A\u5C11 pods/log\uFF0CAPI \u8FD4\u56DE Forbidden\uFF1B\u8FD9\u4E0E\u5BB9\u5668\u65E0\u65E5\u5FD7\u6216\u955C\u50CF\u62C9\u53D6\u5931\u8D25\u662F\u4E0D\u540C\u95EE\u9898\u3002", "\u65E5\u5FD7\u8BF7\u6C42\u88AB\u62D2\u7EDD", "reject"],
+          ["\u786E\u8BA4\u6700\u5C0F\u589E\u91CF", 3, 3, "REVIEW REQUIRED ACCESS", "\u786E\u8BA4\u786E\u9700\u65E5\u5FD7\u6743\u9650\u540E\uFF0C\u518D\u901A\u8FC7\u89D2\u8272\u53D8\u66F4\u6388\u4E88\u5BF9\u5E94\u52A8\u4F5C\u548C\u8303\u56F4\uFF1B\u8BFE\u7A0B\u793A\u4F8B\u4E0D\u81EA\u52A8\u6269\u6743\u3002", "\u907F\u514D\u4E0D\u5FC5\u8981\u7BA1\u7406\u5458\u6743\u9650", "local"]
+        ],
+        code: ["\u533A\u5206 Forbidden \u4E0E NotFound", "\u68C0\u67E5\u5F53\u524D\u8EAB\u4EFD\u7684 pods/log \u6743\u9650", "\u6838\u5BF9\u6240\u6709\u9002\u7528\u89D2\u8272\u7ED1\u5B9A", "\u6709\u9700\u6C42\u624D\u6388\u4E88\u6700\u5C0F\u589E\u91CF"],
+        example: sh("\u6309\u5177\u4F53\u5B50\u8D44\u6E90\u68C0\u67E5\u6743\u9650", "\u68C0\u67E5\u5F53\u524D\u767B\u5F55\u8EAB\u4EFD\uFF1B\u5982\u679C\u4F7F\u7528 --as \u6D4B\u8BD5\u793A\u4F8B ServiceAccount\uFF0C\u8FD8\u9700\u8981\u6A21\u62DF\u8EAB\u4EFD\u6743\u9650\u3002", `kubectl auth can-i get pods -n demo
+kubectl auth can-i get pods/log -n demo
+kubectl -n demo get rolebindings
+kubectl -n demo describe role pod-reader`, "can-i \u53CD\u6620\u5F53\u524D\u8EAB\u4EFD\u4E0E\u5177\u4F53\u64CD\u4F5C\uFF1B\u7BA1\u7406\u5458\u81EA\u5DF1\u7684 yes \u4E0D\u4EE3\u8868 pod-reader \u4E5F\u5177\u5907\u8BE5\u6743\u9650\u3002")
+      }
+    },
+    {
+      id: "pod-security",
+      group: 2,
+      title: "Pod \u5B89\u5168\u4E0E\u51C6\u5165",
+      en: "POD SECURITY ADMISSION",
+      summary: "\u533A\u5206\u8FD0\u884C\u65F6\u5B89\u5168\u914D\u7F6E\u4E0E\u51C6\u5165\u7B56\u7565\uFF0C\u628A\u544A\u8B66\u3001\u5BA1\u8BA1\u548C\u5F3A\u5236\u62D2\u7EDD\u5206\u5F00\u3002",
+      principle: "\u5B89\u5168\u6807\u51C6\u5B9A\u4E49\u7EA6\u675F\uFF0C\u51C6\u5165\u6309\u547D\u540D\u7A7A\u95F4\u6A21\u5F0F\u68C0\u67E5\uFF1Bworkload \u88AB\u63A5\u53D7\u4E0D\u8868\u793A\u5176 Pod \u4E00\u5B9A\u80FD\u521B\u5EFA\u3002",
+      tradeoff: "\u66F4\u4E25\u683C\u7684\u9650\u5236\u51CF\u5C11\u9AD8\u6743\u9650\u8FD0\u884C\u9762\uFF0C\u4E5F\u8981\u6C42\u955C\u50CF\u548C\u5E94\u7528\u652F\u6301\u975E root\u3001\u80FD\u529B\u88C1\u526A\u4E0E\u53EA\u8BFB\u7B49\u7EA6\u675F\u3002",
+      pitfall: "warn \u548C audit \u4E0D\u4F1A\u50CF enforce \u4E00\u6837\u62D2\u7EDD\u8FDD\u89C4 Pod\uFF1B\u7ED9\u547D\u540D\u7A7A\u95F4\u52A0\u6807\u7B7E\u4E5F\u4E0D\u4F1A\u81EA\u52A8\u628A\u8FD0\u884C\u4E2D\u7684 Pod \u53D8\u5B89\u5168\u3002",
+      nodes: ["Pod \u6A21\u677F", "\u5B89\u5168\u6807\u51C6", "\u51C6\u5165\u68C0\u67E5", "\u65B0 Pod"],
+      steps: [
+        ["\u58F0\u660E\u8FD0\u884C\u5B89\u5168\u914D\u7F6E", 0, 0, "SECURITY CONTEXT", "\u5047\u8BBE\u5E94\u7528\u652F\u6301\u975E root\uFF0C\u6A21\u677F\u8BBE\u7F6E\u6240\u9700 securityContext\uFF1B\u5B57\u6BB5\u53EF\u5728 Pod \u6216\u5BB9\u5668\u5C42\u5206\u522B\u914D\u7F6E\u3002", "\u914D\u7F6E\u4F53\u73B0\u8FD0\u884C\u610F\u56FE", "local"],
+        ["\u9009\u62E9\u7B56\u7565\u6A21\u5F0F", 1, 2, "ENFORCE / WARN / AUDIT", "\u547D\u540D\u7A7A\u95F4\u6807\u7B7E\u51B3\u5B9A\u76F8\u5E94\u6A21\u5F0F\u548C\u7EA7\u522B\uFF0C\u8FD8\u9700\u8003\u8651\u96C6\u7FA4\u542F\u7528\u65B9\u5F0F\u3001\u8C41\u514D\u4E0E\u7248\u672C\u3002", "\u7B56\u7565\u5224\u5B9A\u4E0A\u4E0B\u6587\u660E\u786E", "control"],
+        ["\u521B\u5EFA\u65F6\u68C0\u67E5", 0, 2, "POD ADMISSION", "\u521B\u5EFA\u65B0 Pod \u65F6\u6267\u884C enforce \u7B49\u68C0\u67E5\u3002Deployment \u8D44\u6E90\u672C\u8EAB\u53EF\u80FD\u5148\u88AB\u63A5\u53D7\uFF0C\u63A7\u5236\u5668\u518D\u56E0 Pod \u88AB\u62D2\u7EDD\u800C\u5931\u8D25\u3002", "\u68C0\u67E5\u65B0 Pod \u8BF7\u6C42", "check"],
+        ["\u5408\u89C4\u8BF7\u6C42\u88AB\u63A5\u53D7", 2, 3, "ADMITTED", "\u5047\u8BBE\u5168\u90E8\u5B89\u5168\u548C\u5176\u4ED6\u51C6\u5165\u6761\u4EF6\u90FD\u6EE1\u8DB3\uFF0CPod \u624D\u8FDB\u5165\u540E\u7EED\u8C03\u5EA6\u4E0E\u8FD0\u884C\u3002", "\u51C6\u5165\u901A\u8FC7 \xB7 \u8FD0\u884C\u53E6\u67E5", "control"]
+      ],
+      code: ["\u660E\u786E\u5E94\u7528\u6240\u9700\u6743\u9650", "\u914D\u7F6E\u5B89\u5168\u4E0A\u4E0B\u6587", "\u5148\u89C2\u5BDF warn / audit \u518D\u89C4\u5212 enforce", "\u4EE5\u5B9E\u9645 Pod \u521B\u5EFA\u7ED3\u679C\u9A8C\u8BC1"],
+      example: yaml("\u975E root \u7684\u6700\u5C0F Pod", "demo \u5DF2\u5B58\u5728\u4E14\u6709 Linux \u8282\u70B9\uFF1Bbusybox \u7684 echo/sleep \u652F\u6301\u4EE5\u6570\u503C UID 1000 \u8FD0\u884C\uFF0C\u4ECD\u987B\u670D\u4ECE\u96C6\u7FA4\u989D\u5916\u51C6\u5165\u7B56\u7565\u3002", "pod-security.yaml", `apiVersion: v1
+kind: Pod
+metadata:
+  name: restricted-demo
+  namespace: demo
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: app
+      image: busybox:1.37
+      command: [sh, -c, 'id; sleep 3600']
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]`, "\u65E5\u5FD7\u5E94\u663E\u793A uid=1000\uFF1B\u672C\u6E05\u5355\u6F14\u793A\u5E38\u89C1 Restricted \u914D\u7F6E\uFF0C\u4E0D\u627F\u8BFA\u6EE1\u8DB3\u4EFB\u610F\u81EA\u5B9A\u4E49\u7B56\u7565\u3002"),
+      sections: [
+        { title: "\u4E09\u4E2A\u6A21\u5F0F\u4E0D\u80FD\u6DF7\u4E3A\u4E00\u8C08", body: "enforce \u62D2\u7EDD\u8FDD\u53CD\u76F8\u5E94\u7EA7\u522B\u7684\u65B0 Pod\uFF1Bwarn \u5411\u7528\u6237\u7ED9\u51FA\u8B66\u544A\uFF1Baudit \u4E3A\u5BA1\u8BA1\u8BB0\u5F55\u6DFB\u52A0\u4FE1\u606F\u3002\u6A21\u5F0F\u53EF\u4EE5\u7EC4\u5408\u5E76\u8BBE\u7F6E\u4E0D\u540C\u7EA7\u522B\u3002\u751F\u4EA7\u7B56\u7565\u7248\u672C\u5E94\u660E\u786E\u56FA\u5B9A\u6216\u6709\u8BA1\u5212\u5730\u5347\u7EA7\u3002" },
+        { title: "\u955C\u50CF\u5FC5\u987B\u914D\u5408", body: "runAsNonRoot \u5E76\u4E0D\u4F1A\u81EA\u52A8\u4FEE\u6539\u955C\u50CF\u6587\u4EF6\u6743\u9650\u3002\u5E94\u7528\u76D1\u542C\u7279\u6743\u7AEF\u53E3\u3001\u5199\u6839\u6587\u4EF6\u7CFB\u7EDF\u6216\u542F\u52A8\u811A\u672C\u9700\u8981\u989D\u5916\u6743\u9650\u65F6\uFF0C\u5E94\u6539\u9020\u5E94\u7528\u6216\u6309\u8FB9\u754C\u5BA1\u67E5\uFF0C\u800C\u4E0D\u662F\u76F2\u76EE\u5173\u95ED\u6240\u6709\u5B89\u5168\u7EA6\u675F\u3002" },
+        { title: "\u8986\u76D6\u5B8C\u6574\u8FB9\u754C", body: "Pod \u5B89\u5168\u7EA6\u675F\u4E0D\u80FD\u66FF\u4EE3 RBAC\u3001NetworkPolicy\u3001\u955C\u50CF\u4F9B\u5E94\u94FE\u6216\u8282\u70B9\u5B89\u5168\u3002\u5BF9 Deployment \u7B49\u6A21\u677F\u7684\u8B66\u544A\u4E0E\u771F\u6B63\u521B\u5EFA Pod \u65F6\u7684 enforce \u8981\u5206\u5F00\u770B\uFF0C\u6392\u969C\u65F6\u5E94\u8BFB ReplicaSet \u4E8B\u4EF6\u3002" }
+      ],
+      sources: ["security", "standards", "rbac"],
+      related: ["rbac", "namespace", "pod-debug", "reconcile"],
+      fault: {
+        name: "Deployment \u6709\u4E86\uFF0CPod \u88AB\u62D2\u7EDD",
+        nodes: ["Deployment", "ReplicaSet", "\u5B89\u5168\u51C6\u5165", "Pod \u521B\u5EFA\u7ED3\u679C"],
+        steps: [
+          ["\u5DE5\u4F5C\u8D1F\u8F7D\u5BF9\u8C61\u88AB\u63A5\u53D7", 0, 1, "DEPLOYMENT ACCEPTED", "\u72EC\u7ACB\u573A\u666F\uFF1A\u547D\u540D\u7A7A\u95F4 enforce=restricted\uFF0C\u6A21\u677F\u8BF7\u6C42 privileged \u5BB9\u5668\uFF1BDeployment \u5BF9\u8C61\u5DF2\u4FDD\u5B58\u3002", "\u58F0\u660E\u5B58\u5728\u4F46\u4E0D\u4FDD\u8BC1 Pod \u5B58\u5728", "control"],
+          ["\u63A7\u5236\u5668\u8BF7\u6C42\u521B\u5EFA Pod", 1, 2, "CREATE POD", "ReplicaSet \u4ECE\u6A21\u677F\u53D1\u8D77\u5B9E\u9645 Pod \u521B\u5EFA\uFF0C\u89E6\u53D1 Pod \u7EA7\u5B89\u5168\u51C6\u5165\u3002", "\u8FDB\u5165 enforce \u68C0\u67E5", "request"],
+          ["\u8FDD\u89C4 Pod \u88AB\u62D2\u7EDD", 2, 1, "VIOLATES RESTRICTED", "\u51C6\u5165\u8FD4\u56DE\u62D2\u7EDD\uFF0C\u63A7\u5236\u5668\u4E8B\u4EF6\u53EF\u51FA\u73B0 FailedCreate\uFF1B\u5E76\u4E0D\u662F Pod \u5361\u5728\u8C03\u5EA6\u5668\u3002", "\u6CA1\u6709\u6210\u529F\u521B\u5EFA\u8BE5 Pod", "reject"],
+          ["\u68C0\u67E5\u6A21\u677F\u4E0E\u4E8B\u4EF6", 3, 3, "DIAGNOSE ADMISSION", "\u8BFB\u53D6 ReplicaSet \u4E8B\u4EF6\u548C\u547D\u540D\u7A7A\u95F4\u7B56\u7565\uFF0C\u6309\u5E94\u7528\u9700\u8981\u4FEE\u6B63\u6A21\u677F\uFF1B\u4E0D\u5148\u628A\u6574\u4E2A\u7A7A\u95F4\u964D\u4E3A privileged\u3002", "\u6839\u56E0\u5728\u51C6\u5165\u7EA6\u675F", "local"]
+        ],
+        code: ["\u786E\u8BA4\u662F\u5426\u5DF2\u6709 Pod", "\u67E5\u770B ReplicaSet FailedCreate", "\u6838\u5BF9 namespace \u5B89\u5168\u6807\u7B7E", "\u4FEE\u6B63\u6A21\u677F\u7684\u6700\u5C0F\u5FC5\u8981\u6743\u9650"],
+        example: sh("\u67E5\u627E\u5B9E\u9645\u62D2\u7EDD\u4F4D\u7F6E", "\u5DF2\u6709 demo/web\uFF1B\u5B89\u5168\u6807\u7B7E\u53EF\u80FD\u672A\u8BBE\u7F6E\uFF0C\u672C\u547D\u4EE4\u4E0D\u4F1A\u6539\u52A8\u7B56\u7565\u3002", `kubectl get namespace demo --show-labels
+kubectl -n demo describe replicasets
+kubectl -n demo get events --sort-by=.metadata.creationTimestamp`, "FailedCreate \u7684\u5177\u4F53 message \u53EF\u663E\u793A\u51C6\u5165\u539F\u56E0\uFF1BDeployment \u521B\u5EFA\u6210\u529F\u4E0D\u80FD\u6392\u9664\u8FD9\u79CD\u9519\u8BEF\u3002")
+      }
+    },
+    {
+      id: "hpa",
+      group: 2,
+      title: "HPA \u81EA\u52A8\u6269\u7F29\u5BB9",
+      en: "HORIZONTAL POD AUTOSCALING",
+      summary: "\u628A\u6307\u6807\u3001\u8D44\u6E90\u8BF7\u6C42\u3001\u76EE\u6807\u6BD4\u4F8B\u4E0E\u5B9E\u9645\u53EF\u7528\u526F\u672C\u4E32\u8D77\u6765\uFF0C\u8BC6\u522B\u6269\u5BB9\u7684\u524D\u63D0\u3002",
+      principle: "HPA \u4FEE\u6539\u76EE\u6807\u5DE5\u4F5C\u8D1F\u8F7D\u7684\u526F\u672C\u6570\uFF1B\u6307\u6807\u53EF\u7528\u4E0D\u7B49\u4E8E\u65B0\u526F\u672C\u4E00\u5B9A\u80FD\u8C03\u5EA6\u5E76\u5C31\u7EEA\u3002",
+      tradeoff: "\u5FEB\u901F\u6269\u5BB9\u5E94\u5BF9\u6D41\u91CF\u53D8\u5316\uFF0C\u4E5F\u9700\u8981\u542F\u52A8\u5BB9\u91CF\uFF1B\u7A33\u5B9A\u7A97\u53E3\u548C\u901F\u7387\u9650\u5236\u51CF\u5C11\u6296\u52A8\u4F46\u4F1A\u5EF6\u8FDF\u7F29\u5BB9\u3002",
+      pitfall: "\u57FA\u4E8E CPU \u5229\u7528\u7387\u7684 HPA \u4F9D\u8D56\u76F8\u5173 CPU requests\uFF1BHPA \u4E0D\u4F1A\u81EA\u52A8\u7ED9\u96C6\u7FA4\u589E\u52A0\u8282\u70B9\u3002",
+      nodes: ["\u8D44\u6E90\u6307\u6807 API", "HPA \u63A7\u5236\u5668", "Deployment scale", "\u65B0 Pod"],
+      steps: [
+        ["\u83B7\u53D6\u6709\u6548\u6307\u6807", 0, 1, "CPU METRICS", "\u5047\u8BBE\u8D44\u6E90\u6307\u6807 API \u53EF\u7528\uFF0C\u6BCF\u4E2A\u76F8\u5173\u5BB9\u5668\u8BBE\u7F6E CPU request\uFF0C\u5F53\u524D\u526F\u672C\u4E3A 2\u3002", "\u53EF\u8BA1\u7B97\u5E73\u5747 CPU \u5229\u7528\u7387", "data"],
+        ["\u6BD4\u8F83\u76EE\u6807\u5229\u7528\u7387", 1, 1, "80% / TARGET 50%", "\u7406\u60F3\u5316\u7B97\u4F8B\u4E3A ceil(2\xD780/50)=4\uFF1B\u5B9E\u9645\u7B97\u6CD5\u8FD8\u6709\u5BB9\u5DEE\u3001\u7F3A\u5931\u6307\u6807\u3001\u672A\u5C31\u7EEA Pod \u4E0E\u7A33\u5B9A\u7B56\u7565\u5904\u7406\u3002", "\u7B80\u5316\u5EFA\u8BAE=4", "local"],
+        ["\u66F4\u65B0\u671F\u671B\u526F\u672C\u6570", 1, 2, "SET SCALE=4", "\u5047\u8BBE\u8FB9\u754C\u4E0E\u884C\u4E3A\u7B56\u7565\u5141\u8BB8\uFF0C\u5C06\u76EE\u6807\u8D44\u6E90\u7684 scale \u66F4\u65B0\u4E3A 4\u3002", "\u671F\u671B\u526F\u672C\u589E\u5927", "control"],
+        ["\u521B\u5EFA\u5E76\u9A8C\u8BC1\u5BB9\u91CF", 2, 3, "SCALE OUT", "\u5DE5\u4F5C\u8D1F\u8F7D\u63A7\u5236\u5668\u521B\u5EFA Pod\uFF0C\u540E\u7EED\u4ECD\u53D7\u8282\u70B9\u5BB9\u91CF\u3001\u914D\u989D\u3001\u955C\u50CF\u548C\u5C31\u7EEA\u7EA6\u675F\u3002", "\u65B0\u5BB9\u91CF\u5C1A\u9700\u9A8C\u8BC1\u53EF\u7528", "control"]
+      ],
+      code: ["\u53D6\u5F53\u524D\u76EE\u6807\u4E0E\u6307\u6807", "\u8BA1\u7B97\u5EFA\u8BAE\u526F\u672C\uFF08\u542B\u7B97\u6CD5\u6761\u4EF6\uFF09", "\u5E94\u7528 min/max \u4E0E\u884C\u4E3A\u9650\u5236", "\u66F4\u65B0 scale\uFF0C\u89C2\u5BDF\u5B9E\u9645 Ready"],
+      example: yaml("\u57FA\u4E8E CPU \u7684 HPA", "demo/web Deployment \u5B58\u5728\uFF0C\u6240\u6709\u76F8\u5173\u5BB9\u5668\u8BBE\u7F6E CPU requests\uFF0C\u5DF2\u5B89\u88C5 Metrics Server \u6216\u7B49\u6548\u8D44\u6E90\u6307\u6807\u63D0\u4F9B\u8005\u3002", "hpa.yaml", `apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web
+  namespace: demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50`, "HPA \u663E\u793A\u6307\u6807\u4E0E\u6761\u4EF6\uFF1B\u6CA1\u6709\u5B9E\u9645\u8D1F\u8F7D\u65F6\u4E0D\u4FDD\u8BC1\u6269\u5BB9\u3002\u4E0E\u6301\u7EED apply \u56FA\u5B9A replicas \u7684\u81EA\u52A8\u5316\u9700\u8981\u534F\u8C03\u5B57\u6BB5\u7BA1\u7406\u3002"),
+      sections: [
+        { title: "\u767E\u5206\u6BD4\u76F8\u5BF9\u4E8E request", body: "CPU \u5229\u7528\u7387\u4E0E request \u6BD4\u8F83\uFF0C\u800C\u4E0D\u662F\u4E0E limit \u6216\u6574\u53F0\u8282\u70B9 CPU \u6BD4\u8F83\u3002\u76F8\u540C usage \u4E0B\u4FEE\u6539 request \u4F1A\u6539\u53D8\u5229\u7528\u7387\u542B\u4E49\u3002\u7F3A\u5C11\u76F8\u5173 requests \u65F6\uFF0C\u8FD9\u4E2A\u5229\u7528\u7387\u6307\u6807\u65E0\u6CD5\u6309\u9884\u671F\u8BA1\u7B97\u3002" },
+        { title: "\u6307\u6807\u4E0D\u662F\u5185\u7F6E\u5168\u90E8\u53EF\u7528", body: "\u8D44\u6E90\u6307\u6807\u901A\u5E38\u4F9D\u8D56 Metrics Server \u7B49\u7EC4\u4EF6\uFF0C\u5916\u90E8\u6216\u81EA\u5B9A\u4E49\u6307\u6807\u4F9D\u8D56\u76F8\u5E94\u9002\u914D\u5668\u3002\u5148\u6838\u5BF9 HPA conditions \u548C\u539F\u59CB\u6307\u6807\u8DEF\u5F84\uFF0C\u518D\u6000\u7591\u76EE\u6807\u526F\u672C\u7B97\u6CD5\u3002kubectl top \u4E0E\u76D1\u63A7\u7CFB\u7EDF\u7684\u65F6\u95F4\u7A97\u53E3\u4E5F\u53EF\u80FD\u4E0D\u540C\u3002" },
+        { title: "Pod \u4E0E\u8282\u70B9\u6269\u5BB9\u4E0D\u540C", body: "HPA \u8C03\u6574\u5DE5\u4F5C\u8D1F\u8F7D\u89C4\u6A21\uFF0C\u8282\u70B9\u6269\u5BB9\u662F\u53E6\u4E00\u5957\u673A\u5236\u3002\u82E5\u6269\u51FA\u6765\u7684 Pod \u65E0\u6CD5\u8C03\u5EA6\uFF0C\u5E94\u7EE7\u7EED\u68C0\u67E5 requests\u3001\u7EA6\u675F\u548C\u8282\u70B9\u5BB9\u91CF\uFF1B\u526F\u672C\u6570\u5B57\u589E\u957F\u4E0D\u4EE3\u8868\u4E1A\u52A1\u541E\u5410\u5DF2\u7ECF\u589E\u52A0\u3002" }
+      ],
+      sources: ["hpa", "resources"],
+      related: ["resources", "deployment", "scheduling", "observability"],
+      fault: {
+        name: "\u6307\u6807\u4E0D\u53EF\u7528\uFF0C\u65E0\u6CD5\u6B63\u5E38\u51B3\u7B56",
+        nodes: ["\u8D44\u6E90\u6307\u6807 API", "HPA \u72B6\u6001", "\u76EE\u6807\u526F\u672C", "\u6392\u969C\u89C2\u5BDF"],
+        steps: [
+          ["\u8D44\u6E90\u6307\u6807\u8BFB\u53D6\u5931\u8D25", 0, 1, "METRICS UNAVAILABLE", "\u72EC\u7ACB\u573A\u666F\uFF1AHPA \u4EC5\u914D\u7F6E\u4E00\u4E2A CPU \u6307\u6807\uFF0C\u4F46\u8D44\u6E90\u6307\u6807 API \u4E0D\u53EF\u7528\u3002", "\u7F3A\u5C11\u6709\u6548\u5EA6\u91CF", "lost"],
+          ["\u62A5\u544A\u8BA1\u7B97\u95EE\u9898", 1, 1, "SCALING ACTIVE FALSE", "HPA \u6761\u4EF6\u548C\u4E8B\u4EF6\u53EF\u80FD\u663E\u793A FailedGetResourceMetric \u7B49\u539F\u56E0\u3002\u5177\u4F53\u6761\u4EF6\u4EE5\u8F93\u51FA\u4E3A\u51C6\u3002", "\u6307\u6807\u72B6\u6001\u5F02\u5E38", "local"],
+          ["\u6CA1\u6709\u672C\u6B21\u6709\u6548\u5EFA\u8BAE", 1, 2, "NO VALID CPU RECOMMENDATION", "\u5355\u4E00\u4E0D\u53EF\u7528\u6307\u6807\u4E0D\u80FD\u636E\u6B64\u751F\u6210\u6B63\u5E38\u7684 CPU \u6269\u7F29\u5EFA\u8BAE\uFF1B\u8FB9\u754C\u5904\u7406\u7B49\u8FD8\u9700\u770B\u5B9E\u9645\u914D\u7F6E\uFF0C\u4E0D\u80FD\u6CDB\u5316\u6240\u6709\u591A\u6307\u6807\u60C5\u5F62\u3002", "\u4E0D\u4EE5\u672A\u77E5\u503C\u5F53\u96F6\u8D1F\u8F7D", "control"],
+          ["\u68C0\u67E5\u4F9D\u8D56\u94FE", 3, 0, "VERIFY METRICS API", "\u68C0\u67E5\u6307\u6807\u63D0\u4F9B\u8005\u3001\u8BC1\u4E66\u4E0E\u8FDE\u901A\u6027\uFF0C\u5E76\u6838\u5BF9 request\u3002\u76F2\u76EE\u63D0\u9AD8 maxReplicas \u4E0D\u4F1A\u4FEE\u590D\u7F3A\u5931\u6307\u6807\u3002", "\u5148\u6062\u590D\u6709\u6548\u89C2\u6D4B", "check"]
+        ],
+        code: ["\u8BFB\u53D6 HPA conditions \u548C Events", "\u9A8C\u8BC1\u8D44\u6E90\u6307\u6807 API", "\u6838\u5BF9\u5BB9\u5668 CPU requests", "\u6062\u590D\u4F9D\u8D56\u540E\u89C2\u5BDF\u5EFA\u8BAE\u548C Ready"],
+        example: sh("\u68C0\u67E5 HPA \u8F93\u5165", "\u5DF2\u6709 demo/web HPA\uFF1Btop \u5728\u7F3A\u5C11\u8D44\u6E90\u6307\u6807\u65F6\u4F1A\u5931\u8D25\uFF0C\u8FD9\u6B63\u662F\u9700\u5B9A\u4F4D\u7684\u8BC1\u636E\u3002", `kubectl -n demo describe hpa web
+kubectl -n demo top pods
+kubectl get apiservice v1beta1.metrics.k8s.io
+kubectl -n demo get deployment web -o yaml`, "\u5206\u522B\u68C0\u67E5 APIService \u53EF\u7528\u6027\u3001\u6307\u6807\u8F93\u51FA\u3001CPU requests \u4E0E HPA \u4E8B\u4EF6\u3002")
+      }
+    },
+    {
+      id: "observability",
+      group: 2,
+      title: "\u6307\u6807\u3001\u65E5\u5FD7\u4E0E\u4E8B\u4EF6",
+      en: "OBSERVABILITY",
+      summary: "\u5148\u5B9A\u4E49\u95EE\u9898\uFF0C\u518D\u9009\u62E9\u8BC1\u636E\uFF1A\u8D44\u6E90\u72B6\u6001\u3001\u4E8B\u4EF6\u3001\u5E94\u7528\u65E5\u5FD7\u548C\u6307\u6807\u5404\u56DE\u7B54\u4E0D\u540C\u95EE\u9898\u3002",
+      principle: "\u53EF\u89C2\u6D4B\u6027\u5E2E\u52A9\u5EFA\u7ACB\u56E0\u679C\u7EBF\u7D22\uFF1B\u4E00\u4E2A\u5065\u5EB7\u4FE1\u53F7\u4E0D\u80FD\u66FF\u4EE3\u5B8C\u6574\u4E1A\u52A1\u7ED3\u679C\u3002",
+      tradeoff: "\u66F4\u7EC6\u89C2\u6D4B\u63D0\u9AD8\u6392\u969C\u80FD\u529B\uFF0C\u4E5F\u589E\u52A0\u6210\u672C\u3001\u566A\u58F0\u548C\u654F\u611F\u6570\u636E\u66B4\u9732\u9762\u3002",
+      pitfall: "kubectl top \u4E0D\u662F\u957F\u671F\u76D1\u63A7\uFF0CEvents \u4E5F\u4E0D\u662F\u6C38\u4E45\u5BA1\u8BA1\u65E5\u5FD7\uFF1B\u6CA1\u6709\u9519\u8BEF\u65E5\u5FD7\u4E0D\u610F\u5473\u7740\u8BF7\u6C42\u771F\u7684\u6210\u529F\u3002",
+      nodes: ["\u7528\u6237\u8BF7\u6C42", "\u8D44\u6E90\u6307\u6807", "\u5E94\u7528\u65E5\u5FD7", "\u72B6\u6001 / \u4E8B\u4EF6"],
+      steps: [
+        ["\u63CF\u8FF0\u7528\u6237\u75C7\u72B6", 0, 0, "LATENCY / ERRORS", "\u5047\u8BBE\u7528\u6237\u62A5\u544A\u67D0\u6B21\u53D1\u5E03\u540E\u5EF6\u8FDF\u4E0A\u5347\u3002\u5148\u8BB0\u5F55\u65F6\u95F4\u7A97\u3001\u5BF9\u8C61\u548C\u5F71\u54CD\u8303\u56F4\uFF0C\u518D\u6536\u96C6\u6570\u636E\u3002", "\u95EE\u9898\u6709\u53EF\u6838\u5BF9\u4E0A\u4E0B\u6587", "local"],
+        ["\u5BF9\u7167\u8D44\u6E90\u53D8\u5316", 1, 0, "METRIC CORRELATION", "\u67E5\u770B CPU\u3001\u5185\u5B58\u3001\u9519\u8BEF\u7387\u4E0E\u5EF6\u8FDF\u8D8B\u52BF\u3002\u65F6\u95F4\u76F8\u5173\u53EF\u7F29\u5C0F\u8303\u56F4\uFF0C\u4F46\u4E0D\u76F4\u63A5\u8BC1\u660E\u56E0\u679C\u3002", "\u5EFA\u7ACB\u5019\u9009\u5047\u8BBE", "data"],
+        ["\u7ED3\u5408\u5E94\u7528\u8F93\u51FA", 2, 0, "LOG CONTEXT", "\u7528\u65F6\u95F4\u3001\u7248\u672C\u3001Pod UID \u6216\u8BF7\u6C42 ID \u5173\u8054\u65E5\u5FD7\uFF0C\u533A\u5206\u5E94\u7528\u62A5\u9519\u3001\u91CD\u542F\u548C\u6D41\u91CF\u672A\u5230\u8FBE\u3002", "\u8FDE\u63A5\u591A\u79CD\u8BC1\u636E", "data"],
+        ["\u6838\u5BF9\u63A7\u5236\u9762\u4E8B\u4EF6", 3, 0, "CONDITIONS / EVENTS", "\u68C0\u67E5 rollout\u3001\u8C03\u5EA6\u3001\u63A2\u9488\u548C\u6302\u8F7D\u4E8B\u4EF6\uFF0C\u5F62\u6210\u53EF\u9A8C\u8BC1\u7684\u89E3\u91CA\uFF0C\u518D\u8BBE\u8BA1\u6700\u5C0F\u5E72\u9884\u3002", "\u8BC1\u636E\u652F\u6301\u4E0B\u4E00\u6B65\u884C\u52A8", "data"]
+      ],
+      code: ["\u56FA\u5B9A\u65F6\u95F4\u7A97\u4E0E\u5BF9\u8C61\u8EAB\u4EFD", "\u5BF9\u7167\u6307\u6807\u3001\u65E5\u5FD7\u548C\u4E8B\u4EF6", "\u63D0\u51FA\u53EF\u9A8C\u8BC1\u5047\u8BBE", "\u5E72\u9884\u540E\u9A8C\u8BC1\u4E1A\u52A1\u6307\u6807\u6062\u590D"],
+      example: sh("\u6536\u96C6\u5165\u95E8\u5B9E\u9A8C\u7684\u57FA\u672C\u8BC1\u636E", "demo/web \u5DF2\u90E8\u7F72\uFF1Btop \u9700\u8981\u8D44\u6E90\u6307\u6807 API\uFF0Clogs \u53EA\u5305\u542B\u80FD\u8BBF\u95EE\u5230\u7684\u5BB9\u5668\u8F93\u51FA\u3002", `kubectl -n demo get deployment,pods,service
+kubectl -n demo get events --sort-by=.metadata.creationTimestamp
+kubectl -n demo logs deployment/web --all-containers=true --tail=100
+kubectl -n demo top pods`, "\u4E8B\u4EF6\u8BF4\u660E\u8D44\u6E90\u64CD\u4F5C\uFF0C\u65E5\u5FD7\u8BF4\u660E\u5E94\u7528\u8F93\u51FA\uFF0Ctop \u63D0\u4F9B\u77ED\u671F\u8D44\u6E90\u6837\u672C\uFF1B\u5B83\u4EEC\u4E92\u4E0D\u66FF\u4EE3\u3002"),
+      sections: [
+        { title: "\u72B6\u6001\u3001\u4E8B\u4EF6\u3001\u65E5\u5FD7\u3001\u8FFD\u8E2A", body: "status \u548C conditions \u8868\u8FBE\u7EC4\u4EF6\u89C2\u5BDF\uFF0C\u4E8B\u4EF6\u7ED9\u51FA\u8C03\u5EA6\u4E0E\u64CD\u4F5C\u7EBF\u7D22\uFF0C\u65E5\u5FD7\u8BB0\u5F55\u7EC4\u4EF6\u6216\u5E94\u7528\u8F93\u51FA\uFF0C\u5206\u5E03\u5F0F\u8FFD\u8E2A\u8FDE\u63A5\u4E00\u6B21\u8BF7\u6C42\u8DE8\u7EC4\u4EF6\u7684\u8FC7\u7A0B\u3002\u4E0D\u540C\u4FE1\u53F7\u7684\u4FDD\u7559\u65F6\u95F4\u3001\u91C7\u6837\u4E0E\u65F6\u95F4\u57FA\u51C6\u4E0D\u540C\u3002" },
+        { title: "\u8282\u70B9\u672C\u5730\u65E5\u5FD7\u4F1A\u6D88\u5931", body: "kubectl logs \u4F9D\u8D56\u5BB9\u5668\u548C\u8282\u70B9\u4E0A\u7684\u65E5\u5FD7\u53EF\u7528\u6027\uFF0C\u8F6E\u8F6C\u3001Pod \u5220\u9664\u6216\u8282\u70B9\u6545\u969C\u4F1A\u5F71\u54CD\u8BFB\u53D6\u3002\u957F\u671F\u4FDD\u7559\u9700\u8981\u65E5\u5FD7\u91C7\u96C6\u4E0E\u540E\u7AEF\u7CFB\u7EDF\uFF0CDaemonSet \u53EA\u662F\u5E38\u89C1\u91C7\u96C6\u90E8\u7F72\u65B9\u5F0F\u4E4B\u4E00\u3002" },
+        { title: "\u9A8C\u8BC1\u4FEE\u590D\u7684\u4E1A\u52A1\u7ED3\u679C", body: "Pod Ready \u548C CPU \u964D\u4F4E\u672A\u5FC5\u8BF4\u660E\u6545\u969C\u5DF2\u7ECF\u89E3\u51B3\uFF0C\u53EF\u80FD\u53EA\u662F\u6D41\u91CF\u4E22\u5931\u3002\u6062\u590D\u9A8C\u8BC1\u5E94\u56DE\u5230\u7528\u6237\u8BF7\u6C42\u6210\u529F\u7387\u3001\u5EF6\u8FDF\u548C\u6570\u636E\u6B63\u786E\u6027\uFF0C\u5E76\u8BB0\u5F55\u89C2\u5BDF\u7A97\u53E3\u548C\u4ECD\u4E0D\u786E\u5B9A\u7684\u6761\u4EF6\u3002" }
+      ],
+      sources: ["observability", "logging", "debug"],
+      related: ["pod-debug", "service-debug", "hpa", "daemonset"],
+      fault: {
+        name: "\u5F53\u524D\u65E5\u5FD7\u6B63\u5E38\uFF0C\u524D\u6B21\u5DF2\u5D29\u6E83",
+        nodes: ["\u5F53\u524D\u5BB9\u5668", "\u4E0A\u6B21\u5BB9\u5668\u72B6\u6001", "\u4E0A\u6B21\u65E5\u5FD7", "\u6545\u969C\u65F6\u95F4\u7A97"],
+        steps: [
+          ["\u53EA\u770B\u5F53\u524D\u8F93\u51FA", 0, 0, "CURRENT LOG LOOKS OK", "\u72EC\u7ACB\u573A\u666F\uFF1A\u5BB9\u5668\u521A\u91CD\u542F\uFF0C\u65B0\u5B9E\u4F8B\u8F93\u51FA\u6B63\u5E38\uFF0C\u4F46\u7528\u6237\u75C7\u72B6\u53D1\u751F\u5728\u4E0A\u4E00\u4E2A\u5B9E\u4F8B\u3002", "\u5F53\u524D\u65E5\u5FD7\u672A\u8986\u76D6\u6545\u969C", "local"],
+          ["\u68C0\u67E5\u91CD\u542F\u8BC1\u636E", 1, 0, "LAST STATE / RESTARTS", "restartCount \u4E0E lastState \u8868\u660E\u524D\u6B21\u7EC8\u6B62\u3002\u5E94\u8BB0\u5F55\u539F\u56E0\u548C\u65F6\u95F4\uFF0C\u4E0E\u7528\u6237\u62A5\u544A\u5BF9\u5E94\u3002", "\u53D1\u73B0\u8DE8\u5B9E\u4F8B\u8FB9\u754C", "data"],
+          ["\u8BFB\u53D6 previous \u65E5\u5FD7", 2, 3, "PREVIOUS INSTANCE", "\u5982\u679C\u4E0A\u4E00\u5B9E\u4F8B\u65E5\u5FD7\u4ECD\u4FDD\u7559\uFF0C\u4F7F\u7528 previous \u67E5\u9605\uFF1B\u6570\u636E\u5DF2\u8F6E\u8F6C\u65F6\u9700\u4F9D\u8D56\u96C6\u4E2D\u65E5\u5FD7\u7B49\u7CFB\u7EDF\u3002", "\u53EF\u80FD\u8865\u9F50\u6545\u969C\u7247\u6BB5", "data"],
+          ["\u6821\u9A8C\u5B8C\u6574\u89E3\u91CA", 3, 3, "CORRELATE EVIDENCE", "\u628A\u524D\u6B21\u9000\u51FA\u3001\u63A2\u9488\u3001\u8D44\u6E90\u5CF0\u503C\u548C\u7248\u672C\u53D8\u5316\u5173\u8054\uFF0C\u4E0D\u80FD\u4EC5\u51ED\u65B0\u5B9E\u4F8B\u5B89\u9759\u5C31\u5BA3\u544A\u4FEE\u590D\u3002", "\u6062\u590D\u7ED3\u8BBA\u9700\u4E1A\u52A1\u9A8C\u8BC1", "local"]
+        ],
+        code: ["\u8BB0\u5F55\u5F53\u524D\u4E0E\u524D\u6B21\u5B9E\u4F8B\u65F6\u95F4", "\u68C0\u67E5 lastState \u4E0E restartCount", "\u8BFB\u53D6 previous \u6216\u96C6\u4E2D\u65E5\u5FD7", "\u7528\u4E1A\u52A1\u8BF7\u6C42\u9A8C\u8BC1\u6062\u590D"],
+        example: sh("\u56F4\u7ED5\u5BB9\u5668\u5B9E\u4F8B\u6536\u96C6\u8BC1\u636E", "POD \u66FF\u6362\u4E3A\u53D1\u751F\u8FC7\u91CD\u542F\u7684\u5B9E\u9645 Pod\uFF1B\u591A\u5BB9\u5668 Pod \u5E94\u589E\u52A0 -c \u6307\u5B9A\u5BB9\u5668\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl -n demo logs "$POD" --tail=100 --timestamps
+kubectl -n demo logs "$POD" --previous --tail=100 --timestamps`, "\u5BF9\u9F50\u65F6\u95F4\u6233\u4E0E\u9000\u51FA\u65F6\u95F4\uFF1Bprevious \u4E0D\u662F\u6C38\u4E45\u5386\u53F2\u65E5\u5FD7\u5B58\u50A8\u3002")
+      }
+    },
+    {
+      id: "pod-debug",
+      group: 2,
+      title: "Pod \u6545\u969C\u5B9A\u4F4D",
+      en: "DEBUGGING PODS",
+      summary: "\u6309\u201C\u5B58\u5728 \u2192 \u8C03\u5EA6 \u2192 \u542F\u52A8 \u2192 \u8FD0\u884C \u2192 \u5C31\u7EEA\u201D\u7684\u987A\u5E8F\u7F29\u5C0F\u95EE\u9898\u8303\u56F4\u3002",
+      principle: "\u5148\u5B9A\u4F4D\u5931\u8D25\u9636\u6BB5\uFF0C\u518D\u8BFB\u53D6\u5BF9\u5E94\u8BC1\u636E\uFF1B\u5220\u9664 Pod \u4E0D\u662F\u901A\u7528\u8BCA\u65AD\u52A8\u4F5C\u3002",
+      tradeoff: "\u4FDD\u7559\u8BC1\u636E\u80FD\u63D0\u9AD8\u5B9A\u4F4D\u8D28\u91CF\uFF0C\u4F46\u4E5F\u9700\u8981\u53CA\u65F6\u63A7\u5236\u5F71\u54CD\uFF0C\u6743\u8861\u53D6\u8BC1\u3001\u6062\u590D\u548C\u4E1A\u52A1\u671F\u9650\u3002",
+      pitfall: "\u6CA1\u6709\u6210\u529F\u521B\u5EFA\u7684\u5BB9\u5668\u53EF\u80FD\u6CA1\u6709\u65E5\u5FD7\uFF1BPending\u3001ImagePullBackOff\u3001CrashLoopBackOff \u4E0E NotReady \u6307\u5411\u4E0D\u540C\u73AF\u8282\u3002",
+      nodes: ["\u8D44\u6E90\u5BF9\u8C61", "\u8C03\u5EA6\u72B6\u6001", "\u5BB9\u5668\u72B6\u6001", "\u5E94\u7528\u5C31\u7EEA"],
+      steps: [
+        ["\u786E\u8BA4\u5BF9\u8C61\u8EAB\u4EFD", 0, 0, "GET / OWNER", "\u5047\u8BBE\u4E1A\u52A1\u8D1F\u8F7D\u5F02\u5E38\u3002\u5148\u6838\u5BF9\u96C6\u7FA4\u3001\u7A7A\u95F4\u3001\u5BF9\u8C61\u540D\u548C owner\uFF0C\u8D44\u6E90\u4E0D\u5B58\u5728\u65F6\u67E5\u63A7\u5236\u5668\u521B\u5EFA\u9519\u8BEF\u3002", "\u627E\u5230\u6B63\u786E\u5BF9\u8C61\u4E0E\u63A7\u5236\u5668", "local"],
+        ["\u68C0\u67E5\u662F\u5426\u5206\u914D\u8282\u70B9", 0, 1, "POD SCHEDULED?", "\u6709\u65E0 nodeName \u548C\u8C03\u5EA6\u6761\u4EF6\u5E2E\u52A9\u533A\u5206\u8C03\u5EA6\u5931\u8D25\u4E0E\u8282\u70B9\u6267\u884C\u9636\u6BB5\u7684\u95EE\u9898\u3002", "\u786E\u5B9A\u662F\u5426\u8FDB\u5165\u8282\u70B9\u9636\u6BB5", "check"],
+        ["\u68C0\u67E5\u5BB9\u5668\u72B6\u6001", 1, 2, "WAITING / TERMINATED", "\u7ED3\u5408\u4E8B\u4EF6\u770B\u955C\u50CF\u3001\u914D\u7F6E\u3001\u5377\u548C\u8FD0\u884C\u65F6\uFF1B\u6709\u8FC7\u6267\u884C\u8BB0\u5F55\u518D\u770B\u9000\u51FA\u539F\u56E0\u53CA\u5E94\u7528\u65E5\u5FD7\u3002", "\u5B9A\u4F4D\u542F\u52A8\u6216\u8FD0\u884C\u539F\u56E0", "check"],
+        ["\u9A8C\u8BC1\u5E94\u7528\u4E0E\u5C31\u7EEA", 2, 3, "READY / BUSINESS CHECK", "\u5BB9\u5668\u8FD0\u884C\u540E\u7EE7\u7EED\u68C0\u67E5\u63A2\u9488\u3001\u7AEF\u53E3\u4E0E\u8BF7\u6C42\u7ED3\u679C\u3002\u91CD\u542F\u6210\u529F\u5E76\u4E0D\u8868\u793A\u4E1A\u52A1\u95EE\u9898\u5DF2\u7ECF\u6D88\u5931\u3002", "\u5F62\u6210\u53EF\u9A8C\u8BC1\u8BCA\u65AD", "check"]
+      ],
+      code: ["\u4E0D\u5B58\u5728 \u2192 \u67E5\u63A7\u5236\u5668\u4E8B\u4EF6\u4E0E\u51C6\u5165", "\u672A\u8C03\u5EA6 \u2192 \u67E5 FailedScheduling", "\u672A\u542F\u52A8 \u2192 \u67E5\u955C\u50CF\u3001\u914D\u7F6E\u548C\u6302\u8F7D", "\u5DF2\u8FD0\u884C \u2192 \u67E5\u65E5\u5FD7\u3001\u63A2\u9488\u548C\u4E1A\u52A1\u7ED3\u679C"],
+      example: sh("\u6700\u5C0F Pod \u6392\u969C\u987A\u5E8F", "POD \u66FF\u6362\u4E3A\u771F\u5B9E\u540D\u79F0\uFF0C\u5148\u786E\u8BA4 current-context \u6307\u5411\u5B9E\u9A8C\u96C6\u7FA4\uFF1B\u591A\u5BB9\u5668\u53EF\u6309\u9700\u6307\u5B9A -c\u3002", `POD=replace-me
+kubectl config current-context
+kubectl -n demo get pod "$POD" -o wide
+kubectl -n demo describe pod "$POD"
+kubectl -n demo logs "$POD" --tail=100`, "\u524D\u4E09\u6761\u660E\u786E\u5BF9\u8C61\u4E0E\u9636\u6BB5\uFF1Blogs \u82E5\u62A5\u544A\u5BB9\u5668\u672A\u542F\u52A8\uFF0C\u4E0D\u5E94\u628A\u5B83\u89C6\u4E3A\u65E5\u5FD7\u91C7\u96C6\u7CFB\u7EDF\u6545\u969C\u3002"),
+      sections: [
+        { title: "\u5BF9\u8C61\u4E0D\u5B58\u5728\u5148\u770B\u7236\u8D44\u6E90", body: "Deployment \u5B58\u5728\u4F46 Pod \u6CA1\u6709\u521B\u5EFA\uFF0C\u5E38\u89C1\u65B9\u5411\u662F ReplicaSet \u4E8B\u4EF6\u3001\u914D\u989D\u3001\u51C6\u5165\u6216\u6743\u9650\u3002\u6CA1\u6709 Pod \u5BF9\u8C61\u65F6\uFF0C\u53BB\u8282\u70B9\u627E\u5BB9\u5668\u65E5\u5FD7\u5F80\u5F80\u8FD8\u6CA1\u6709\u610F\u4E49\u3002" },
+        { title: "\u628A\u72B6\u6001\u539F\u56E0\u7FFB\u8BD1\u6210\u95EE\u9898", body: "FailedScheduling \u67E5\u786C\u7EA6\u675F\u4E0E\u8D44\u6E90\uFF1BImagePullBackOff \u67E5\u955C\u50CF\u3001\u51ED\u636E\u4E0E\u7F51\u7EDC\uFF1BCreateContainerConfigError \u67E5\u914D\u7F6E\u5F15\u7528\uFF1BCrashLoopBackOff \u67E5\u9000\u51FA\u4E0E\u4E0A\u6B21\u65E5\u5FD7\uFF1BRunning/NotReady \u67E5\u5C31\u7EEA\u6761\u4EF6\u3002\u5177\u4F53\u4EE5\u4E8B\u4EF6\u4E3A\u51C6\u3002" },
+        { title: "\u8C03\u8BD5\u5DE5\u5177\u6709\u524D\u63D0", body: "exec \u4F9D\u8D56\u76EE\u6807\u5BB9\u5668\u548C\u5DE5\u5177\uFF1B\u6781\u7B80\u955C\u50CF\u53EF\u80FD\u6CA1\u6709 shell\u3002\u4E34\u65F6\u8C03\u8BD5\u5BB9\u5668\u9700\u8981\u96C6\u7FA4\u652F\u6301\u4E0E\u76F8\u5E94\u6743\u9650\uFF0C\u5E76\u9075\u5B88 Pod \u5B89\u5168\u7B56\u7565\u3002\u8C03\u8BD5\u4E0D\u80FD\u7ED5\u5F00\u6743\u9650\uFF0C\u4E5F\u4E0D\u5E94\u6C61\u67D3\u8BC1\u636E\u540E\u518D\u89E3\u91CA\u539F\u6545\u969C\u3002" }
+      ],
+      sources: ["debug", "lifecycle", "probes"],
+      related: ["pod", "scheduling", "resources", "config", "observability"],
+      fault: {
+        name: "\u5F15\u7528\u4E86\u4E0D\u5B58\u5728\u7684\u914D\u7F6E",
+        nodes: ["Pod \u58F0\u660E", "kubelet", "\u7F3A\u5931 ConfigMap", "\u5BB9\u5668\u65E5\u5FD7"],
+        steps: [
+          ["\u8C03\u5EA6\u5DF2\u7ECF\u6210\u529F", 0, 1, "ASSIGNED", "\u72EC\u7ACB\u573A\u666F\uFF1APod \u5F15\u7528\u5FC5\u9700\u7684 ConfigMap\uFF0C\u4F46\u8BE5\u7A7A\u95F4\u5185\u5BF9\u8C61\u4E0D\u5B58\u5728\u3002Pod \u5DF2\u5206\u914D\u8282\u70B9\u3002", "\u8282\u70B9\u5F00\u59CB\u51C6\u5907\u5BB9\u5668", "control"],
+          ["\u89E3\u6790\u5FC5\u9700\u914D\u7F6E\u5931\u8D25", 1, 2, "CONFIG NOT FOUND", "\u8282\u70B9\u65E0\u6CD5\u51C6\u5907\u5FC5\u9700\u73AF\u5883\u53D8\u91CF\u914D\u7F6E\uFF0C\u5BB9\u5668\u6CA1\u6709\u5B8C\u6210\u521B\u5EFA\u3002\u9519\u8BEF\u6D88\u606F\u6BD4\u731C\u6D4B\u5E94\u7528\u65E5\u5FD7\u66F4\u76F4\u63A5\u3002", "CreateContainerConfigError", "check"],
+          ["\u6CA1\u6709\u5E94\u7528\u6267\u884C\u8BB0\u5F55", 3, 3, "NO APPLICATION LOG", "\u5E94\u7528\u8FDB\u7A0B\u6CA1\u6709\u542F\u52A8\uFF0C\u56E0\u6B64\u53EF\u80FD\u6CA1\u6709\u53EF\u8BFB\u5E94\u7528\u65E5\u5FD7\uFF1B\u8FD9\u662F\u9636\u6BB5\u7ED3\u679C\uFF0C\u4E0D\u662F\u5E94\u7528\u6CA1\u6709\u62A5\u9519\u3002", "\u65E5\u5FD7\u65E0\u6CD5\u56DE\u7B54\u542F\u52A8\u524D\u9519\u8BEF", "local"],
+          ["\u6838\u5BF9\u5BF9\u8C61\u4E0E\u952E", 0, 2, "CHECK NAMESPACE / KEY", "\u68C0\u67E5\u5F15\u7528\u7A7A\u95F4\u3001\u5BF9\u8C61\u540D\u3001\u952E\u4E0E optional \u6807\u5FD7\uFF0C\u4FEE\u6B63\u6E90\u6E05\u5355\u6216\u521B\u5EFA\u6240\u9700\u914D\u7F6E\u540E\u89C2\u5BDF\u3002", "\u914D\u7F6E\u524D\u63D0\u5F97\u5230\u6838\u5BF9", "check"]
+        ],
+        code: ["\u5148\u770B describe Events", "\u68C0\u67E5 configMapKeyRef / secretKeyRef", "\u786E\u8BA4\u540C\u7A7A\u95F4\u5BF9\u8C61\u4E0E\u952E\u5B58\u5728", "\u4FEE\u6B63\u540E\u518D\u89C2\u5BDF\u5BB9\u5668\u542F\u52A8"],
+        example: sh("\u68C0\u67E5\u914D\u7F6E\u5F15\u7528\u800C\u4E0D\u8F93\u51FA\u673A\u5BC6", "POD \u4E3A\u5F02\u5E38 Pod\uFF1BSecret \u4EC5\u67E5\u770B\u5BF9\u8C61\u5217\u8868\uFF0C\u4E0D\u6253\u5370\u771F\u5B9E\u503C\u3002", `POD=replace-me
+kubectl -n demo describe pod "$POD"
+kubectl -n demo get configmaps
+kubectl -n demo get secrets`, "\u63CF\u8FF0\u4E2D\u7684\u9519\u8BEF\u53EF\u6307\u51FA\u7F3A\u5931\u5BF9\u8C61\u6216\u952E\uFF1B\u4E0D\u8981\u628A Secret \u5185\u5BB9\u590D\u5236\u5230\u5DE5\u5355\u6216\u65E5\u5FD7\u3002")
+      }
+    },
+    {
+      id: "service-debug",
+      group: 2,
+      title: "Service \u8FDE\u901A\u6027\u6392\u969C",
+      en: "DEBUGGING CONNECTIVITY",
+      summary: "\u6CBF\u8C03\u7528\u65B9 \u2192 DNS \u2192 \u670D\u52A1\u5165\u53E3 \u2192 \u7AEF\u70B9 \u2192 \u5E94\u7528\u6392\u67E5\uFF0C\u7528\u5206\u5C42\u5BF9\u7167\u7F29\u5C0F\u6545\u969C\u8303\u56F4\u3002",
+      principle: "\u6BCF\u6B21\u9A8C\u8BC1\u53EA\u6392\u9664\u4E00\u5C42\u5047\u8BBE\uFF1B\u670D\u52A1\u540D\u3001\u670D\u52A1\u5730\u5740\u4E0E Pod \u5730\u5740\u63D0\u4F9B\u4E0D\u540C\u8BC1\u636E\u3002",
+      tradeoff: "\u9010\u5C42\u6392\u67E5\u7A0D\u6162\u4E8E\u53CD\u590D\u91CD\u542F\uFF0C\u4F46\u80FD\u907F\u514D\u628A\u6807\u7B7E\u3001\u7AEF\u53E3\u6216\u7B56\u7565\u9519\u8BEF\u5F53\u6210\u968F\u673A\u7F51\u7EDC\u6296\u52A8\u3002",
+      pitfall: "port-forward \u6210\u529F\u53EA\u9A8C\u8BC1\u4E00\u6761\u7ECF\u63A7\u5236\u9762\u5EFA\u7ACB\u7684\u8BBF\u95EE\u8DEF\u5F84\uFF0C\u4E0D\u80FD\u8BC1\u660E\u666E\u901A Service \u6570\u636E\u9762\u6216 NetworkPolicy \u8DEF\u5F84\u6B63\u5E38\u3002",
+      nodes: ["\u5B9E\u9645\u8C03\u7528\u65B9", "DNS / Service", "EndpointSlice", "\u5E94\u7528 Pod"],
+      steps: [
+        ["\u56FA\u5B9A\u8C03\u7528\u4E0A\u4E0B\u6587", 0, 0, "SOURCE / TIME / ERROR", "\u5047\u8BBE\u8C03\u7528\u65B9\u62A5\u544A web \u8BF7\u6C42\u5931\u8D25\u3002\u8BB0\u5F55\u547D\u540D\u7A7A\u95F4\u3001\u76EE\u6807\u540D\u79F0\u3001\u7AEF\u53E3\u3001\u534F\u8BAE\u4E0E\u5177\u4F53\u9519\u8BEF\u3002", "\u8BCA\u65AD\u53EF\u91CD\u590D", "local"],
+        ["\u68C0\u67E5\u540D\u79F0\u4E0E\u670D\u52A1", 0, 1, "RESOLVE / SERVICE CONFIG", "\u5728\u8C03\u7528\u65B9\u73AF\u5883\u68C0\u67E5\u89E3\u6790\u4E0E Service \u914D\u7F6E\u3002\u89E3\u6790\u5931\u8D25\u4E0E\u8FDE\u63A5\u5931\u8D25\u9700\u8981\u4E0D\u540C\u540E\u7EED\u8DEF\u5F84\u3002", "\u660E\u786E\u5165\u53E3\u4E0E\u7AEF\u53E3", "check"],
+        ["\u68C0\u67E5\u540E\u7AEF\u6761\u4EF6", 1, 2, "READY ENDPOINTS", "\u6838\u5BF9 selector\u3001\u7AEF\u70B9\u5730\u5740\u3001\u7AEF\u53E3\u3001ready \u4E0E Pod \u5BF9\u5E94\u5173\u7CFB\uFF0C\u907F\u514D\u53EA\u770B Service \u5BF9\u8C61\u5B58\u5728\u3002", "\u660E\u786E\u53EF\u9009\u540E\u7AEF", "check"],
+        ["\u5BF9\u7167\u5E94\u7528\u4E0E\u8DEF\u5F84", 0, 3, "TEST FROM SOURCE", "\u68C0\u67E5\u771F\u5B9E\u6765\u6E90\u5230\u540E\u7AEF\u7684\u6D41\u91CF\u3001\u76D1\u542C\u548C\u7B56\u7565\uFF0C\u518D\u4E0E\u670D\u52A1\u5165\u53E3\u8DEF\u5F84\u5BF9\u7167\uFF1B\u4E0D\u80FD\u4ECE\u65C1\u8DEF\u6D4B\u8BD5\u63A8\u65AD\u6240\u6709\u8DEF\u5F84\u3002", "\u6309\u8BC1\u636E\u533A\u5206\u5E94\u7528\u4E0E\u7F51\u7EDC\u5C42", "request"]
+      ],
+      code: ["\u56FA\u5B9A\u5B9E\u9645\u6765\u6E90\u548C\u9519\u8BEF", "\u68C0\u67E5 DNS \u4E0E Service \u7AEF\u53E3", "\u68C0\u67E5 EndpointSlice \u4E0E Pod \u5C31\u7EEA", "\u6BD4\u8F83\u540E\u7AEF\u76F4\u8FDE\u4E0E\u670D\u52A1\u8DEF\u5F84\uFF0C\u6838\u5BF9\u7B56\u7565"],
+      example: sh("\u4ECE\u96C6\u7FA4\u5185\u53D1\u8D77 HTTP \u6D4B\u8BD5", "demo/web \u5B58\u5728\uFF1B\u5141\u8BB8\u521B\u5EFA\u4E34\u65F6 Pod\uFF0C\u5E76\u80FD\u62C9\u53D6 busybox\u3002\u82E5\u5E94\u7528\u53EA\u5141\u8BB8\u7279\u5B9A\u6765\u6E90\uFF0C\u5E94\u4F7F\u7528\u771F\u5B9E\u8C03\u7528\u65B9\u6216\u5339\u914D\u5176\u7B56\u7565\u8EAB\u4EFD\u3002", `kubectl -n demo get service web -o yaml
+kubectl -n demo get endpointslices -l kubernetes.io/service-name=web -o yaml
+kubectl -n demo run http-check --rm -i --restart=Never --image=busybox:1.37 -- wget -S -O- -T 5 http://web.demo.svc`, "\u6210\u529F\u65F6\u53EF\u89C1 HTTP \u54CD\u5E94\uFF1B\u4E34\u65F6 Pod \u7684\u7F51\u7EDC\u7B56\u7565\u8EAB\u4EFD\u53EF\u80FD\u4E0E\u771F\u5B9E\u8C03\u7528\u65B9\u4E0D\u540C\u3002"),
+      sections: [
+        { title: "\u5148\u4FDD\u7559\u5177\u4F53\u9519\u8BEF", body: "NXDOMAIN\u3001\u8FDE\u63A5\u62D2\u7EDD\u3001\u8D85\u65F6\u3001TLS \u9519\u8BEF\u548C HTTP \u9519\u8BEF\u7801\u63D0\u4F9B\u4E0D\u540C\u7EBF\u7D22\u3002\u5C06\u5B83\u4EEC\u7EDF\u4E00\u53EB\u201C\u7F51\u7EDC\u4E0D\u901A\u201D\u4F1A\u4E22\u5931\u6700\u6709\u4EF7\u503C\u7684\u8BCA\u65AD\u5206\u652F\uFF0C\u5C24\u5176\u8981\u6807\u8BB0\u6765\u81EA\u54EA\u4E2A\u5BB9\u5668\u548C\u65F6\u95F4\u7A97\u53E3\u3002" },
+        { title: "\u7AEF\u70B9\u4E0E\u5E94\u7528\u5BF9\u7167", body: "\u7AEF\u70B9\u4E3A\u7A7A\u5148\u67E5 selector \u4E0E\u5C31\u7EEA\uFF1B\u7AEF\u70B9\u5B58\u5728\u5219\u6838\u5BF9 targetPort \u548C\u5E94\u7528\u76D1\u542C\u3002Pod \u76F4\u8FDE\u5931\u8D25\u53EF\u80FD\u6765\u81EA\u5E94\u7528\u3001\u7B56\u7565\u6216\u57FA\u7840\u7F51\u7EDC\uFF1BPod \u80FD\u8BBF\u95EE\u800C\u670D\u52A1\u4E0D\u80FD\u8BBF\u95EE\u65F6\u518D\u91CD\u70B9\u68C0\u67E5\u670D\u52A1\u6570\u636E\u9762\u3002" },
+        { title: "\u6D4B\u8BD5\u8DEF\u5F84\u5FC5\u987B\u4E00\u81F4", body: "\u672C\u673A curl\u3001kubectl port-forward\u3001\u4E0D\u540C\u547D\u540D\u7A7A\u95F4\u7684\u4E34\u65F6 Pod \u4E0E\u771F\u5B9E\u8C03\u7528\u65B9\u53EF\u80FD\u8D70\u4E0D\u540C\u7F51\u7EDC\u548C\u6388\u6743\u8DEF\u5F84\u3002\u65C1\u8DEF\u80FD\u5E2E\u52A9\u9A8C\u8BC1\u5E94\u7528\uFF0C\u4F46\u5E94\u56DE\u5230\u7528\u6237\u5B9E\u9645\u8DEF\u5F84\u590D\u6D4B\uFF0C\u624D\u53EF\u5224\u65AD\u95EE\u9898\u662F\u5426\u89E3\u51B3\u3002" }
+      ],
+      sources: ["debugservice", "service", "endpoints", "network"],
+      related: ["service", "dns", "labels", "network-policy", "probes"],
+      fault: {
+        name: "\u65C1\u8DEF\u6210\u529F\uFF0C\u670D\u52A1\u4ECD\u4E0D\u53EF\u8FBE",
+        nodes: ["\u672C\u673A port-forward", "\u76EE\u6807 Pod", "\u771F\u5B9E\u8C03\u7528\u65B9", "Service \u6570\u636E\u9762"],
+        steps: [
+          ["\u65C1\u8DEF\u8BBF\u95EE\u5E94\u7528\u6210\u529F", 0, 1, "PORT-FORWARD OK", "\u72EC\u7ACB\u573A\u666F\uFF1Akubectl port-forward \u8BBF\u95EE\u67D0\u4E2A Pod \u7684 HTTP \u7AEF\u53E3\u6210\u529F\u3002", "\u8BE5\u5E94\u7528\u8DEF\u5F84\u5F53\u65F6\u53EF\u5DE5\u4F5C", "request"],
+          ["\u771F\u5B9E\u8BF7\u6C42\u4ECD\u5931\u8D25", 2, 3, "SERVICE REQUEST FAILS", "\u5B9E\u9645\u8C03\u7528\u65B9\u901A\u8FC7 Service \u8D85\u65F6\uFF0C\u8BF4\u660E\u4E24\u79CD\u6D4B\u8BD5\u8DEF\u5F84\u4E0D\u7B49\u4EF7\u3002", "\u7528\u6237\u95EE\u9898\u4ECD\u5B58\u5728", "request"],
+          ["\u5BF9\u7167\u4E0D\u540C\u8DEF\u5F84", 0, 3, "COMPARE PATHS", "port-forward \u4E0D\u8986\u76D6\u5E38\u89C4 Service \u8F6C\u53D1\u4E0E\u771F\u5B9E\u6765\u6E90\u7B56\u7565\uFF0C\u4E0D\u80FD\u636E\u6B64\u5BA3\u5E03\u7F51\u7EDC\u5065\u5EB7\u3002", "\u65C1\u8DEF\u8BC1\u636E\u53EA\u6392\u9664\u90E8\u5206\u5047\u8BBE", "compare"],
+          ["\u8FD4\u56DE\u771F\u5B9E\u6765\u6E90\u6392\u67E5", 2, 3, "VERIFY SOURCE PATH", "\u4ECE\u771F\u5B9E\u6765\u6E90\u6838\u5BF9 DNS\u3001\u7AEF\u70B9\u3001\u7AEF\u53E3\u3001\u7F51\u7EDC\u7B56\u7565\u548C\u6570\u636E\u9762\uFF0C\u4FEE\u590D\u540E\u5728\u540C\u4E00\u8DEF\u5F84\u590D\u6D4B\u3002", "\u6062\u590D\u4F9D\u636E\u662F\u771F\u5B9E\u8BF7\u6C42", "check"]
+        ],
+        code: ["\u8BB0\u5F55 port-forward \u7684\u76EE\u6807\u4E0E\u7AEF\u53E3", "\u4ECE\u771F\u5B9E\u6765\u6E90\u590D\u73B0\u5931\u8D25", "\u5BF9\u7167 Service \u548C\u7B56\u7565\u914D\u7F6E", "\u4FEE\u590D\u540E\u6309\u539F\u8DEF\u5F84\u9A8C\u6536"],
+        example: sh("\u5148\u6838\u5BF9\u539F\u59CB\u8DEF\u5F84\u914D\u7F6E", "\u547D\u4EE4\u53EA\u68C0\u67E5\u914D\u7F6E\uFF1B\u5B9E\u9645\u8FDE\u63A5\u6D4B\u8BD5\u5E94\u5728\u539F\u8C03\u7528\u65B9\u5BB9\u5668\u4E2D\u4F7F\u7528\u5176\u5DF2\u6709 HTTP \u5DE5\u5177\u3002", `kubectl -n demo get service web -o yaml
+kubectl -n demo get endpointslices -l kubernetes.io/service-name=web -o yaml
+kubectl -n demo get networkpolicy
+kubectl -n demo get pods -l app=web -o wide`, "\u628A\u7AEF\u70B9 IP\u3001\u7AEF\u53E3\u3001\u5C31\u7EEA\u548C\u6765\u6E90\u7B56\u7565\u9010\u9879\u5BF9\u7167\uFF1B\u4E0D\u8981\u628A\u5355\u4E2A\u6210\u529F\u8BF7\u6C42\u6269\u5C55\u4E3A\u5168\u8DEF\u5F84\u7ED3\u8BBA\u3002")
+      }
+    },
+    {
+      id: "drain",
+      group: 2,
+      title: "\u8282\u70B9\u7EF4\u62A4\u4E0E PDB",
+      en: "NODE DRAIN & DISRUPTIONS",
+      summary: "\u7528 cordon\u3001\u53D7\u9884\u7B97\u7EA6\u675F\u7684\u9A71\u9010\u4E0E\u6062\u590D\u8C03\u5EA6\u5B8C\u6210\u8282\u70B9\u7EF4\u62A4\uFF0C\u7406\u89E3\u54EA\u4E9B\u4E2D\u65AD\u4E0D\u53D7 PDB \u4FDD\u62A4\u3002",
+      principle: "PDB \u7EA6\u675F\u7ECF\u8FC7\u9A71\u9010 API \u7684\u81EA\u613F\u4E2D\u65AD\uFF1B\u5B83\u4E0D\u662F\u4E1A\u52A1\u6C38\u4E0D\u6389\u7EBF\u6216\u8282\u70B9\u4E0D\u4F1A\u6545\u969C\u7684\u4FDD\u8BC1\u3002",
+      tradeoff: "\u4E25\u683C\u9884\u7B97\u4FDD\u62A4\u7EF4\u62A4\u65F6\u7684\u53EF\u7528\u526F\u672C\uFF0C\u4E5F\u53EF\u80FD\u963B\u6B62\u6392\u7A7A\uFF0C\u9700\u8981\u63D0\u524D\u9884\u7559\u5BB9\u91CF\u548C\u6062\u590D\u8DEF\u5F84\u3002",
+      pitfall: "--ignore-daemonsets \u662F\u8DF3\u8FC7\u5B88\u62A4 Pod\uFF0C\u4E0D\u662F\u5220\u9664\u5B83\u4EEC\uFF1Bcordon \u4E0D\u4F1A\u8FC1\u8D70\u5DF2\u6709 Pod\uFF0C\u4E5F\u4E0D\u963B\u6B62\u6240\u6709\u7279\u6B8A\u653E\u7F6E\u3002",
+      nodes: ["\u7EF4\u62A4\u64CD\u4F5C\u8005", "\u76EE\u6807\u8282\u70B9", "\u9A71\u9010 / PDB", "\u5176\u4ED6\u8282\u70B9\u526F\u672C"],
+      steps: [
+        ["\u5148\u786E\u8BA4\u7EF4\u62A4\u8303\u56F4", 0, 1, "CORDON", "\u5047\u8BBE\u5E94\u7528\u6709\u591A\u526F\u672C\u4E14\u5176\u4ED6\u8282\u70B9\u6709\u8DB3\u591F\u5BB9\u91CF\u3002cordon \u5C06\u8282\u70B9\u6807\u4E3A\u4E0D\u53EF\u8C03\u5EA6\uFF0C\u4E0D\u8FC1\u8D70\u5DF2\u6709 Pod\u3002", "\u666E\u901A\u65B0\u8C03\u5EA6\u907F\u5F00\u8BE5\u8282\u70B9", "control"],
+        ["\u8BF7\u6C42\u6709\u9884\u7B97\u7684\u9A71\u9010", 0, 2, "DRAIN / EVICTION", "drain \u5C1D\u8BD5\u9A71\u9010\u53EF\u5904\u7406\u7684 Pod\uFF0C\u5E76\u9075\u5B88\u9002\u7528 PDB\uFF1B\u672C\u5730\u6570\u636E\u3001\u88F8 Pod\u3001DaemonSet \u7B49\u8FD8\u9700\u660E\u786E\u5904\u7406\u3002", "\u4E2D\u65AD\u9884\u7B97\u88AB\u68C0\u67E5", "request"],
+        ["\u7B49\u5F85\u66FF\u4EE3\u5BB9\u91CF", 2, 3, "REPLACEMENT READY", "\u63A7\u5236\u5668\u5728\u53EF\u884C\u8282\u70B9\u8865\u5EFA\u66FF\u4EE3 Pod\uFF1B\u8BFE\u7A0B\u5047\u8BBE\u4F9D\u8D56\u548C\u8D44\u6E90\u6EE1\u8DB3\uFF0C\u7EF4\u62A4\u524D\u5E94\u5B9E\u9645\u9A8C\u8BC1\u6062\u590D\u3002", "\u66FF\u4EE3\u526F\u672C\u9010\u6B65\u5C31\u7EEA", "control"],
+        ["\u7EF4\u62A4\u540E\u6062\u590D\u8C03\u5EA6", 0, 1, "UNCORDON", "\u7EF4\u62A4\u5B8C\u6210\u5E76\u68C0\u67E5\u8282\u70B9\u5065\u5EB7\u540E\u518D uncordon\uFF0C\u4F7F\u666E\u901A\u8C03\u5EA6\u53EF\u4EE5\u6062\u590D\uFF1B\u4E1A\u52A1\u5065\u5EB7\u4E5F\u8981\u68C0\u67E5\u3002", "\u8282\u70B9\u91CD\u65B0\u53C2\u4E0E\u8C03\u5EA6", "control"]
+      ],
+      code: ["\u68C0\u67E5 PDB\u3001\u5BB9\u91CF\u3001\u5B58\u50A8\u4E0E\u88F8 Pod", "cordon \u2192 drain\uFF08\u9075\u5B88\u9A71\u9010\u9884\u7B97\uFF09", "\u786E\u8BA4\u8282\u70B9\u5DE5\u4F5C\u8D1F\u8F7D\u4E0E\u4E1A\u52A1\u72B6\u6001", "\u7EF4\u62A4\u5E76\u9A8C\u8BC1\u540E uncordon"],
+      example: sh("\u7EF4\u62A4\u524D\u7684\u53EA\u8BFB\u68C0\u67E5", "\u5177\u5907\u8282\u70B9\u4E0E PDB \u8BFB\u53D6\u6743\u9650\uFF1BNODE \u66FF\u6362\u4E3A\u8BA1\u5212\u7EF4\u62A4\u7684\u8282\u70B9\u3002\u6B64\u793A\u4F8B\u4E0D\u5B9E\u9645\u6392\u7A7A\u8282\u70B9\u3002", `NODE=replace-me
+kubectl get node "$NODE" -o wide
+kubectl get pods -A --field-selector spec.nodeName="$NODE" -o wide
+kubectl get pdb -A
+kubectl describe node "$NODE"`, "\u5148\u8BC6\u522B DaemonSet\u3001\u88F8 Pod\u3001\u5377\u548C\u9884\u7B97\uFF1B\u771F\u6B63\u7EF4\u62A4\u547D\u4EE4\u5E94\u5728\u660E\u786E\u8282\u70B9\u4E0E\u4E1A\u52A1\u7A97\u53E3\u540E\u6267\u884C\u3002"),
+      sections: [
+        { title: "\u7EF4\u62A4\u8FC7\u7A0B\u4E0D\u662F\u642C\u5BB6", body: "\u666E\u901A Pod \u4E0D\u4F1A\u88AB\u539F\u5C01\u4E0D\u52A8\u642C\u5230\u53E6\u4E00\u4E2A\u8282\u70B9\uFF0C\u901A\u5E38\u662F\u9A71\u9010\u540E\u7531\u63A7\u5236\u5668\u521B\u5EFA\u65B0 Pod\u3002\u5BB9\u91CF\u3001\u8C03\u5EA6\u7EA6\u675F\u3001\u5377\u62D3\u6251\u3001\u4F18\u96C5\u9000\u51FA\u548C\u5E94\u7528\u8FDE\u63A5\u5904\u7406\u5171\u540C\u5F71\u54CD\u7EF4\u62A4\u7ED3\u679C\u3002" },
+        { title: "PDB \u4FDD\u62A4\u7684\u8FB9\u754C", body: "PDB \u4E3B\u8981\u9650\u5236\u81EA\u613F\u9A71\u9010\uFF0C\u4E0D\u80FD\u963B\u6B62\u8282\u70B9\u6389\u7535\u7B49\u975E\u81EA\u613F\u6545\u969C\u3002\u76F4\u63A5\u5220\u9664 Pod \u6216\u5DE5\u4F5C\u8D1F\u8F7D\u81EA\u5DF1\u7684\u6EDA\u52A8\u66F4\u65B0\u4E0D\u7B49\u540C\u4E8E\u7ECF\u8FC7\u9A71\u9010 API \u7684 drain\uFF1B\u53D1\u5E03\u7B56\u7565\u8FD8\u9700\u7531\u5DE5\u4F5C\u8D1F\u8F7D\u914D\u7F6E\u3002" },
+        { title: "\u5B8C\u6210\u4E0E\u6062\u590D", body: "drain \u9700\u8981\u6309\u5B9E\u9645\u8D44\u6E90\u5904\u7406\u5B88\u62A4 Pod\u3001\u88F8 Pod \u548C\u672C\u5730\u4E34\u65F6\u6570\u636E\uFF0C\u4E0D\u80FD\u76F2\u76EE\u6DFB\u52A0\u5F3A\u5236\u53C2\u6570\u3002\u6392\u7A7A\u540E\u7EF4\u62A4\u8282\u70B9\uFF0C\u5B8C\u6210\u5065\u5EB7\u68C0\u67E5\u518D uncordon\u3002\u8282\u70B9\u53D8\u4E3A\u53EF\u8C03\u5EA6\u4E5F\u4E0D\u4F1A\u81EA\u52A8\u8FC1\u56DE\u6240\u6709\u5DF2\u8FC1\u8D70\u7684\u5E94\u7528\u3002" }
+      ],
+      sources: ["drain", "pdb", "daemonset"],
+      related: ["deployment", "scheduling", "storage", "backup-upgrade"],
+      fault: {
+        name: "\u53EF\u7528\u9884\u7B97\u4E3A\u96F6\uFF0C\u6392\u7A7A\u88AB\u963B\u6B62",
+        nodes: ["drain \u8BF7\u6C42", "PDB minAvailable=2", "\u4E24\u4E2A\u5C31\u7EEA\u526F\u672C", "\u9A71\u9010\u7ED3\u679C"],
+        steps: [
+          ["\u51C6\u5907\u9A71\u9010\u4E00\u4E2A\u526F\u672C", 0, 1, "EVICTION REQUEST", "\u72EC\u7ACB\u573A\u666F\uFF1ADeployment \u6709\u4E24\u4E2A\u5C31\u7EEA\u526F\u672C\uFF0CPDB minAvailable=2\uFF0C\u76EE\u6807\u8282\u70B9\u4E0A\u6709\u5176\u4E2D\u4E00\u4E2A\u3002", "disruptionsAllowed=0", "request"],
+          ["\u68C0\u67E5\u5269\u4F59\u53EF\u7528\u6570\u91CF", 1, 2, "WOULD DROP TO 1", "\u9A71\u9010\u540E\u4E0D\u80FD\u6EE1\u8DB3\u9884\u7B97\uFF0CPDB \u4E0D\u4F1A\u81EA\u52A8\u589E\u52A0\u7B2C\u4E09\u4E2A\u526F\u672C\u6216\u63D0\u4F9B\u989D\u5916\u8282\u70B9\u3002", "\u9884\u7B97\u6761\u4EF6\u4E0D\u6EE1\u8DB3", "check"],
+          ["\u62D2\u7EDD\u672C\u6B21\u9A71\u9010", 1, 3, "EVICTION BLOCKED", "drain \u4F1A\u7B49\u5F85\u6216\u91CD\u8BD5\uFF0C\u4E0D\u80FD\u628A\u8FD9\u89E3\u91CA\u4E3A Kubernetes \u968F\u673A\u5361\u4F4F\u3002", "\u7EF4\u62A4\u5C1A\u672A\u5B8C\u6210", "reject"],
+          ["\u5148\u51C6\u5907\u5B89\u5168\u4F59\u91CF", 2, 2, "REVIEW CAPACITY / BUDGET", "\u6309\u4E1A\u52A1\u9700\u6C42\u51C6\u5907\u989D\u5916\u5065\u5EB7\u526F\u672C\u4E0E\u5BB9\u91CF\uFF0C\u6216\u5BA1\u67E5\u9884\u7B97\u8BBE\u8BA1\uFF1B\u4E0D\u76F4\u63A5\u5173\u95ED\u9A71\u9010\u7EA6\u675F\u6765\u63A9\u76D6\u53EF\u7528\u6027\u98CE\u9669\u3002", "\u4FEE\u6B63\u524D\u63D0\u518D\u7EF4\u62A4", "local"]
+        ],
+        code: ["\u8BFB\u53D6 disruptionsAllowed", "\u786E\u8BA4 currentHealthy / desiredHealthy", "\u51C6\u5907\u989D\u5916\u526F\u672C\u4E0E\u8C03\u5EA6\u5BB9\u91CF", "\u91CD\u65B0\u9A8C\u8BC1\u9884\u7B97\u548C\u4E1A\u52A1\u5065\u5EB7"],
+        example: sh("\u68C0\u67E5 PDB \u963B\u585E\u8BC1\u636E", "\u5E94\u7528\u5B58\u5728 PDB \u65F6\u4F7F\u7528\uFF1B\u672C\u793A\u4F8B\u4E0D\u7ED5\u8FC7\u9884\u7B97\uFF0C\u4E0D\u6267\u884C\u5220\u9664\u3002", `kubectl -n demo get pdb
+kubectl -n demo describe pdb
+kubectl -n demo get deployment web
+kubectl -n demo get pods -l app=web -o wide`, "\u6838\u5BF9 selector \u662F\u5426\u786E\u5B9E\u5339\u914D\u76EE\u6807 Pod\uFF0C\u4EE5\u53CA\u9884\u7B97\u3001\u5065\u5EB7\u526F\u672C\u548C\u53EF\u8C03\u5EA6\u4F59\u91CF\u3002")
+      }
+    },
+    {
+      id: "backup-upgrade",
+      group: 2,
+      title: "\u5907\u4EFD\u3001\u6062\u590D\u4E0E\u5347\u7EA7",
+      en: "BACKUP \xB7 RESTORE \xB7 UPGRADE",
+      summary: "\u628A\u63A7\u5236\u9762\u72B6\u6001\u3001\u5E94\u7528\u6570\u636E\u3001\u7248\u672C\u517C\u5BB9\u4E0E\u6062\u590D\u6F14\u7EC3\u4F5C\u4E3A\u4E00\u7EC4\u8FD0\u7EF4\u7EA6\u675F\u3002",
+      principle: "\u53EF\u6062\u590D\u6027\u6765\u81EA\u53EF\u9A8C\u8BC1\u7684\u5907\u4EFD\u4E0E\u6062\u590D\u6D41\u7A0B\uFF1B\u5347\u7EA7\u9700\u8981\u6309\u53D1\u884C\u7248\u3001\u7EC4\u4EF6\u7248\u672C\u4E0E\u5DE5\u4F5C\u8D1F\u8F7D\u6761\u4EF6\u9010\u6B65\u63A8\u8FDB\u3002",
+      tradeoff: "\u66F4\u9891\u7E41\u5907\u4EFD\u548C\u6F14\u7EC3\u964D\u4F4E\u6062\u590D\u4E0D\u786E\u5B9A\u6027\uFF0C\u4E5F\u5E26\u6765\u5B58\u50A8\u3001\u4FDD\u5BC6\u3001\u7EF4\u62A4\u7A97\u53E3\u548C\u9A8C\u8BC1\u6210\u672C\u3002",
+      pitfall: "etcd \u5FEB\u7167\u4E0D\u5305\u542B\u5916\u90E8 PV \u7684\u4E1A\u52A1\u6570\u636E\uFF1B\u5FEB\u7167\u6587\u4EF6\u5B58\u5728\u4E5F\u4E0D\u80FD\u8BC1\u660E\u6574\u4E2A\u4E1A\u52A1\u53EF\u6062\u590D\u3002",
+      nodes: ["\u63A7\u5236\u9762\u72B6\u6001", "\u5E94\u7528 / \u5377\u6570\u636E", "\u9694\u79BB\u6062\u590D\u73AF\u5883", "\u5347\u7EA7\u8BA1\u5212"],
+      steps: [
+        ["\u76D8\u70B9\u5907\u4EFD\u5BF9\u8C61", 0, 1, "STATE + APPLICATION DATA", "\u5047\u8BBE\u81EA\u7BA1\u96C6\u7FA4\u9700\u8981\u7EF4\u62A4\u3002\u5206\u522B\u8BC6\u522B etcd\u3001\u5E94\u7528\u5377\u3001\u5916\u90E8\u6570\u636E\u5E93\u3001\u8BC1\u4E66\u548C\u914D\u7F6E\u7B49\u6062\u590D\u4F9D\u8D56\u3002", "\u5907\u4EFD\u8303\u56F4\u8986\u76D6\u4E0D\u540C\u5C42", "check"],
+        ["\u9A8C\u8BC1\u6062\u590D\u80FD\u529B", 0, 2, "RESTORE DRILL", "\u6309\u5BF9\u5E94\u5DE5\u5177\u4E0E\u7248\u672C\uFF0C\u5728\u9694\u79BB\u73AF\u5883\u9A8C\u8BC1\u6062\u590D\u6D41\u7A0B\uFF0C\u4E0D\u80FD\u5BF9\u5728\u7EBF\u96C6\u7FA4\u76F4\u63A5\u5957\u7528\u6062\u590D\u547D\u4EE4\u3002", "\u6062\u590D\u8BC1\u636E\u53EF\u590D\u6838", "control"],
+        ["\u6838\u5BF9\u5347\u7EA7\u7EA6\u675F", 3, 3, "VERSION / ADD-ON CHECK", "\u68C0\u67E5\u7EC4\u4EF6\u7248\u672C\u504F\u5DEE\u3001\u53D1\u884C\u7248\u5347\u7EA7\u8DEF\u5F84\u3001API \u79FB\u9664\u4E0E CNI/CSI \u7B49\u63D2\u4EF6\u517C\u5BB9\u3002\u6258\u7BA1\u670D\u52A1\u9075\u5B88\u4F9B\u5E94\u5546\u6D41\u7A0B\u3002", "\u5347\u7EA7\u524D\u63D0\u660E\u786E", "local"],
+        ["\u5206\u6279\u7EF4\u62A4\u5E76\u9A8C\u6536", 3, 2, "STAGED VALIDATION", "\u6309\u65B9\u6848\u9010\u6B65\u5347\u7EA7\u63A7\u5236\u9762\u4E0E\u8282\u70B9\uFF0C\u6BCF\u6B65\u89C2\u5BDF\u8282\u70B9\u3001\u7CFB\u7EDF\u7EC4\u4EF6\u4E0E\u4E1A\u52A1\uFF1B\u56FE\u89E3\u4E0D\u63D0\u4F9B\u9002\u7528\u6240\u6709\u96C6\u7FA4\u7684\u81EA\u52A8\u811A\u672C\u3002", "\u5B8C\u6210\u9700\u4F9D\u9760\u5B9E\u9645\u9A8C\u6536", "check"]
+      ],
+      code: ["\u76D8\u70B9\u63A7\u5236\u9762\u4E0E\u4E1A\u52A1\u6570\u636E", "\u9A8C\u8BC1\u5907\u4EFD\u5B8C\u6574\u6027\u5E76\u6F14\u7EC3\u6062\u590D", "\u6838\u5BF9\u76EE\u6807\u7248\u672C\u548C\u63D2\u4EF6\u517C\u5BB9", "\u5206\u6279\u7EF4\u62A4\uFF0C\u6BCF\u6B65\u9A8C\u8BC1\u4E1A\u52A1"],
+      example: sh("\u5347\u7EA7\u524D\u76D8\u70B9\u7248\u672C", "\u53EA\u8BFB\u76D8\u70B9\uFF1B\u4E0D\u6267\u884C\u5347\u7EA7\u6216\u6062\u590D\u3002\u81EA\u7BA1 kubeadm\u3001\u5176\u4ED6\u53D1\u884C\u7248\u548C\u6258\u7BA1\u670D\u52A1\u7684\u540E\u7EED\u6D41\u7A0B\u4E0D\u540C\u3002", `kubectl version -o yaml
+kubectl get nodes -o wide
+kubectl get apiservices
+kubectl -n kube-system get pods -o wide
+kubectl get storageclasses`, "\u8BB0\u5F55\u7EC4\u4EF6\u4E0E\u9A71\u52A8\u7248\u672C\u5E76\u67E5\u5BF9\u5E94\u5347\u7EA7\u6587\u6863\uFF1B\u7248\u672C\u504F\u5DEE\u4E0D\u80FD\u7B80\u5355\u5047\u8BBE\u4E3A\u201C\u76F8\u5DEE\u4E00\u7248\u90FD\u53EF\u4EE5\u201D\u3002"),
+      sections: [
+        { title: "\u5907\u4EFD\u5206\u5C42", body: "etcd \u4FDD\u5B58 Kubernetes API \u72B6\u6001\u4E0E\u654F\u611F\u5BF9\u8C61\uFF0C\u5E94\u7528\u5377\u6570\u636E\u901A\u5E38\u4F4D\u4E8E\u5176\u4ED6\u5B58\u50A8\u3002\u5916\u90E8\u6570\u636E\u5E93\u3001\u5BF9\u8C61\u5B58\u50A8\u3001\u8BC1\u4E66\u548C\u52A0\u5BC6\u5BC6\u94A5\u4E5F\u53EF\u80FD\u662F\u6062\u590D\u4F9D\u8D56\u3002\u5907\u4EFD\u8303\u56F4\u548C\u4E00\u81F4\u6027\u8981\u6C42\u5E94\u7531\u5E94\u7528\u6062\u590D\u76EE\u6807\u51B3\u5B9A\u3002" },
+        { title: "\u6062\u590D\u5FC5\u987B\u6F14\u7EC3", body: "\u5FEB\u7167\u6821\u9A8C\u53EA\u80FD\u8BF4\u660E\u90E8\u5206\u6587\u4EF6\u5C5E\u6027\uFF0C\u4E0D\u80FD\u8BC1\u660E\u4E1A\u52A1\u80FD\u542F\u52A8\u548C\u6570\u636E\u6B63\u786E\u3002etcd \u6062\u590D\u5DE5\u5177\u3001\u8BC1\u4E66\u3001\u6210\u5458\u914D\u7F6E\u4E0E\u7248\u672C\u9700\u8981\u76F8\u7B26\uFF1B\u5728\u7EBF\u6062\u590D\u8FD8\u6D89\u53CA\u505C\u670D\u52A1\u4E0E\u7F13\u5B58\u4E00\u81F4\u6027\uFF0C\u5FC5\u987B\u9075\u5FAA\u660E\u786E\u5B98\u65B9\u6D41\u7A0B\u3002" },
+        { title: "\u5347\u7EA7\u6309\u5B9E\u9645\u90E8\u7F72\u65B9\u5F0F", body: "kubeadm \u7684\u8BA1\u5212\u548C\u9010\u8282\u70B9\u6D41\u7A0B\u4E0D\u80FD\u76F4\u63A5\u66FF\u4EE3\u4E91\u5382\u5546\u6216\u5176\u4ED6\u53D1\u884C\u7248\u6D41\u7A0B\u3002\u6838\u5BF9\u7248\u672C\u504F\u5DEE\u3001\u5DF2\u79FB\u9664 API\u3001Webhook\u3001CNI/CSI \u548C\u76D1\u63A7\u63D2\u4EF6\uFF0C\u518D\u7ED3\u5408 drain\u3001PDB\u3001\u5907\u4EFD\u548C\u9A8C\u8BC1\u7A97\u53E3\u63A8\u8FDB\u3002" }
+      ],
+      sources: ["etcd", "upgrade", "skew", "storage"],
+      related: ["drain", "storage", "statefulset", "observability"],
+      fault: {
+        name: "\u63A7\u5236\u9762\u6062\u590D\u4E86\uFF0C\u4E1A\u52A1\u6570\u636E\u6CA1\u6709",
+        nodes: ["etcd \u5FEB\u7167", "API \u8D44\u6E90", "\u7F3A\u5931\u4E1A\u52A1\u5377", "\u4E1A\u52A1\u9A8C\u8BC1"],
+        steps: [
+          ["\u4ECE\u63A7\u5236\u9762\u5FEB\u7167\u6062\u590D", 0, 1, "RESTORE API STATE", "\u72EC\u7ACB\u573A\u666F\uFF1A\u6F14\u7EC3\u73AF\u5883\u5DF2\u6062\u590D etcd \u8D44\u6E90\u72B6\u6001\uFF0C\u4F46\u540E\u7AEF\u4E1A\u52A1\u5377\u6CA1\u6709\u76F8\u5E94\u5907\u4EFD\u3002", "\u8D44\u6E90\u5B9A\u4E49\u53EF\u91CD\u65B0\u51FA\u73B0", "control"],
+          ["\u58F0\u660E\u4E0D\u7B49\u4E8E\u5377\u5185\u5BB9", 1, 2, "PVC METADATA \u2260 DATA", "PVC/PV \u5BF9\u8C61\u63CF\u8FF0\u5E76\u4E0D\u5305\u542B\u5377\u4E2D\u7684\u6570\u636E\u5E93\u6587\u4EF6\uFF0C\u540E\u7AEF\u5377\u53EF\u7F3A\u5931\u6216\u4E0E\u6062\u590D\u65F6\u70B9\u4E0D\u4E00\u81F4\u3002", "\u4E1A\u52A1\u6570\u636E\u4ECD\u53EF\u80FD\u4E0D\u53EF\u7528", "check"],
+          ["\u4E1A\u52A1\u9A8C\u6536\u5931\u8D25", 3, 3, "APPLICATION CHECK FAILS", "\u5373\u4F7F API \u53EF\u7528\u3001\u90E8\u5206 Pod \u5DF2\u8FD0\u884C\uFF0C\u5E94\u7528\u4E5F\u53EF\u80FD\u7F3A\u6570\u636E\u3001\u62A5\u9519\u6216\u7ED3\u679C\u4E0D\u4E00\u81F4\u3002", "\u4E0D\u80FD\u5BA3\u79F0\u5B8C\u6574\u6062\u590D", "local"],
+          ["\u8865\u9F50\u5206\u5C42\u6062\u590D\u8BBE\u8BA1", 3, 2, "RECOVERY GAP", "\u660E\u786E\u5377\u548C\u6570\u636E\u5E93\u5907\u4EFD\u3001\u4E00\u81F4\u6027\u4E0E\u987A\u5E8F\uFF0C\u5728\u9694\u79BB\u6F14\u7EC3\u4E2D\u8BC1\u660E\u76EE\u6807\u3002\u4E0D\u80FD\u8BA9\u4E00\u4EFD etcd \u5FEB\u7167\u66FF\u4EE3\u5168\u90E8\u4E1A\u52A1\u6062\u590D\u65B9\u6848\u3002", "\u6062\u590D\u8303\u56F4\u9700\u8986\u76D6\u771F\u5B9E\u4F9D\u8D56", "check"]
+        ],
+        code: ["\u533A\u5206\u8D44\u6E90\u5143\u6570\u636E\u4E0E\u4E1A\u52A1\u5185\u5BB9", "\u6838\u5BF9\u5907\u4EFD\u7684\u65F6\u95F4\u70B9\u4E0E\u4F9D\u8D56", "\u9694\u79BB\u73AF\u5883\u6062\u590D\u5E94\u7528\u6570\u636E", "\u9A8C\u8BC1\u4E1A\u52A1\u6B63\u786E\u6027\u548C\u6062\u590D\u76EE\u6807"],
+        example: sh("\u76D8\u70B9\u5377\u4E0E\u4E1A\u52A1\u4F9D\u8D56", "\u9700\u8981\u76F8\u5E94\u53EA\u8BFB\u6743\u9650\uFF1B\u547D\u4EE4\u4E0D\u8BFB\u53D6 Secret \u503C\uFF0C\u4E0D\u505A\u6062\u590D\uFF0C\u4E0D\u9A8C\u8BC1\u5907\u4EFD\u5185\u5BB9\u3002", `kubectl get pvc -A
+kubectl get pv
+kubectl get statefulsets -A
+kubectl get storageclasses`, "\u5C06\u8D44\u6E90\u6E05\u5355\u4E0E\u5B58\u50A8\u540E\u7AEF\u53CA\u5E94\u7528\u5907\u4EFD\u8BB0\u5F55\u5BF9\u5E94\uFF1Bkubectl \u5217\u8868\u4E0D\u80FD\u66FF\u4EE3\u540E\u7AEF\u6570\u636E\u6062\u590D\u6D4B\u8BD5\u3002")
+      }
     }
-  },
-  {
-    "group": 0,
-    "id": "schedule",
-    "title": "线程与任务调度",
-    "en": "SCHEDULING",
-    "summary": "在可运行任务之间分配 CPU；就绪、运行和阻塞是不同的状态。",
-    "nodes": [
-      "就绪队列",
-      "CPU 核心",
-      "I/O 等待",
-      "调度器"
-    ],
-    "steps": [
-      [
-        "加入可运行任务",
-        3,
-        0,
-        "ENQUEUE READY",
-        "A 与 B 已满足运行条件，被加入就绪队列。就绪表示具备运行资格，不表示此时正在使用 CPU。",
-        "A: READY · B: READY",
-        "control"
-      ],
-      [
-        "选择 A 运行",
-        3,
-        1,
-        "DISPATCH A",
-        "调度器从就绪任务中选择 A，恢复所需执行上下文并让它运行。本例只有一个 CPU 核心。",
-        "A: RUNNING · B: READY",
-        "control"
-      ],
-      [
-        "A 等待 I/O",
-        1,
-        2,
-        "BLOCK A",
-        "A 发起需要等待的 I/O 并进入阻塞状态。调度器随后可选择 B，本例让 B 使用腾出的 CPU。",
-        "A: BLOCKED · B: RUNNING",
-        "control"
-      ],
-      [
-        "I/O 完成后唤醒 A",
-        2,
-        0,
-        "WAKE A",
-        "I/O 完成使 A 重新进入就绪队列；是否立即抢占 B 取决于调度策略。本例让 A 等待下一次调度。",
-        "A: READY · B: RUNNING",
-        "control"
-      ]
-    ],
-    "principle": "只调度已经就绪的工作，明确区分“被唤醒”和“已执行”。",
-    "tradeoff": "抢占提高响应性；过多上下文切换与线程竞争会降低吞吐。",
-    "pitfall": "增加线程数不会自动增加 CPU 容量；还可能放大锁竞争和缓存抖动。",
-    "code": [
-      "while systemRunning:",
-      "  task = chooseReadyTask()",
-      "  runUntilBlockYieldOrPreemption(task)",
-      "  if stillRunnable(task): requeue(task)",
-      "onIOComplete(task): makeReady(task)"
-    ],
-    "sources": [
-      "process_notes",
-      "schedule_notes"
-    ],
-    "related": [
-      "async",
-      "backpressure",
-      "sync"
-    ],
-    "fault": {
-      "name": "高优先级任务持续到来",
-      "nodes": [
-        "就绪队列",
-        "CPU 核心",
-        "高优先级到达流",
-        "调度器"
-      ],
-      "steps": [
-        [
-          "低优先级 A 已就绪",
-          3,
-          0,
-          "READY A,B",
-          "A 与 B 都可运行，A 优先级较低，B 优先级较高。本反例采用没有老化或公平性补偿的严格优先级策略。",
-          "A: READY 低优先级 · B: READY 高优先级",
-          "control"
-        ],
-        [
-          "优先运行 B",
-          3,
-          1,
-          "RUN B",
-          "调度器选择更高优先级的 B。A 仍留在就绪队列，它不是在等待 I/O。",
-          "B: RUNNING · A: READY",
-          "control"
-        ],
-        [
-          "新的高优先级任务到达",
-          2,
-          0,
-          "ARRIVE C,D",
-          "B 结束前后，C、D 等高优先级任务继续变为就绪；高优先级队列始终有工作。",
-          "A 仍可运行 · 高优先级队列非空",
-          "control"
-        ],
-        [
-          "A 继续被推迟",
-          3,
-          1,
-          "RUN HIGH AGAIN",
-          "调度器再次选择高优先级任务。如果这种到达持续，A 可能无限等待。老化、配额或公平调度可限制这种饥饿。",
-          "A: READY · 等待时间持续增加",
-          "control"
-        ]
-      ],
-      "code": [
-        "while readyTasksExist:",
-        "  task = highestPriorityReadyTask()",
-        "  run(task)",
-        "  requeueIfRunnable(task)",
-        "// 若高优先级工作持续存在，低优先级任务可能饥饿"
-      ]
-    }
-  },
-  {
-    "group": 0,
-    "id": "sync",
-    "title": "锁、原子操作与内存序",
-    "en": "SYNCHRONIZATION",
-    "summary": "同时约束谁能修改共享数据，以及其他线程何时能看见这些修改。",
-    "nodes": [
-      "线程 A",
-      "共享状态",
-      "线程 B",
-      "互斥锁 m"
-    ],
-    "steps": [
-      [
-        "A 获取互斥锁",
-        0,
-        3,
-        "LOCK / ACQUIRE",
-        "A 成功获取 m；所有可能冲突的访问都必须遵循同一同步约定。锁的 acquire 语义约束之后的相关内存访问。",
-        "owner(m) = A",
-        "control"
-      ],
-      [
-        "在锁内维护不变量",
-        0,
-        1,
-        "UPDATE",
-        "A 在临界区内更新多个相关字段，并保证释放锁前恢复不变量。遵循同一锁协议的线程不会观察到不完整的中间状态。",
-        "balance 与 ledger 已一致更新",
-        "data"
-      ],
-      [
-        "A 释放并发布",
-        0,
-        3,
-        "UNLOCK / RELEASE",
-        "A 释放 m；release 语义将临界区中的写入与随后成功获取同一锁的线程同步。单独的无关原子操作不会自动发布所有数据。",
-        "owner(m) = none · A 的写入待同步读取",
-        "control"
-      ],
-      [
-        "B 获取同一锁",
-        2,
-        3,
-        "LOCK / ACQUIRE",
-        "B 成功获取 m 后，在保护下读取共享状态。A 的 release 与 B 对同一锁的 acquire 建立必要的顺序与可见性。",
-        "owner(m) = B · B 可见 A 的受保护写入",
-        "control"
-      ]
-    ],
-    "principle": "互斥限制谁能进入临界区；同步关系约束可见性与重排序。原子性和内存排序是不同保证。",
-    "tradeoff": "阻塞互斥锁可能挂起等待者，自旋锁会消耗 CPU；CAS 循环可能重试或活锁，也不会自动解决 ABA 与内存回收。",
-    "pitfall": "relaxed 原子操作不自动为其他内存位置建立发布关系；单个原子操作也不保护跨变量不变量。无数据竞争仍不等于业务正确。",
-    "code": [
-      "A: lock(m)",
-      "   updateRelatedFields(state)",
-      "   assert invariant(state)",
-      "   unlock(m)",
-      "B: lock(m); readRelatedFields(state); unlock(m)"
-    ],
-    "sources": [
-      "memory_order",
-      "deadlock_notes"
-    ],
-    "related": [
-      "txn",
-      "occ",
-      "schedule"
-    ],
-    "fault": {
-      "name": "两个线程反序拿锁",
-      "nodes": [
-        "线程 A",
-        "锁 X",
-        "线程 B",
-        "锁 Y"
-      ],
-      "steps": [
-        [
-          "A 先持有 X",
-          0,
-          1,
-          "LOCK X",
-          "A 按自己的获取顺序先成功拿到 X，但完成操作还需要 Y。",
-          "owner(X) = A · Y 空闲",
-          "control"
-        ],
-        [
-          "B 先持有 Y",
-          2,
-          3,
-          "LOCK Y",
-          "B 采用相反顺序，先成功拿到 Y；它稍后还需要 X。",
-          "owner(X) = A · owner(Y) = B",
-          "control"
-        ],
-        [
-          "A 持 X 等待 Y",
-          0,
-          3,
-          "WAIT Y",
-          "A 未释放 X 就尝试获取 Y。Y 由 B 持有，因此 A 阻塞等待。",
-          "A 等 Y · A 仍持 X",
-          "control"
-        ],
-        [
-          "B 持 Y 等待 X",
-          2,
-          1,
-          "WAIT X",
-          "B 又等待 A 持有的 X，形成 A→Y→B→X→A 的等待环。统一锁顺序，或使用可回退的获取协议，可打破循环等待条件。",
-          "A 与 B 循环等待 · DEADLOCK",
-          "control"
-        ]
-      ],
-      "code": [
-        "parallel:",
-        "  A: lock(X); lock(Y)",
-        "  B: lock(Y); lock(X)",
-        "// 若各自先拿到第一把锁，再等第二把锁，就会形成环",
-        "// 修复示例：所有线程都先拿 X，再拿 Y"
-      ]
-    }
-  },
-  {
-    "group": 0,
-    "id": "async",
-    "title": "异步 I/O 与事件循环",
-    "en": "ASYNC I/O",
-    "summary": "将“发起操作”和“结果就绪”分开，让线程在等待期间继续处理其他任务。",
-    "nodes": [
-      "任务 A",
-      "非阻塞套接字 I/O",
-      "就绪事件队列",
-      "事件循环"
-    ],
-    "steps": [
-      [
-        "尝试读取并等待",
-        0,
-        1,
-        "TRY READ / EAGAIN",
-        "本例采用就绪通知式非阻塞 I/O。A 尝试读取，暂时没有数据而返回 EAGAIN；运行时登记可读兴趣并挂起 A 的继续执行。",
-        "A: WAITING · 没有读取结果",
-        "request"
-      ],
-      [
-        "执行其他已就绪工作",
-        3,
-        3,
-        "RUN OTHER",
-        "事件循环处理其他可运行任务，或等待下一批事件。单个回调长时间占用线程，仍会拖住同一循环中的其他任务。",
-        "A 仍等待 · 线程可服务其他任务",
-        "local"
-      ],
-      [
-        "系统报告可读",
-        1,
-        2,
-        "READABLE",
-        "系统把套接字可读事件加入就绪列表。这是再次尝试 I/O 的信号，不是完整业务结果，也不保证能一次读完消息。",
-        "有就绪事件 · 业务尚未完成",
-        "control"
-      ],
-      [
-        "分派后再次尝试读取",
-        3,
-        0,
-        "DISPATCH / READ",
-        "事件循环取出事件并恢复 A，A 再执行非阻塞读取；可能得到部分数据、EOF、错误或再次 EAGAIN。只有满足完整消息等业务条件后才算完成。",
-        "A: RUNNING · 可能再次 WAITING",
-        "control"
-      ]
-    ],
-    "principle": "把等待变为显式状态，完成、取消、超时和迟到结果都要有处理分支。",
-    "tradeoff": "异步减少等待线程的成本，但状态分散、错误传播和取消语义更复杂。",
-    "pitfall": "取消本地等待不代表远端操作已停止；迟到回调仍可能到达。",
-    "code": [
-      "result = emptyBuffer()",
-      "while !messageComplete(result):",
-      "  read = tryRead(socket)",
-      "  if read.wouldBlock: await readable(socket); continue",
-      "  if read.eof || read.error: return handleTerminalIO(read, result)",
-      "  result.append(read.bytes)",
-      "commitIfCurrent(version, result)"
-    ],
-    "sources": [
-      "epoll",
-      "read"
-    ],
-    "related": [
-      "schedule",
-      "ordering",
-      "backpressure"
-    ],
-    "fault": {
-      "name": "取消后旧回调迟到",
-      "nodes": [
-        "任务 · version 7",
-        "事件循环",
-        "当前任务状态",
-        "旧事件队列"
-      ],
-      "steps": [
-        [
-          "旧任务登记等待",
-          0,
-          1,
-          "WAIT version 7",
-          "旧任务以 version 7 登记读取等待，回调绑定该执行身份；旧事件可能已进入系统或运行时队列。",
-          "currentVersion = 7 · version 7: WAITING",
-          "request"
-        ],
-        [
-          "取消并推进版本",
-          2,
-          2,
-          "CANCEL 7 / START 8",
-          "用户发起新意图，当前版本推进到 8，并将旧任务标为取消。取消本地等待不保证已经排队的事件消失，也不保证外部操作停止。",
-          "currentVersion = 8 · version 7 已取消",
-          "local"
-        ],
-        [
-          "旧事件仍被分派",
-          3,
-          1,
-          "LATE EVENT v7",
-          "先前排队的 version 7 就绪事件随后到达事件循环。事件到达并不能恢复旧任务的提交资格。",
-          "收到 v7 回调 · 当前仍为 v8",
-          "control"
-        ],
-        [
-          "在写入边界拒绝旧版本",
-          1,
-          2,
-          "REJECT v7",
-          "回调先检查身份以快速退出；任何结果写入都必须与版本、取消状态校验处在同一原子或串行边界。旧回调被丢弃，不能覆盖 v8。",
-          "v7 不提交 · v8 状态保持有效",
-          "reject"
-        ]
-      ],
-      "code": [
-        "onReady(event):",
-        "  if !isCurrent(event.version): return",
-        "  result = tryRead(event.socket)",
-        "  atomicOrSerialized:",
-        "    if cancelled || event.version != currentVersion: return",
-        "    applyIfComplete(result)"
-      ]
-    }
-  },
-  {
-    "group": 0,
-    "id": "backpressure",
-    "title": "有界队列与背压",
-    "en": "BOUNDED QUEUES",
-    "summary": "当到达速度超过处理能力，把过载显式反馈给上游。",
-    "nodes": [
-      "生产者",
-      "有界队列 K=3",
-      "工作线程",
-      "接入控制 / 预算"
-    ],
-    "steps": [
-      [
-        "接收三个任务",
-        0,
-        1,
-        "ENQUEUE A,B,C",
-        "用容量 K=3 的队列举例；A、B、C 被依次成功加入。检查容量与入队必须由有界队列原子地执行。",
-        "排队 [A,B,C] · 3 / 3",
-        "data"
-      ],
-      [
-        "工作线程取出 A",
-        1,
-        2,
-        "DEQUEUE A",
-        "一个工作线程取出 A 执行，队列留下 B、C。排队数、运行中任务数和每秒吞吐量是不同指标。",
-        "排队 [B,C] · 2 / 3 · 运行 A",
-        "data"
-      ],
-      [
-        "新任务 D 填满空位",
-        0,
-        1,
-        "ENQUEUE D",
-        "A 尚未完成时 D 到达并占用唯一空位；队列重新达到容量，但不会因此增加处理能力。",
-        "排队 [B,C,D] · 3 / 3",
-        "data"
-      ],
-      [
-        "E 的入队被拒绝",
-        0,
-        1,
-        "FULL / SLOW DOWN",
-        "E 的原子入队尝试返回满；本例由接入控制拒绝它并反馈上游。也可按业务选择有期限的阻塞、丢弃或合并；队列容量必须保持受控。",
-        "E 未入队 · 队列仍 3 / 3",
-        "reject"
-      ]
-    ],
-    "principle": "让缓冲有界，把过载处理写进协议。",
-    "tradeoff": "更大队列能吸收突发，也增加排队时间；隔离资源池可避免单类任务拖垮所有业务。",
-    "pitfall": "限流、背压和熔断解决的问题不同，不能用无限重试抵消拒绝信号。",
-    "code": [
-      "accepted = queue.tryPush(task) // 原子有界入队",
-      "if !accepted: rejectWithOverload(task)",
-      "worker.takeWhenReady()",
-      "// 可选择有期限的阻塞入队，但不能先查大小再无条件 push"
-    ],
-    "sources": [
-      "bounded",
-      "systems"
-    ],
-    "related": [
-      "measure",
-      "retries",
-      "schedule"
-    ],
-    "fault": {
-      "name": "无界排队",
-      "nodes": [
-        "生产者",
-        "无界队列",
-        "工作线程",
-        "延迟 / 内存指标"
-      ],
-      "steps": [
-        [
-          "改用无界队列接收突发",
-          0,
-          1,
-          "ENQUEUE A,B,C",
-          "反例从一开始就使用没有容量限制的队列。A、B、C 到达后全部被接收，尚未产生上游反馈。",
-          "排队 [A,B,C] · 无容量上限",
-          "data"
-        ],
-        [
-          "只能取出一个执行",
-          1,
-          2,
-          "DEQUEUE A",
-          "一个工作线程取出 A，B 与 C 留在队列中；工作线程的处理能力没有随队列长度增加。",
-          "排队 [B,C] · 运行 A",
-          "data"
-        ],
-        [
-          "到达持续快于消费",
-          0,
-          1,
-          "ENQUEUE D,E,F",
-          "A 执行期间又到达 D、E、F，无界队列继续全部接收。若这种到达速度持续高于服务速度，积压会不断增长。",
-          "排队 [B,C,D,E,F] · 5 个等待",
-          "data"
-        ],
-        [
-          "积压暴露为延迟与内存",
-          1,
-          3,
-          "QUEUE AGE / MEMORY",
-          "监测到排队任务年龄与内存占用上升；等待可能耗尽请求截止时间。应限制容量与总在途工作，并让过载信号返回上游。",
-          "积压增加 · 部分 deadline 将耗尽",
-          "data"
-        ]
-      ],
-      "code": [
-        "queue = UnboundedQueue()",
-        "onRequest(task): queue.push(task)",
-        "worker: process(queue.take())",
-        "// 持续 arrivalRate > serviceRate → backlog 增长",
-        "// 接收成功不等于能在截止时间内处理"
-      ]
-    }
-  },
-  {
-    "group": 0,
-    "id": "measure",
-    "title": "性能测量与瓶颈",
-    "en": "PERFORMANCE ANALYSIS",
-    "summary": "先定义工作负载与指标，再区分 CPU、I/O、锁和排队造成的时间。",
-    "nodes": [
-      "请求负载",
-      "CPU / I/O / 锁",
-      "指标与追踪",
-      "优化实验"
-    ],
-    "steps": [
-      [
-        "建立可比较基线",
-        0,
-        1,
-        "LOAD",
-        "固定工作负载、并发度与测量窗口，明确端到端测量边界；记录吞吐、错误率与资源利用率。",
-        "同一工作负载 · 保留基线",
-        "request"
-      ],
-      [
-        "观察分布与等待",
-        1,
-        2,
-        "PROFILE",
-        "查看 p50、p95、p99、排队长度和追踪，并区分处理时间与等待时间。平均值可能掩盖少量极慢请求。",
-        "尾延迟、队列与资源数据齐备",
-        "data"
-      ],
-      [
-        "形成可验证假设",
-        2,
-        3,
-        "HYPOTHESIS",
-        "用剖析与追踪提出假设，例如锁等待占主导。理想 Amdahl 加速比为 1/(s+(1−s)/N)：s 是基线串行耗时比例，假设其余工作理想均分且无额外开销。",
-        "假设：锁等待限制收益",
-        "check"
-      ],
-      [
-        "控制变量比较",
-        3,
-        3,
-        "COMPARE",
-        "修改一个关键因素，再用同样的负载比较基线与候选方案的吞吐、尾延迟、错误率和资源成本，决定假设是否成立。",
-        "基线与候选结果比较 · 检查回归",
-        "local"
-      ]
-    ],
-    "principle": "优化的目标是可测量的系统行为，而不是局部代码看起来更快。",
-    "tradeoff": "吞吐、延迟、内存和成本常互相制约；先确定服务目标。",
-    "pitfall": "高 CPU 不一定是瓶颈，低 CPU 也不代表系统空闲：可能在等锁或 I/O。",
-    "code": [
-      "baseline = measure(workload, latencyDistribution, errors)",
-      "hypothesis = profileAndLocateBottleneck()",
-      "changeOneFactor()",
-      "candidate = measure(sameWorkload, latencyDistribution, errors)",
-      "compare(candidate, baseline)"
-    ],
-    "sources": [
-      "amdahl",
-      "systems"
-    ],
-    "related": [
-      "cache",
-      "backpressure",
-      "observability"
-    ],
-    "fault": {
-      "name": "只看平均延迟",
-      "nodes": [
-        "请求负载",
-        "被测服务",
-        "平均值报表",
-        "完整样本 / 分布"
-      ],
-      "steps": [
-        [
-          "产生快慢不一的请求",
-          0,
-          1,
-          "LOAD",
-          "同一测量窗口内，多数请求很快，少数请求因排队或依赖等待而明显变慢。收集端到端耗时样本。",
-          "存在少量慢请求",
-          "request"
-        ],
-        [
-          "报表只汇总均值",
-          1,
-          2,
-          "MEAN ONLY",
-          "监控只展示平均延迟，没有展示分位数、错误率或等待中的请求年龄；大量快请求可能让均值仍符合表面目标。",
-          "平均延迟看似正常 · 尾部未知",
-          "data"
-        ],
-        [
-          "据均值过早判定健康",
-          2,
-          2,
-          "INCOMPLETE CHECK",
-          "仅凭均值就宣布服务健康，没有证据说明慢请求比例或最差等待符合目标。此结论超出了现有指标能支持的范围。",
-          "遗漏慢请求体验与超时风险",
-          "local"
-        ],
-        [
-          "用分布揭示隐藏尾部",
-          3,
-          2,
-          "ADD P95 / P99",
-          "补看完整样本分布、请求年龄和队列长度，发现尾部已经恶化。均值与分位数分别回答不同问题，不能互相替代。",
-          "平均正常 · 尾部恶化被确认",
-          "compare"
-        ]
-      ],
-      "code": [
-        "samples = measureEndToEnd(workload)",
-        "mean = average(samples)",
-        "if mean < meanTarget: declareHealthy() // 证据不足",
-        "// 补查分位数、错误率、队列长度与未完成请求年龄"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "txn",
-    "title": "事务与原子提交",
-    "en": "TRANSACTIONS",
-    "summary": "把一组相关修改作为一个业务动作提交或回滚。",
-    "nodes": [
-      "客户端",
-      "事务执行器",
-      "账户 A 与 B",
-      "提交记录"
-    ],
-    "steps": [
-      [
-        "定义事务边界",
-        0,
-        1,
-        "BEGIN",
-        "例：A 向 B 转账 10。业务要求两边修改一起生效；先明确哪些数据属于同一原子边界。",
-        "A=100 · B=100",
-        "request"
-      ],
-      [
-        "更新关联数据",
-        1,
-        2,
-        "WRITE",
-        "事务执行器在同一事务内写入 A=90、B=110。隔离机制控制其他事务能看见什么。",
-        "事务内总额仍为 200 · 尚未提交",
-        "data"
-      ],
-      [
-        "提交并持久化",
-        1,
-        3,
-        "COMMIT",
-        "按照数据库的提交与持久化配置完成提交；原子性、隔离性、持久性分别需要机制支持。",
-        "提交决定已记录",
-        "control"
-      ],
-      [
-        "对外返回",
-        1,
-        0,
-        "ACK",
-        "事务执行器返回业务成功。事务之外的邮件、消息、HTTP 调用不会自动随数据库回滚。",
-        "对外可见：A=90 · B=110",
-        "control"
-      ]
-    ],
-    "principle": "业务不变量决定事务边界；ACID 的不同保证不能互相代替。",
-    "tradeoff": "更大的事务更易表达原子性，也可能增加锁等待、冲突和恢复负担。",
-    "pitfall": "可串行化讨论并发执行顺序；持久性讨论崩溃后保留，两者独立。",
-    "code": [
-      "begin()",
-      "try:",
-      "  debit(A, 10)",
-      "  credit(B, 10)",
-      "  commit()",
-      "on error before commit:",
-      "  rollback()"
-    ],
-    "sources": [
-      "db",
-      "recovery_notes"
-    ],
-    "related": [
-      "isolation",
-      "wal",
-      "outbox"
-    ],
-    "fault": {
-      "name": "第二次写入失败",
-      "nodes": [
-        "客户端",
-        "事务执行器",
-        "账户 A 与 B",
-        "提交记录"
-      ],
-      "steps": [
-        [
-          "开始原子转账",
-          0,
-          1,
-          "BEGIN",
-          "客户端请求 A 向 B 转账 10；本次故障轨迹从两个账户均为 100 开始。",
-          "A=100 · B=100",
-          "request"
-        ],
-        [
-          "第一笔写入成功",
-          1,
-          2,
-          "DEBIT A",
-          "事务内先将 A 扣为 90，此时 B 仍为 100；整个事务尚未提交。",
-          "事务内 A=90 · B=100 · 未提交",
-          "data"
-        ],
-        [
-          "第二笔写入被拒绝",
-          1,
-          2,
-          "CREDIT FAILED",
-          "给 B 入账时发生错误。本例选择中止整个转账事务，不能继续返回成功。",
-          "B=100 · 整个事务待回滚",
-          "reject"
-        ],
-        [
-          "中止整个事务",
-          1,
-          0,
-          "ABORT",
-          "数据库撤销修改或使本事务版本不可见，确认事务中止后向客户端返回失败。没有只扣款、未入账的已提交结果。",
-          "对外 A=100 · B=100",
-          "control"
-        ]
-      ],
-      "code": [
-        "begin()",
-        "debit(A, 10)",
-        "try credit(B, 10) -> error",
-        "rollbackWholeTransaction()",
-        "return failure"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "isolation",
-    "title": "隔离级别与两阶段锁",
-    "en": "ISOLATION & 2PL",
-    "summary": "限制并发交错，使事务不会读到或产生不允许的中间结果。",
-    "nodes": [
-      "事务 T1",
-      "锁管理器",
-      "共享记录 A",
-      "事务 T2"
-    ],
-    "steps": [
-      [
-        "申请所需锁",
-        0,
-        1,
-        "LOCK X(A)",
-        "两阶段锁的增长阶段获取锁；读、写锁是否兼容由锁模式决定。本例采用把所有锁保留到事务结束的严格变体。",
-        "T1 获得 X(A)",
-        "request"
-      ],
-      [
-        "冲突访问等待",
-        3,
-        1,
-        "WAIT X(A)",
-        "T2 想写同一记录，需要等待 T1 释放排他锁。锁范围也可能需要覆盖查询谓词或范围。",
-        "T2: BLOCKED",
-        "request"
-      ],
-      [
-        "修改并提交",
-        0,
-        2,
-        "WRITE A=90",
-        "T1 在 X(A) 保护下修改记录并完成提交。将排他锁持有到提交或中止，可防止其他事务读到未提交写入。",
-        "T1 已提交 A=90 · 即将释放锁",
-        "data"
-      ],
-      [
-        "释放并授予等待者",
-        1,
-        3,
-        "GRANT X(A)",
-        "T1 释放锁后，锁管理器把锁授予 T2。基础 2PL 进入释放阶段后不能再获取新锁；它保证冲突可串行化，但仍可能死锁。",
-        "T2 获得 X(A) · 可以继续",
-        "control"
-      ]
-    ],
-    "principle": "隔离级别约束允许的异常；具体实现可能是锁、版本或依赖检测。",
-    "tradeoff": "更强隔离减少应用推理负担，但可能引入等待、死锁或需要重试的事务中止。",
-    "pitfall": "两阶段锁 2PL 是并发控制；两阶段提交 2PC 是跨参与者提交协议。",
-    "code": [
-      "acquireRequiredLocks()",
-      "readAndWrite()",
-      "commitOrAbort()",
-      "releaseAllLocksAtTransactionEnd()"
-    ],
-    "sources": [
-      "locks_notes",
-      "pg"
-    ],
-    "related": [
-      "txn",
-      "mvcc",
-      "occ"
-    ],
-    "fault": {
-      "name": "读已提交下的不可重复读",
-      "nodes": [
-        "事务 T1",
-        "每条语句的新快照",
-        "共享记录 A",
-        "事务 T2"
-      ],
-      "steps": [
-        [
-          "第一条查询读到 100",
-          2,
-          0,
-          "READ 100",
-          "这是独立的 PostgreSQL 读已提交示例。T1 的第一条普通 SELECT 读取当时已提交的 A=100，不持有阻止后续更新的读锁。",
-          "T1 首次读到 100",
-          "data"
-        ],
-        [
-          "另一事务写入",
-          3,
-          2,
-          "WRITE 90",
-          "T2 更新 A=90，修改尚未提交；T1 不能把这个未提交值当作普通查询结果。",
-          "T2 未提交 A=90",
-          "data"
-        ],
-        [
-          "另一事务提交",
-          3,
-          3,
-          "COMMIT",
-          "T2 完成提交。之后开始的新语句快照可以看到 A=90。",
-          "已提交值 A=90",
-          "local"
-        ],
-        [
-          "第二条查询看到新值",
-          2,
-          0,
-          "READ 90",
-          "T1 在同一事务里再次执行 SELECT，但读已提交为该语句使用新快照，所以返回 90。这是该级别允许的不可重复读，不是绕过已经持有的排他锁。",
-          "T1 两次读到 100 → 90",
-          "data"
-        ]
-      ],
-      "code": [
-        "T1.begin(isolation = READ_COMMITTED)",
-        "first = T1.select(A)  // 100",
-        "T2.updateAndCommit(A, 90)",
-        "second = T1.select(A) // 90 is permitted"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "mvcc",
-    "title": "MVCC 与快照",
-    "en": "MULTI-VERSION CONCURRENCY",
-    "summary": "保留数据版本，使读取者能看到符合自身快照规则的数据。",
-    "nodes": [
-      "读事务 R",
-      "版本 v1: 100",
-      "写事务 W",
-      "版本 v2: 90"
-    ],
-    "steps": [
-      [
-        "建立快照并读取",
-        1,
-        0,
-        "READ v1",
-        "R 建立快照并读取可见的 v1。快照何时建立、是否每条语句刷新，由隔离级别与实现决定。",
-        "R 可见值 = 100",
-        "data"
-      ],
-      [
-        "写入新版本",
-        2,
-        3,
-        "NEW VERSION",
-        "W 产生新版本，旧版本仍可能被较早的快照使用。",
-        "v1 与未提交的 v2 共存",
-        "data"
-      ],
-      [
-        "提交新版本",
-        2,
-        2,
-        "COMMIT",
-        "W 完成提交后，满足可见性规则的新快照可读 v2；旧快照不必跟着变化。",
-        "新快照可见 90",
-        "local"
-      ],
-      [
-        "旧快照继续读",
-        1,
-        0,
-        "READ v1",
-        "本例使用事务级快照：R 再读仍为 100。没有活跃快照需要的旧版本才具备回收条件。",
-        "R 仍读 100 · 稍后清理 v1",
-        "data"
-      ]
-    ],
-    "principle": "版本解决“读哪个状态”，可串行化还要控制事务之间的依赖。",
-    "tradeoff": "读写冲突可减少，但旧版本占空间；长事务会拖慢垃圾回收。",
-    "pitfall": "MVCC 不自动保证可串行化；快照隔离可能出现写偏差。",
-    "code": [
-      "snapshot = beginTransactionSnapshot()",
-      "first = readNewestVisibleVersion(snapshot)",
-      "writer.createNewVersion(90)",
-      "writer.commit()",
-      "again = readNewestVisibleVersion(snapshot) // 100",
-      "reclaimOnlyWhenNoSnapshotNeedsIt()"
-    ],
-    "sources": [
-      "pg",
-      "db"
-    ],
-    "related": [
-      "isolation",
-      "occ",
-      "invariants"
-    ],
-    "fault": {
-      "name": "两个医生同时下班",
-      "nodes": [
-        "医生 A 的事务",
-        "快照 A=值班 B=值班",
-        "医生 B 的事务",
-        "值班记录 A / B"
-      ],
-      "steps": [
-        [
-          "A 看到 B 在值班",
-          1,
-          0,
-          "READ B=ON",
-          "A、B 两个事务都采用快照隔离，并在任一方提交前建立快照。A 看到 B 在值班，计划只更新自己的记录。",
-          "A 计划下班 · B=值班",
-          "data"
-        ],
-        [
-          "B 看到 A 在值班",
-          1,
-          2,
-          "READ A=ON",
-          "B 在自己的旧快照中也看到 A 值班，计划只更新 B 的记录。两次判断都基于两人仍值班的状态。",
-          "两事务都认为另一人会留守",
-          "data"
-        ],
-        [
-          "A 提交下班",
-          0,
-          3,
-          "COMMIT A=OFF",
-          "A 将自己的记录改为下班并提交；B 的快照仍然显示 A 在值班。",
-          "当前 A=下班 · B=值班",
-          "data"
-        ],
-        [
-          "B 也提交下班",
-          2,
-          3,
-          "COMMIT B=OFF",
-          "B 写的是另一条记录，单纯检测同一记录写冲突的快照隔离可以让两者都提交，最终违反至少一人值班的不变量。可串行化执行应拒绝这种结果。",
-          "A=下班 · B=下班 · 写偏差",
-          "data"
-        ]
-      ],
-      "code": [
-        "A.beginSnapshot(); B.beginSnapshot()",
-        "A.read(B.onCall) == true",
-        "B.read(A.onCall) == true",
-        "A.updateOwnRow(false); A.commit()",
-        "B.updateOwnRow(false); B.commit()",
-        "// Snapshot isolation can permit both commits."
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "occ",
-    "title": "乐观并发控制",
-    "en": "OPTIMISTIC CONCURRENCY",
-    "summary": "先基于读取状态计算，提交时验证其仍然有效。",
-    "nodes": [
-      "事务 T1",
-      "记录及版本",
-      "事务 T2",
-      "原子提交检查"
-    ],
-    "steps": [
-      [
-        "读取基线",
-        1,
-        0,
-        "READ v7",
-        "本例展示单记录版本条件更新。T1 读取值与版本号，在本地计算新状态。",
-        "expectedVersion = 7",
-        "data"
-      ],
-      [
-        "并发修改",
-        2,
-        1,
-        "WRITE v8",
-        "T2 原子提交值与新版本号，将记录版本推进到 8。",
-        "currentVersion = 8",
-        "data"
-      ],
-      [
-        "校验前置条件",
-        0,
-        3,
-        "REJECT v7",
-        "T1 已尝试以版本仍为 7 为前提提交。原子检查发现版本为 8，拒绝写入；检查与更新之间不能留下竞争窗口。",
-        "7 ≠ 8 · T1 未写入",
-        "reject"
-      ],
-      [
-        "重读并重算",
-        0,
-        1,
-        "READ FRESH",
-        "T1 放弃旧计算，重新读取 v8 后重算并重试。多记录 OCC 还需要验证完整的相关读写依赖，包括必要的范围或谓词依赖。",
-        "重新读取 v8 · 不复用旧结果",
-        "request"
-      ]
-    ],
-    "principle": "提交时验证决定正确性的前置条件，并原子地完成条件检查与更新。",
-    "tradeoff": "低冲突时避免长时间持锁；高冲突下重试浪费算力，可能导致饥饿。",
-    "pitfall": "只检查单个版本号，不能自动保护跨记录条件或范围查询。",
-    "code": [
-      "base = readValueAndVersion()",
-      "next = compute(base.value)",
-      "ok = atomicUpdateIfVersion(",
-      "  expected = base.version,",
-      "  value = next, version = base.version + 1)",
-      "if !ok: retryFromFreshState()"
-    ],
-    "sources": [
-      "occ_paper",
-      "versioning"
-    ],
-    "related": [
-      "sync",
-      "mvcc",
-      "ordering"
-    ],
-    "fault": {
-      "name": "忽略冲突强行写入",
-      "nodes": [
-        "事务 T1",
-        "记录及版本",
-        "事务 T2",
-        "T1 的本地计算"
-      ],
-      "steps": [
-        [
-          "T1 读取旧值",
-          1,
-          0,
-          "READ 100 / v7",
-          "共享值初始为 100，版本为 7。T1 计划在读到的值上增加 10。",
-          "T1 基线 = 100 / v7",
-          "data"
-        ],
-        [
-          "计算但尚未提交",
-          0,
-          3,
-          "COMPUTE 110",
-          "T1 在本地得到 110，还没有更新共享记录。",
-          "待写结果 = 110",
-          "data"
-        ],
-        [
-          "T2 提交减 10",
-          2,
-          1,
-          "COMMIT 90 / v8",
-          "T2 把共享值减为 90，原子提交新值和版本 8。",
-          "共享值 = 90 / v8",
-          "data"
-        ],
-        [
-          "旧计算盲目覆盖",
-          0,
-          1,
-          "BLIND WRITE 110",
-          "T1 不检查版本就写入旧计算 110，覆盖了 T2 的减 10。两个加减操作若串行执行应得到 100，而不是 110。",
-          "丢失 T2 更新 · 最终 110",
-          "data"
-        ]
-      ],
-      "code": [
-        "base = read()                 // 100, v7",
-        "next = base.value + 10        // 110",
-        "T2.commit(value = 90, version = 8)",
-        "writeWithoutVersionCheck(next)",
-        "// T2's decrement is lost."
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "wal",
-    "title": "预写日志 WAL",
-    "en": "WRITE-AHEAD LOGGING",
-    "summary": "先保证恢复所需的日志持久化，再允许对应的数据页落盘。",
-    "nodes": [
-      "事务与内存页",
-      "WAL 缓冲区",
-      "持久化日志",
-      "磁盘数据页"
-    ],
-    "steps": [
-      [
-        "记录页面修改",
-        0,
-        1,
-        "UPDATE LSN 42",
-        "修改内存页面并产生日志记录 42。WAL 不要求修改内存页之前先刷盘，但数据页写回必须先有对应的持久日志。",
-        "pageLSN=42 · 内存页已脏",
-        "data"
-      ],
-      [
-        "提交记录与日志持久化",
-        1,
-        2,
-        "FLUSH THROUGH 43",
-        "事务完成写入后追加提交记录 43，再把日志刷到 43。仅刷到页面修改记录 42，不足以证明事务已经持久提交。",
-        "durableLSN=43 ≥ commitLSN=43",
-        "data"
-      ],
-      [
-        "确认持久提交",
-        0,
-        0,
-        "COMMIT ACK",
-        "本例要求同步持久提交；确认日志已持久到本事务的提交记录之后，才向客户端返回成功。数据页可稍后写回。",
-        "提交记录已持久化 · 可以确认成功",
-        "local"
-      ],
-      [
-        "稍后刷数据页",
-        0,
-        3,
-        "FLUSH PAGE",
-        "将脏页写回前核对 durableLSN ≥ pageLSN。WAL 允许数据页滞后；是否允许提交前刷页还取决于恢复协议。",
-        "durableLSN ≥ pageLSN=42",
-        "data"
-      ]
-    ],
-    "principle": "正确的“先”是日志先于对应数据页持久化，并非日志先于内存修改。",
-    "tradeoff": "顺序日志与组提交能降低持久化成本；同步策略影响延迟及故障时的数据丢失窗口。",
-    "pitfall": "开启 WAL 本身不等于所有成功响应都绝不丢失，还要核对提交和存储持久化语义。",
-    "code": [
-      "page.LSN = updateBufferAndAppendLog()",
-      "commitLSN = appendCommitRecord()",
-      "flushLogThrough(commitLSN)",
-      "ackCommit() // synchronous durability in this example",
-      "beforeFlush(page): require durableLSN >= page.LSN",
-      "flushDataPageLater()"
-    ],
-    "sources": [
-      "wal",
-      "wal_commit",
-      "recovery_notes"
-    ],
-    "related": [
-      "txn",
-      "recovery",
-      "outbox"
-    ],
-    "fault": {
-      "name": "提交记录持久化前崩溃",
-      "nodes": [
-        "事务与内存页",
-        "WAL 缓冲区",
-        "持久化日志",
-        "恢复后的可见状态"
-      ],
-      "steps": [
-        [
-          "生成修改日志",
-          0,
-          1,
-          "UPDATE LSN 42",
-          "事务把值从 100 改为 90，并为页面修改产生日志 42；事务尚未提交。",
-          "内存值 90 · pageLSN=42",
-          "data"
-        ],
-        [
-          "只刷出修改记录",
-          1,
-          2,
-          "FLUSH THROUGH 42",
-          "日志 42 已持久化，但提交记录尚未持久化。更新日志可用于恢复，不代表业务已成功提交。",
-          "durableLSN=42 · 无持久提交证据",
-          "data"
-        ],
-        [
-          "确认成功前崩溃",
-          0,
-          0,
-          "CRASH",
-          "系统在提交记录持久化、返回成功之前崩溃。内存状态丢失；客户端没有本次成功确认。",
-          "事务结果不能判为已提交",
-          "local"
-        ],
-        [
-          "恢复时排除未提交结果",
-          2,
-          3,
-          "RECOVER UNCOMMITTED",
-          "恢复协议可能先重做物理修改，再撤销或用可见性规则排除未提交事务。本例没有持久提交记录，不能将 90 作为成功结果。",
-          "本例可见值仍为 100",
-          "data"
-        ]
-      ],
-      "code": [
-        "updateLSN = logUpdate(100, 90)",
-        "flushLogThrough(updateLSN)",
-        "crashBeforeCommitRecordIsDurable()",
-        "recoverUsingTransactionStatus()",
-        "assert !isCommitted(transaction)"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "recovery",
-    "title": "崩溃恢复与检查点",
-    "en": "CRASH RECOVERY",
-    "summary": "从持久化记录重建可继续运行的状态，区分已提交与未完成的工作。",
-    "nodes": [
-      "检查点元数据",
-      "持久化日志",
-      "恢复管理器",
-      "数据库状态"
-    ],
-    "steps": [
-      [
-        "找到恢复起点",
-        0,
-        2,
-        "CHECKPOINT",
-        "读取有效检查点元数据，按恢复协议确定需要扫描的日志范围；检查点不必表示所有页面在同一瞬间落盘。",
-        "定位必要日志 · 不假定检查点前全已完成",
-        "data"
-      ],
-      [
-        "分析与重做",
-        1,
-        2,
-        "REDO",
-        "根据恢复协议重建必要状态，并重做尚未体现在页面上的日志记录；某些协议会先重演包含未提交修改的历史。",
-        "页面和事务状态逐步重建",
-        "data"
-      ],
-      [
-        "处理未完成事务",
-        2,
-        3,
-        "UNDO / INVISIBLE",
-        "需要时撤销未提交更新，或用事务状态和版本可见性排除它们。不同数据库并不都采用 ARIES 的物理 UNDO 路径。",
-        "未提交结果不能作为成功结果",
-        "data"
-      ],
-      [
-        "继续运行",
-        2,
-        2,
-        "OPEN DATABASE",
-        "页面、事务状态和恢复元数据满足一致性条件后，恢复管理器重新开放数据库服务。",
-        "服务恢复 · 保留安全状态",
-        "local"
-      ]
-    ],
-    "principle": "恢复必须有明确的持久化依据；不能用“进程启动了”代替“状态正确了”。",
-    "tradeoff": "更频繁检查点缩短部分恢复工作，但增加运行时 I/O；保留日志还要考虑备份与复制。",
-    "pitfall": "WAL、检查点和备份职责不同；单机恢复不能替代异地备份。",
-    "code": [
-      "start = locateValidRecoveryPoint()",
-      "replayRequiredLog(start)",
-      "resolveUncommittedTransactionsByProtocol()",
-      "openDatabaseWhenConsistent()"
-    ],
-    "sources": [
-      "recovery_notes",
-      "wal"
-    ],
-    "related": [
-      "wal",
-      "invariants",
-      "messaging"
-    ],
-    "fault": {
-      "name": "重放期间再次崩溃",
-      "nodes": [
-        "检查点元数据",
-        "持久化日志",
-        "恢复管理器",
-        "数据库页面"
-      ],
-      "steps": [
-        [
-          "开始第一次恢复",
-          0,
-          2,
-          "START RECOVERY",
-          "读取有效检查点并发现页面仍停留在 LSN 40；持久日志中包含需要重做的更新 42。",
-          "磁盘 pageLSN=40 · 需要重做 42",
-          "data"
-        ],
-        [
-          "重做并写回一页",
-          1,
-          3,
-          "REDO 42",
-          "按协议重做记录 42，并把修改后的页面及其 pageLSN 一起可靠写回。数据库整体恢复仍未结束。",
-          "该页持久 pageLSN=42",
-          "data"
-        ],
-        [
-          "恢复进程再次崩溃",
-          2,
-          2,
-          "CRASH AGAIN",
-          "恢复管理器在处理其余日志前再次崩溃；刚才已持久化的页面和原始日志仍在。",
-          "服务尚未开放 · 恢复未完成",
-          "local"
-        ],
-        [
-          "重启并跳过已完成修改",
-          0,
-          2,
-          "RESTART RECOVERY",
-          "从有效恢复起点再扫描。支持 pageLSN 判定的重做协议可识别该页已包含记录 42，跳过它并继续其余工作；其他实现也必须提供等价的可重入保证。",
-          "记录 42 不重复产生额外效果",
-          "data"
-        ]
-      ],
-      "code": [
-        "startRecoveryFromValidCheckpoint()",
-        "redoAndPersistPage(recordLSN = 42)",
-        "crash()",
-        "restartRecovery()",
-        "skipAlreadyAppliedRedoUsingPageLSN()",
-        "continueRemainingRecovery()"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "index",
-    "title": "B+ 树与 LSM 树",
-    "en": "STORAGE INDEXES",
-    "summary": "用不同的数据布局，在查询成本、写入成本和空间占用之间取舍。",
-    "nodes": [
-      "访问需求",
-      "B+ 树页",
-      "LSM MemTable",
-      "有序 SST 文件"
-    ],
-    "steps": [
-      [
-        "方案 A：B+ 树路径",
-        0,
-        1,
-        "OPTION A",
-        "这里比较两种替代方案。本例的页式 B+ 树按键定位叶页并更新；有序叶子适合点查询和范围扫描，页满时可能分裂。",
-        "独立方案 A · 修改叶页",
-        "compare"
-      ],
-      [
-        "方案 B：LSM 路径",
-        0,
-        2,
-        "OPTION B",
-        "现在改看另一种实现，不是把上一步写入再执行一次。LSM 先写入内存结构，通常辅以日志保护，累积后刷成有序文件。",
-        "独立方案 B · MemTable 累积",
-        "compare"
-      ],
-      [
-        "LSM 后续刷盘与合并",
-        2,
-        3,
-        "FLUSH / COMPACT",
-        "沿方案 B 继续：刷盘产生 SST；后台压实合并文件、处理旧版本与删除标记，同时消耗 I/O。",
-        "此步骤仅属于 LSM 路径",
-        "data"
-      ],
-      [
-        "比较查询与写入成本",
-        1,
-        3,
-        "TRADEOFF",
-        "比较两个方案的读、写和空间成本。LSM 查询可能访问多个结构；布隆过滤器等可减少无效读取。选择取决于真实读写模式。",
-        "读放大 / 写放大 / 空间放大",
-        "compare"
-      ]
-    ],
-    "principle": "索引结构决定数据访问路径，不能脱离缓存、持久化与工作负载比较。",
-    "tradeoff": "B+ 树与 LSM 都有工程变体；LSM 压实以写放大换取查询与空间效率。",
-    "pitfall": "LSM 不是“每个字节只写一次”；compaction 可能重复搬运数据。",
-    "code": [
-      "if engine == B_PLUS_TREE:",
-      "  updateLeafAndSplitIfNeeded()",
-      "else if engine == LSM:",
-      "  appendWALAndUpdateMemtable()",
-      "  if memtableFull: flushSortedRun()",
-      "  compactRunsInBackground()"
-    ],
-    "sources": [
-      "bpt",
-      "rocks",
-      "stalls"
-    ],
-    "related": [
-      "cache",
-      "wal",
-      "measure"
-    ],
-    "fault": {
-      "name": "压实跟不上写入",
-      "nodes": [
-        "写入请求",
-        "LSM MemTable",
-        "后台压实与限速",
-        "有序 SST 文件"
-      ],
-      "steps": [
-        [
-          "持续接收 LSM 写入",
-          0,
-          1,
-          "LSM WRITE",
-          "本故障轨迹只讨论 LSM。写入持续进入 MemTable，日志按所选持久化策略保护修改。",
-          "写入速率持续较高",
-          "data"
-        ],
-        [
-          "刷出更多有序文件",
-          1,
-          3,
-          "FLUSH SST",
-          "MemTable 到达阈值后刷成新的 SST；新文件生成速度持续高于后台处理速度。",
-          "待处理 SST 持续增加",
-          "data"
-        ],
-        [
-          "后台压实积压",
-          3,
-          2,
-          "COMPACTION BACKLOG",
-          "文件需要压实，但后台 I/O 或 CPU 预算不足。积压增加查询与空间成本，逼近限速阈值。",
-          "待压实字节 / 文件数量过高",
-          "control"
-        ],
-        [
-          "限制新写入",
-          2,
-          0,
-          "WRITE STALL",
-          "存储引擎延迟或暂停新写入，为后台刷盘和压实留出资源；积压下降到恢复条件后再继续接收。",
-          "写入受限 · 后台继续消化积压",
-          "control"
-        ]
-      ],
-      "code": [
-        "appendWALAndUpdateMemtable()",
-        "flushWhenMemtableFull()",
-        "if tooManyFiles || pendingCompactionTooLarge:",
-        "  delayOrStopNewWrites()",
-        "keepBackgroundCompactionRunning()",
-        "resumeWhenBacklogDrops()"
-      ]
-    }
-  },
-  {
-    "group": 1,
-    "id": "invariants",
-    "title": "不变量与状态机验证",
-    "en": "INVARIANTS & VERIFICATION",
-    "summary": "先写明所有合法执行都必须满足什么，再用模型与故障测试寻找反例。",
-    "nodes": [
-      "规范与假设",
-      "有限状态模型",
-      "模型检查器",
-      "反例 / 验证结果"
-    ],
-    "steps": [
-      [
-        "定义安全属性",
-        0,
-        1,
-        "SAFETY",
-        "例如：同一任务版本最多有一个有效提交结果。把状态、事件和提交前置条件表达清楚。",
-        "坏事永远不发生",
-        "control"
-      ],
-      [
-        "定义活性条件",
-        0,
-        1,
-        "LIVENESS",
-        "例如：在依赖最终可用且调度公平等假设下，任务最终完成。把环境、故障范围与公平性假设写进规范。",
-        "好事最终会发生 · 假设明确",
-        "control"
-      ],
-      [
-        "探索状态与执行循环",
-        1,
-        2,
-        "MODEL CHECK",
-        "模型包含崩溃、重复、乱序和分区转移。检查可达状态中的安全属性；验证活性时，还需检查满足假设却无法进展的执行循环。",
-        "状态图 + 活性循环检查",
-        "data"
-      ],
-      [
-        "用结果修复并回归",
-        2,
-        3,
-        "RESULT",
-        "读取反例以改进协议、模型和测试。通过检查的结论仅覆盖该模型、假设与检查范围，仍需核对实现。",
-        "反例可重现 · 规范与实现需对应",
-        "data"
-      ]
-    ],
-    "principle": "把正确性写成可检查的属性，围绕关键事件和故障交错验证。",
-    "tradeoff": "模型越贴近实现越复杂；抽象需要保留决定正确性的状态和顺序。",
-    "pitfall": "测试没发现问题不等于证明正确；心跳正常也不等于系统持续取得业务进展。",
-    "code": [
-      "model = defineFiniteStateModel()",
-      "checkInvariantInEveryReachableState(model)",
-      "checkLivenessWithExplicitFairness(model)",
-      "if counterexample: reviseAndCheckAgain()",
-      "verifyImplementationMatchesModel()"
-    ],
-    "sources": [
-      "tla",
-      "deadlock_notes"
-    ],
-    "related": [
-      "fencing",
-      "occ",
-      "observability"
-    ],
-    "fault": {
-      "name": "仅检查进程存活",
-      "nodes": [
-        "任务 A",
-        "任务 B",
-        "锁状态 X / Y",
-        "健康与进度监控"
-      ],
-      "steps": [
-        [
-          "A 先取得 X",
-          0,
-          2,
-          "LOCK X",
-          "任务 A 取得锁 X，准备继续取得 Y；此时没有持有全部所需资源。",
-          "X 归 A · Y 空闲",
-          "request"
-        ],
-        [
-          "B 先取得 Y",
-          1,
-          2,
-          "LOCK Y",
-          "任务 B 取得 Y，随后需要 X。两个任务的锁获取顺序不同。",
-          "X 归 A · Y 归 B",
-          "request"
-        ],
-        [
-          "形成循环等待",
-          2,
-          2,
-          "WAIT CYCLE",
-          "A 请求 Y 被 B 阻塞，B 请求 X 被 A 阻塞。若没有超时中止、死锁处理或其他恢复，两者都无法继续；公平调度不能让被锁阻塞的动作自动成功。",
-          "A 等 B · B 等 A · 无任务进展",
-          "local"
-        ],
-        [
-          "心跳掩盖业务停滞",
-          3,
-          3,
-          "HEARTBEAT ≠ PROGRESS",
-          "独立健康检查仍可返回成功，但业务任务没有推进。结合等待关系、任务年龄与阶段变化才能识别阻塞，并按协议恢复。",
-          "进程存活 · 任务死锁",
-          "local"
-        ]
-      ],
-      "code": [
-        "schedule(A.acquire(X), B.acquire(Y))",
-        "schedule(A.request(Y), B.request(X))",
-        "assert heartbeatEndpoint() == OK",
-        "assert detectWaitForCycle(A, B)",
-        "// No completion without a recovery transition."
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "retries",
-    "title": "超时、重试与退避",
-    "en": "TIMEOUTS & RETRIES",
-    "summary": "超时只表示在期限内未得到结果，不能证明远端没有执行。",
-    "nodes": [
-      "客户端 / 重试预算",
-      "网络",
-      "服务端",
-      "结果查询"
-    ],
-    "steps": [
-      [
-        "发送逻辑请求",
-        0,
-        1,
-        "REQUEST K",
-        "客户端为一次逻辑操作生成稳定的 K，并设置覆盖所有尝试的总截止时间。",
-        "同一逻辑操作使用同一 K",
-        "request"
-      ],
-      [
-        "服务提交、响应丢失",
-        1,
-        2,
-        "EXECUTE K",
-        "请求到达服务端并提交；本例中成功响应在返回途中丢失，客户端尚不知道结果。",
-        "服务端已提交 · 客户端尚未知",
-        "request"
-      ],
-      [
-        "本地等待超时",
-        0,
-        0,
-        "TIMEOUT",
-        "客户端自己的计时器到期。超时不能证明服务端没有执行，也不会自动撤销远端效果。",
-        "UNKNOWN ≠ FAILED",
-        "local"
-      ],
-      [
-        "退避后有限重试",
-        0,
-        1,
-        "RETRY K",
-        "确认接口支持所需幂等语义后，在总预算内退避并加入随机抖动，以相同 K 和参数重试；也可按协议查询结果。",
-        "相同 K · 有限尝试 · 结果待确认",
-        "request"
-      ]
-    ],
-    "principle": "把超时看成不确定性，用协议解决结果查询与重复副作用。",
-    "tradeoff": "更积极重试可掩盖短暂故障，也会放大已过载服务的压力。",
-    "pitfall": "无限重试不是可靠性；各层分别重试会乘法放大请求数量。",
-    "code": [
-      "key = stableIdForLogicalOperation()",
-      "deadline = monotonicNow() + totalBudget",
-      "while attemptsRemain() && before(deadline):",
-      "  result = request(key, sameParameters, deadline)",
-      "  if result.success || result.permanentFailure: return result",
-      "  if !safeAndRetryable(result): return UNKNOWN",
-      "  waitWithinDeadline(backoffWithJitter())",
-      "return UNKNOWN"
-    ],
-    "sources": [
-      "retry",
-      "idempotent"
-    ],
-    "related": [
-      "idempotency",
-      "backpressure",
-      "observability"
-    ],
-    "fault": {
-      "name": "反例：立即、无限重试",
-      "nodes": [
-        "客户端群",
-        "网络",
-        "过载服务",
-        "重试策略"
-      ],
-      "steps": [
-        [
-          "同时发起请求",
-          0,
-          1,
-          "REQUEST Kᵢ",
-          "多个客户端各自发送逻辑请求 Kᵢ；本反例故意不设置重试次数和总预算。",
-          "多个请求同时在途",
-          "request"
-        ],
-        [
-          "请求到达，响应未达",
-          1,
-          2,
-          "EXECUTE / NO RESPONSE",
-          "图中请求到达服务端；服务端可能已经产生部分业务效果，但高负载使返回的响应延迟或丢失。",
-          "部分效果可能已生效",
-          "request"
-        ],
-        [
-          "客户端同时超时",
-          0,
-          0,
-          "TIMEOUT",
-          "这些客户端在相近时间超时；每个调用者掌握的仍是不确定结果。",
-          "UNKNOWN · 不能当作未执行",
-          "local"
-        ],
-        [
-          "立即连续重发",
-          0,
-          2,
-          "RETRY STORM",
-          "错误策略让客户端不退避、不限次地反复重发，放大服务压力；即使按 Kᵢ 去重，重复请求也会消耗资源。",
-          "重试放大 · 恢复更困难",
-          "request"
-        ]
-      ],
-      "code": [
-        "// Counterexample: no deadline, limit, or backoff",
-        "while true:",
-        "  result = request(sameLogicalId, sameParameters)",
-        "  if result.isKnown: return result",
-        "  continue"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "idempotency",
-    "title": "幂等键与结果去重",
-    "en": "IDEMPOTENCY",
-    "summary": "让同一逻辑请求的重复到达，复用同一个业务效果。",
-    "nodes": [
-      "客户端",
-      "服务实例 A",
-      "数据库：业务 + 去重",
-      "服务实例 B"
-    ],
-    "steps": [
-      [
-        "建立稳定身份",
-        0,
-        1,
-        "KEY K",
-        "客户端发送 K 和参数；K 在调用者与操作的约定作用域内标识一次意图，重试沿用它。",
-        "K 绑定调用者、操作与参数",
-        "request"
-      ],
-      [
-        "原子执行并记录",
-        1,
-        2,
-        "ATOMIC TX K",
-        "数据库通过唯一键与事务串行化同一 K 的竞争，核对参数，并把业务修改、完成状态和结果 R 一起提交。",
-        "业务效果与 K→R 一起持久提交",
-        "data"
-      ],
-      [
-        "重复请求到达另一实例",
-        0,
-        3,
-        "RETRY K",
-        "首次响应未被客户端收到，它以相同 K 和参数重试，负载均衡把请求送到实例 B。",
-        "逻辑身份不随尝试或实例改变",
-        "request"
-      ],
-      [
-        "返回已保存结果",
-        2,
-        3,
-        "SAVED R",
-        "B 查询共享的已提交记录；数据库返回 R，B 再向客户端返回同义结果，不再执行该业务效果。",
-        "完成记录命中 · 业务效果仍只有一次",
-        "data"
-      ]
-    ],
-    "principle": "幂等的核心是重复操作不增加额外业务效果，关键在原子边界与身份稳定。",
-    "tradeoff": "去重记录需要存储与保留策略；过期后重新出现的请求仍要有明确语义。",
-    "pitfall": "事务名本身不能消除“先查再写”的竞争；还需唯一约束或等价串行化协议。事务外部副作用和去重记录过期必须另行定义语义。",
-    "code": [
-      "transaction:",
-      "  row = claimOrLockUnique(caller, key, parameters)",
-      "  require row.parameters == parameters",
-      "  if row.completed: return row.savedResult",
-      "  result = applyBusinessMutation()",
-      "  saveCompletedResult(row, result)",
-      "// Commit effect, identity, and result together"
-    ],
-    "sources": [
-      "idempotent",
-      "db"
-    ],
-    "related": [
-      "retries",
-      "txn",
-      "outbox"
-    ],
-    "fault": {
-      "name": "反例：查重与执行未原子化",
-      "nodes": [
-        "相同逻辑请求 K",
-        "服务实例 A",
-        "共享数据库",
-        "服务实例 B"
-      ],
-      "steps": [
-        [
-          "A 查到键不存在",
-          1,
-          2,
-          "LOOKUP K: MISS",
-          "两个实例已收到相同 K 的并发请求。本反例没有唯一占位或覆盖查重与修改的事务；A 先查到记录不存在。",
-          "A 判断 K 未处理",
-          "request"
-        ],
-        [
-          "B 也查到不存在",
-          3,
-          2,
-          "LOOKUP K: MISS",
-          "A 尚未记录完成时，B 的独立查询也得到不存在；两个判断都不能保留执行权。",
-          "A、B 都准备执行",
-          "request"
-        ],
-        [
-          "A 执行第一次修改",
-          1,
-          2,
-          "APPLY K",
-          "A 根据先前查询执行业务修改并记录结果；查询和写入之间没有隔离条件。",
-          "业务效果计数 = 1",
-          "data"
-        ],
-        [
-          "B 执行第二次修改",
-          3,
-          2,
-          "DUPLICATE EFFECT",
-          "B 继续使用自己的旧查询结果执行修改，重复业务效果已经产生；事后补写 K 不能撤销它。",
-          "业务效果计数 = 2",
-          "data"
-        ]
-      ],
-      "code": [
-        "// Counterexample: check and effect can race",
-        "if lookup(key) == ABSENT:",
-        "  applyBusinessMutation()",
-        "  saveCompletedResult(key, result)",
-        "// Two workers may both pass the lookup"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "messaging",
-    "title": "消息、确认与重放",
-    "en": "DELIVERY & ACKNOWLEDGMENT",
-    "summary": "区分“消息到达”“业务提交”和“消费确认”，在崩溃后安全重放。",
-    "nodes": [
-      "消息队列",
-      "消费者",
-      "业务存储",
-      "恢复后的消费者"
-    ],
-    "steps": [
-      [
-        "投递消息",
-        0,
-        1,
-        "DELIVER M",
-        "队列把 M 交给消费者，并等待消费确认。投递成功不代表业务已提交。",
-        "M: IN FLIGHT",
-        "data"
-      ],
-      [
-        "原子提交业务与去重",
-        1,
-        2,
-        "COMMIT M",
-        "消费者在同一事务中写业务结果和 M 的已处理记录，并用唯一约束或等价协议处理并发重复。",
-        "业务效果与消费记录已持久提交",
-        "data"
-      ],
-      [
-        "向队列发送确认",
-        1,
-        0,
-        "ACK M",
-        "提交成功后，消费者向队列发送 ACK。ACK 可能在途中丢失，消费者不能据此假定永远不会重投。",
-        "ACK 已发送 · 队列尚待处理",
-        "data"
-      ],
-      [
-        "队列记录确认",
-        0,
-        0,
-        "ACKNOWLEDGED",
-        "队列收到并处理 ACK，按其协议移除未确认投递或推进消费位置；消费端仍保留所需去重语义。",
-        "本次投递已确认",
-        "local"
-      ]
-    ],
-    "principle": "至少一次投递与幂等消费配合，才能在重放时控制业务副作用。",
-    "tradeoff": "批量确认提高吞吐，但扩大重放范围；顺序消费会限制并行度。",
-    "pitfall": "“恰好一次”必须说明边界；队列保证不自动覆盖外部 HTTP、邮件或支付效果。",
-    "code": [
-      "message = receive()",
-      "transaction:",
-      "  if claimUnprocessedUnique(message.id):",
-      "    applyBusinessEffect()",
-      "    markProcessed(message.id)",
-      "ackAfterCommit(message)"
-    ],
-    "sources": [
-      "acks",
-      "idempotent"
-    ],
-    "related": [
-      "idempotency",
-      "outbox",
-      "recovery"
-    ],
-    "fault": {
-      "name": "安全恢复：提交后、ACK 前崩溃",
-      "nodes": [
-        "消息队列",
-        "崩溃消费者",
-        "业务存储",
-        "恢复后的消费者"
-      ],
-      "steps": [
-        [
-          "投递消息",
-          0,
-          1,
-          "DELIVER M",
-          "队列发送 M，使用需要显式确认的投递协议。",
-          "M: IN FLIGHT",
-          "data"
-        ],
-        [
-          "提交业务与消费记录",
-          1,
-          2,
-          "COMMIT M",
-          "消费者把业务效果和 M 的去重记录原子地持久提交。",
-          "M 已处理 · 尚未 ACK",
-          "data"
-        ],
-        [
-          "确认前进程崩溃",
-          1,
-          1,
-          "CRASH BEFORE ACK",
-          "消费者在发送 ACK 前崩溃。队列在连接关闭、故障检测或可见性超时后，按协议允许再次投递。",
-          "业务已提交 · 队列仍未确认",
-          "local"
-        ],
-        [
-          "重投后复用结果",
-          0,
-          3,
-          "REDELIVER M",
-          "恢复后的消费者收到同一 M，核对已提交消费记录后跳过业务修改，再发送 ACK；后续 ACK 丢失仍可按同样方式重放。",
-          "重复投递 · 没有第二次业务效果",
-          "data"
-        ]
-      ],
-      "code": [
-        "commitEffectAndProcessedIdAtomically(M)",
-        "crashBeforeAck()",
-        "// After restart or redelivery:",
-        "if processed(M.id): skipBusinessMutation()",
-        "ack(M)"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "ordering",
-    "title": "序号、版本与任期",
-    "en": "ORDERING & VERSIONS",
-    "summary": "用有明确作用域的版本信息，识别迟到消息和过期执行。",
-    "nodes": [
-      "权威目标 / 提交存储",
-      "当前任务 run=8",
-      "旧任务 run=7",
-      "提交处理器"
-    ],
-    "steps": [
-      [
-        "推进目标与有效执行",
-        0,
-        0,
-        "VERSION 2 / RUN 8",
-        "控制器原子地把当前目标设为 v2、有效执行设为 run=8；新任务绑定这两个身份。",
-        "current = (goal=2, run=8)",
-        "local"
-      ],
-      [
-        "旧结果迟到",
-        2,
-        3,
-        "RESULT (1,7)",
-        "旧任务仍可能继续运行，向提交处理器发送目标 v1、run=7 的结果。",
-        "到达时间不代表新旧顺序",
-        "data"
-      ],
-      [
-        "在写入边界核对身份",
-        3,
-        0,
-        "CHECK / REJECT",
-        "提交存储原子检查目标版本、当前 run 与任务状态；(1,7) 不满足当前 (2,8)，不改变业务状态。",
-        "旧结果被拒绝",
-        "reject"
-      ],
-      [
-        "提交当前结果",
-        1,
-        0,
-        "COMMIT (2,8)",
-        "run=8 的结果通过同一原子条件更新目标 v2 的状态；同一执行的重复完成也按状态或请求 ID 去重。",
-        "v2 得到有效执行的结果",
-        "data"
-      ]
-    ],
-    "principle": "版本的比较规则与作用域必须清楚，提交前置条件要在实际写入边界执行。",
-    "tradeoff": "版本协议增加状态，但让取消、重试和迁移的竞争可以被检测。",
-    "pitfall": "序号只在定义的序列中有序；墙上时钟不能自动提供跨机器全序。",
-    "code": [
-      "result = run(goalVersion, runId)",
-      "storage.atomicCommitIf(",
-      "  result.goalVersion == currentGoalVersion &&",
-      "  result.runId == currentRunId &&",
-      "  taskState == expectedTaskState, result)",
-      "// Repeated completion must also be defined"
-    ],
-    "sources": [
-      "versioning",
-      "dist"
-    ],
-    "related": [
-      "occ",
-      "async",
-      "fencing"
-    ],
-    "fault": {
-      "name": "反例：按到达时间覆盖状态",
-      "nodes": [
-        "权威目标 / 提交存储",
-        "当前任务 run=8",
-        "旧任务 run=7",
-        "无版本检查的处理器"
-      ],
-      "steps": [
-        [
-          "新目标已经生效",
-          0,
-          0,
-          "CURRENT (2,8)",
-          "当前目标已更新为 v2，有效执行为 run=8；旧任务的取消消息未必已经生效。",
-          "current = (goal=2, run=8)",
-          "local"
-        ],
-        [
-          "旧任务返回结果",
-          2,
-          3,
-          "LATE RESULT (1,7)",
-          "run=7 为旧目标 v1 生成的结果晚到，进入未实现提交条件的处理器。",
-          "旧结果仍可能到达",
-          "data"
-        ],
-        [
-          "错误地按最后到达处理",
-          3,
-          3,
-          "LATEST ARRIVAL",
-          "本反例处理器只比较接收时间，不检查权威目标、有效执行和任务状态。",
-          "缺少版本与状态条件",
-          "local"
-        ],
-        [
-          "旧结果覆盖新状态",
-          3,
-          0,
-          "STALE OVERWRITE",
-          "处理器无条件写入旧结果，把目标 v2 的业务状态覆盖为 v1 的结果。发送取消不能替代提交边界的检查。",
-          "旧意图覆盖新意图",
-          "data"
-        ]
-      ],
-      "code": [
-        "// Counterexample: arrival order is not goal order",
-        "result = receiveAnyRunResult()",
-        "storage.unconditionalWrite(result)",
-        "// Missing goal, run, and state preconditions"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "raft",
-    "title": "Raft 与复制日志",
-    "en": "CONSENSUS & REPLICATION",
-    "summary": "通过任期、选举约束和日志复制规则，让副本对一串命令达成一致。",
-    "nodes": [
-      "客户端",
-      "Leader · T4",
-      "Follower B",
-      "Follower C"
-    ],
-    "steps": [
-      [
-        "追加当前任期命令",
-        0,
-        1,
-        "APPEND x",
-        "Leader 在任期 4 接收命令，并将 index=12、term=4 的条目持久写入自己的日志；仅有这一份还不能提交。",
-        "持久副本 = Leader",
-        "request"
-      ],
-      [
-        "复制到 B",
-        1,
-        2,
-        "APPEND ENTRIES",
-        "Leader 发送日志；B 校验前一条目的索引和任期，按规则修复冲突，并在成功应答前持久保存条目。",
-        "持久副本 = Leader + B",
-        "data"
-      ],
-      [
-        "B 返回持久化确认",
-        2,
-        1,
-        "ACK · QUORUM 2/3",
-        "B 的成功应答让 Leader 知道当前任期条目已存于多数节点，因而可以推进 commitIndex；C 可以仍然落后。",
-        "Leader 已知 index 12 达到多数",
-        "data"
-      ],
-      [
-        "按序应用并回复",
-        1,
-        0,
-        "APPLY / RESULT",
-        "Leader 按日志顺序应用已提交命令并向客户端回复。后续 AppendEntries 传播提交位置，使副本继续应用。",
-        "index 12 已提交并应用",
-        "data"
-      ]
-    ],
-    "principle": "安全性来自多数交集、任期与日志规则的组合，不是“投票多就正确”。",
-    "tradeoff": "多数派可用时才能推进提交；复制提升容错但增加网络与持久化延迟。",
-    "pitfall": "复制到多数不能任意提交旧任期条目；线性一致读也需要额外的领导权与读协议。",
-    "code": [
-      "persistLeaderLog(currentTerm, command)",
-      "replicateWithLogMatchingAndDurableAcks()",
-      "if majorityStored(N) && log[N].term == currentTerm:",
-      "  commitIndex = max(commitIndex, N)",
-      "applyCommittedInOrder()",
-      "replyAfterApplicationAsRequired()"
-    ],
-    "sources": [
-      "raft"
-    ],
-    "related": [
-      "consistency",
-      "fencing",
-      "messaging"
-    ],
-    "fault": {
-      "name": "安全停止：复制前发生网络分区",
-      "nodes": [
-        "客户端",
-        "孤立 Leader · T4",
-        "Follower B",
-        "Follower C"
-      ],
-      "steps": [
-        [
-          "仅 Leader 持久追加",
-          0,
-          1,
-          "APPEND index 12",
-          "任期 4 的 Leader 收到命令，把 index=12 存入本地；本分支的网络分区发生在任何 Follower 保存该条目前。",
-          "index 12 仅有 1/3 份",
-          "request"
-        ],
-        [
-          "复制请求无法送达",
-          1,
-          2,
-          "APPEND LOST",
-          "Leader 到 B、C 的链路被切断。本次复制未在 Follower 上落盘，也没有成功 ACK。",
-          "仍只有 1/3 · 无多数",
-          "lost"
-        ],
-        [
-          "不推进提交位置",
-          1,
-          1,
-          "NO QUORUM",
-          "Leader 不能仅凭本地追加宣称 index=12 已提交，也不能返回该命令的成功结果。",
-          "commitIndex 不包含 index 12",
-          "local"
-        ],
-        [
-          "客户端收到未确认结果",
-          1,
-          0,
-          "UNCONFIRMED",
-          "本例旧 Leader 返回未确认/不可用状态；客户端不能把它解释为操作必然未执行，超时也不能提供这样的证明。B、C 可在满足选举约束后产生新 Leader。",
-          "本次写入没有成功确认",
-          "control"
-        ]
-      ],
-      "code": [
-        "persistLocal(currentTerm, command)",
-        "attemptReplication()",
-        "if !haveMajorityEvidence():",
-        "  doNotAdvanceCommitIndex()",
-        "  waitOrReturnUnconfirmed()",
-        "// Never turn a timeout into successful commit"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "consistency",
-    "title": "线性一致性与读协议",
-    "en": "CONSISTENCY MODELS",
-    "summary": "定义并发操作看起来以什么顺序发生，以及读取允许有多旧。",
-    "nodes": [
-      "客户端 A",
-      "主副本",
-      "落后副本",
-      "客户端 B"
-    ],
-    "steps": [
-      [
-        "写入成功响应已到达",
-        1,
-        0,
-        "ACK x=2",
-        "A 此前发出了 x=2 的写请求。主副本完成所需提交后向 A 返回成功；本步展示成功响应，且本例没有后续写入覆盖 x。",
-        "写入已完成",
-        "data"
-      ],
-      [
-        "观察副本落后",
-        2,
-        2,
-        "REPLICA x=1",
-        "落后副本尚未应用这次更新。复制中的传输与应用延迟不会自行提供线性一致读。",
-        "主 x=2 · 落后副本 x=1",
-        "local"
-      ],
-      [
-        "之后发起读取",
-        3,
-        1,
-        "READ x",
-        "B 在 A 收到写入成功之后才向主副本发起读；正确结果必须尊重这一实时先后。",
-        "读必须包含已完成的写入",
-        "request"
-      ],
-      [
-        "读屏障后返回",
-        1,
-        3,
-        "READ x=2",
-        "本例用 Raft 读协议：确认当前任期提交与领导权，取得读位置并等状态机应用到该位置，然后返回 x=2。",
-        "返回 x=2 · 满足本例的实时顺序",
-        "data"
-      ]
-    ],
-    "principle": "线性一致性把每个操作看作在调用与返回之间某一瞬间生效，并尊重实时先后。",
-    "tradeoff": "允许陈旧读取可降低延迟、提高部分故障下的读可用性，但语义更弱。",
-    "pitfall": "读到自己的写入只是较弱的会话保证。有 Raft 不代表任意副本可直接提供线性一致读；租约读还需要满足其明确的时间和时钟假设。",
-    "code": [
-      "// Reader starts after the writer received success",
-      "ensureCommittedEntryInCurrentTerm()",
-      "readIndex = confirmReadAuthorityWithQuorum()",
-      "await lastApplied >= readIndex",
-      "return state[x]"
-    ],
-    "sources": [
-      "raft",
-      "versioning"
-    ],
-    "related": [
-      "raft",
-      "sharding",
-      "txn"
-    ],
-    "fault": {
-      "name": "反例：完成写入后直接读落后副本",
-      "nodes": [
-        "客户端 A",
-        "主副本",
-        "落后副本",
-        "客户端 B"
-      ],
-      "steps": [
-        [
-          "写入成功响应已到达",
-          1,
-          0,
-          "ACK x=2",
-          "A 此前发出了 x=2 的写请求。主副本完成所需提交后向 A 返回成功；本步展示成功响应，且本例没有后续写入覆盖 x。",
-          "已完成的写入是 x=2",
-          "data"
-        ],
-        [
-          "副本尚未应用更新",
-          2,
-          2,
-          "REPLICA x=1",
-          "异步复制落后，副本仍保留旧值 x=1。",
-          "落后副本 x=1",
-          "local"
-        ],
-        [
-          "后发读请求走到副本",
-          3,
-          2,
-          "READ x",
-          "B 在写入完成之后向这个落后副本发起读取；本反例没有执行领导权确认或所需读屏障。",
-          "读的目标是落后副本",
-          "request"
-        ],
-        [
-          "返回旧值",
-          2,
-          3,
-          "STALE x=1",
-          "该副本直接返回 x=1，违反本例的线性一致性承诺。只有较弱、允许陈旧值的读契约才可能接受此结果。",
-          "x=1 · 违反已声明的读语义",
-          "data"
-        ]
-      ],
-      "code": [
-        "writeAndAwaitSuccess(x, 2)",
-        "// Later, with no intervening write:",
-        "return laggingReplica.localRead(x)",
-        "// Counterexample: returns 1 without a read barrier"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "sharding",
-    "title": "分片与数据迁移",
-    "en": "SHARDING & MIGRATION",
-    "summary": "把不同键分给不同节点，并在迁移期间维护明确的所有权和路由版本。",
-    "nodes": [
-      "迁移控制器 / 路由",
-      "旧分片 A",
-      "新分片 B",
-      "客户端"
-    ],
-    "steps": [
-      [
-        "查找当前所有者",
-        3,
-        0,
-        "ROUTE key · epoch 5",
-        "客户端读取当前配置，在 epoch=5 时由 A 服务这个键。配置版本须有明确作用域和比较规则。",
-        "owner(key)=A · epoch=5",
-        "request"
-      ],
-      [
-        "复制并冻结切换点",
-        1,
-        2,
-        "COPY · FREEZE · FINAL DELTA",
-        "先复制快照并追赶更新，再通过协议持久冻结 A 的写入，传送冻结点之前的最终增量和所需去重状态；B 此时尚未服务该分片。",
-        "A 已冻结 · B 具有完整切换状态",
-        "data"
-      ],
-      [
-        "启用 B 并发布新路由",
-        0,
-        2,
-        "ACTIVATE epoch 6",
-        "确认 A 已停止旧所有权写入、B 已安装切换状态后，启用 B 并发布 epoch=6 路由；失败恢复也必须遵守同一所有权协议。",
-        "owner(key)=B · A 不再接受旧写入",
-        "control"
-      ],
-      [
-        "旧路由被拒绝",
-        3,
-        1,
-        "STALE epoch 5",
-        "持旧配置的客户端仍请求 A；A 在写入边界拒绝旧所有权请求，客户端刷新配置后再联系 B。",
-        "旧请求未写入 · 客户端将刷新路由",
-        "reject"
-      ]
-    ],
-    "principle": "迁移要转移数据和所需去重状态，并在最终增量与新所有者启用之间建立写入边界；更新路由本身不能撤销旧节点的写入权。",
-    "tradeoff": "更多分片增加扩展能力，也增加跨分片查询、事务和运维成本。",
-    "pitfall": "把数据复制到新机器不等于完成迁移；切换期间的写入不能漏或双写失控。",
-    "code": [
-      "copySnapshotAndStreamChanges(A, B)",
-      "barrier = freezeWritesDurably(A, nextEpoch)",
-      "copyFinalChangesAndDedupStateThrough(barrier)",
-      "installAndActivate(B, nextEpoch)",
-      "publishRoute(B, nextEpoch)",
-      "rejectOldOwnerWritesAndRefreshClients()"
-    ],
-    "sources": [
-      "migration"
-    ],
-    "related": [
-      "ordering",
-      "fencing",
-      "consistency"
-    ],
-    "fault": {
-      "name": "反例：只改路由，未冻结旧分片",
-      "nodes": [
-        "只改路由的控制器",
-        "仍接受写入的 A",
-        "新分片 B",
-        "持旧配置的客户端"
-      ],
-      "steps": [
-        [
-          "客户端缓存旧路由",
-          3,
-          0,
-          "ROUTE epoch 5",
-          "客户端得到 owner(key)=A 并缓存 epoch=5；本反例中的迁移协议没有旧所有者冻结或写入隔离步骤。",
-          "客户端缓存 A / epoch 5",
-          "request"
-        ],
-        [
-          "复制当时的数据",
-          1,
-          2,
-          "COPY x=1",
-          "把 A 的快照复制到 B，此时两边都是 x=1；A 仍可以接收新的写入。",
-          "A x=1 · B x=1",
-          "data"
-        ],
-        [
-          "只发布新配置",
-          0,
-          2,
-          "ROUTE ONLY · epoch 6",
-          "控制器把新路由指向 B 并启用 B，但没有停止 A 或传送之后发生的更新。",
-          "B 被启用 · A 也仍可写",
-          "control"
-        ],
-        [
-          "旧客户端继续写 A",
-          3,
-          1,
-          "STALE WRITE x=2",
-          "旧客户端按 epoch=5 向 A 写 x=2，A 错误地接受；B 保持 x=1，新路由读不到这次已确认写入。",
-          "A x=2 · B x=1 · 状态分叉",
-          "request"
-        ]
-      ],
-      "code": [
-        "// Counterexample: copying + routing is insufficient",
-        "copySnapshot(A, B)",
-        "publishRouteAndActivate(B, epoch + 1)",
-        "// A was never frozen or fenced",
-        "A.acceptWrite(staleEpoch, x = 2)"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "fencing",
-    "title": "租约与隔离令牌",
-    "en": "LEASES & FENCING TOKENS",
-    "summary": "租约决定谁应当工作；资源端的单调令牌检查阻止旧令牌覆盖已接受的新令牌写入。",
-    "nodes": [
-      "旧 Worker · token 7",
-      "租约服务",
-      "新 Worker · token 8",
-      "目标存储"
-    ],
-    "steps": [
-      [
-        "授予租约与令牌",
-        1,
-        0,
-        "TOKEN 7",
-        "W1 得到针对同一受保护资源的租约和单调令牌 7。令牌须来自可信的授予协议。",
-        "当前租约持有者 W1",
-        "control"
-      ],
-      [
-        "过期后重新授予",
-        1,
-        2,
-        "TOKEN 8",
-        "W1 暂停超过租约期限，W2 获得更大的令牌 8；旧进程及其在途请求可能仍存在。",
-        "当前租约持有者 W2",
-        "control"
-      ],
-      [
-        "资源接受新令牌",
-        2,
-        3,
-        "WRITE token 8",
-        "目标资源把令牌比较、最高令牌更新和业务写入放在同一原子边界，接受 8 后记录 maxToken=8。",
-        "目标资源 maxToken=8",
-        "data"
-      ],
-      [
-        "拒绝旧令牌写入",
-        0,
-        3,
-        "WRITE 7 · REJECT",
-        "W1 恢复并携带 7 写入；目标资源发现 7<8，拒绝这次请求，旧写入不能覆盖已经接受的 8。",
-        "旧请求被拒绝 · 新结果保留",
-        "reject"
-      ]
-    ],
-    "principle": "真正接收副作用的资源必须原子校验并持久保存隔离令牌。比较最高已见令牌可以阻止更旧持有者覆盖已接受的新持有者写入。",
-    "tradeoff": "租约便于故障后接管；实际隔离保证取决于存储支持和副作用边界。",
-    "pitfall": "资源尚未见到 8 时，最高令牌比较不等于知道 7 的租约已到期。允许相同令牌多次写入也不提供操作去重或同一持有者内部的顺序保证。",
-    "code": [
-      "token = acquireMonotonicToken(resource)",
-      "resource.atomicWrite(token, value):",
-      "  require token >= highestSeen",
-      "  highestSeen = max(highestSeen, token)",
-      "  persistTokenAndValueTogether()",
-      "// Same-token ordering/dedup needs its own protocol"
-    ],
-    "sources": [
-      "chubby",
-      "dist"
-    ],
-    "related": [
-      "ordering",
-      "invariants",
-      "raft"
-    ],
-    "fault": {
-      "name": "反例：目标存储完全不校验令牌",
-      "nodes": [
-        "旧 Worker · token 7",
-        "租约服务",
-        "新 Worker · token 8",
-        "未实现隔离的存储"
-      ],
-      "steps": [
-        [
-          "W1 获得租约",
-          1,
-          0,
-          "TOKEN 7",
-          "W1 得到 token=7；本反例的目标存储从一开始就没有令牌校验与原子隔离逻辑。",
-          "有租约 · 资源侧无隔离",
-          "control"
-        ],
-        [
-          "W2 在到期后接管",
-          1,
-          2,
-          "TOKEN 8",
-          "W1 长时间暂停，租约服务让 W2 取得 token=8；租约服务无法自行停止 W1 的进程或撤销在途请求。",
-          "当前租约持有者 W2",
-          "control"
-        ],
-        [
-          "W2 写入新结果",
-          2,
-          3,
-          "WRITE newValue",
-          "W2 把新结果写入存储。该存储接受写入，但没有保存并约束 maxToken。",
-          "存储 = newValue",
-          "data"
-        ],
-        [
-          "W1 的旧写入覆盖",
-          0,
-          3,
-          "STALE WRITE",
-          "W1 恢复后发来的旧结果被同一个未实施隔离的写入接口接受，覆盖新结果。",
-          "旧结果覆盖新结果",
-          "data"
-        ]
-      ],
-      "code": [
-        "// Counterexample: lease status is not enforced here",
-        "token = acquireLeaseToken()",
-        "resource.write(value)",
-        "// Resource ignores token and permits old writers"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "outbox",
-    "title": "跨系统原子性与 Outbox",
-    "en": "TRANSACTIONAL OUTBOX",
-    "summary": "把业务修改与待发消息放进同一个本地事务，再可靠地转发。",
-    "nodes": [
-      "业务事务",
-      "数据库 + Outbox",
-      "消息转发器",
-      "消息系统"
-    ],
-    "steps": [
-      [
-        "提交业务与发送意图",
-        0,
-        1,
-        "BUSINESS + EVENT E",
-        "在同一个数据库事务中更新业务状态并插入带稳定 eventId 的 E；事务提交后，两者一起持久化。",
-        "业务状态与事件 E 一起提交",
-        "data"
-      ],
-      [
-        "读取已提交事件",
-        1,
-        2,
-        "READ OUTBOX E",
-        "转发器扫描或订阅已提交的 Outbox，取得尚未确认发送的 E。未提交或已回滚的事件不能发出。",
-        "事件 E 待发送",
-        "data"
-      ],
-      [
-        "发布并等待确认",
-        2,
-        3,
-        "PUBLISH E",
-        "转发器用同一 eventId 发布 E，并等待消息系统按约定持久化语义给出成功确认；发送到 socket 本身不够。",
-        "E 已被消息系统确认接收",
-        "data"
-      ],
-      [
-        "记录发送进度",
-        2,
-        1,
-        "MARK SENT E",
-        "只有确认成功后才记录或清理 Outbox。下游处理另按 eventId 原子去重，发布完成不等于整个跨系统业务已完成。",
-        "已记录发送进度 · 下游另行消费",
-        "control"
-      ]
-    ],
-    "principle": "Outbox 原子化的是本地业务数据与发送意图，不是整个跨系统业务瞬时完成。",
-    "tradeoff": "2PC 协调跨参与者提交但增加耦合与故障处理；补偿流程需要定义可补偿的业务语义。",
-    "pitfall": "补偿不是时间倒流；已经发送的邮件或不可逆副作用未必能完全撤销。",
-    "code": [
-      "transaction:",
-      "  updateBusinessState()",
-      "  insertOutbox(stableEventId, payload)",
-      "event = readCommittedPendingOutbox()",
-      "publishAndAwaitBrokerConfirmation(event)",
-      "markSent(event.id)",
-      "// Consumer commits dedup + business effect together"
-    ],
-    "sources": [
-      "outbox_doc",
-      "acks"
-    ],
-    "related": [
-      "txn",
-      "messaging",
-      "idempotency"
-    ],
-    "fault": {
-      "name": "安全重放：发布后、记录进度前崩溃",
-      "nodes": [
-        "业务事务",
-        "数据库 + Outbox",
-        "消息转发器",
-        "消息系统"
-      ],
-      "steps": [
-        [
-          "业务和事件一起提交",
-          0,
-          1,
-          "COMMIT E",
-          "本地事务成功提交业务状态与稳定 ID 的事件 E；Outbox 中 E 仍标为待发送。",
-          "本地业务与发送意图都已持久化",
-          "data"
-        ],
-        [
-          "发布事件 E",
-          2,
-          3,
-          "PUBLISH E",
-          "转发器读取已提交的待发事件并发布；消息系统已持久接收并确认 E。",
-          "E 已发布 · Outbox 仍待发送",
-          "data"
-        ],
-        [
-          "写进度前崩溃",
-          2,
-          2,
-          "CRASH BEFORE MARK",
-          "转发器在记录发送成功前崩溃。数据库中的发送意图仍在，重启后无法仅凭待发标记断定消息从未发布。",
-          "发送进度未保存 · 结果存在歧义",
-          "local"
-        ],
-        [
-          "重启后重复发布",
-          2,
-          3,
-          "REPUBLISH SAME E",
-          "恢复后的转发器重读待发记录，用相同 eventId 再次发布 E；下游通过原子去重避免重复业务效果。",
-          "消息可能重复 · 发送意图未丢失",
-          "data"
-        ]
-      ],
-      "code": [
-        "commitBusinessAndOutboxAtomically(E)",
-        "publishAndAwaitBrokerConfirmation(E)",
-        "crashBeforeMarkSent()",
-        "// Restart reads the same pending E:",
-        "republish(E.sameEventId)",
-        "consumeWithAtomicDedup(E.sameEventId)"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "security",
-    "title": "身份、权限与故障隔离",
-    "en": "TRUST & RESOURCE BOUNDARIES",
-    "summary": "识别调用者，并在真正执行操作的边界核对权限与资源预算。",
-    "nodes": [
-      "调用者",
-      "认证入口",
-      "授权与预算",
-      "目标资源"
-    ],
-    "steps": [
-      [
-        "验证调用身份",
-        0,
-        1,
-        "AUTHENTICATE",
-        "入口验证凭证及其有效期，建立可信主体；客户端自报的用户或租户字段不能直接当作认证结果。",
-        "已验证主体 user:A",
-        "request"
-      ],
-      [
-        "检查具体权限",
-        1,
-        2,
-        "AUTHORIZE",
-        "把可信主体、请求操作和真实目标对象交给授权逻辑；根据策略核对租户、对象和动作，默认拒绝未获授权的请求。",
-        "检查 principal + action + resource",
-        "check"
-      ],
-      [
-        "执行前落实约束",
-        2,
-        3,
-        "ADMIT",
-        "本请求授权通过且满足预算。目标执行边界落实授权结果与参数检查，并按限流、配额等策略约束资源使用。",
-        "已授权 · 资源预算允许",
-        "control"
-      ],
-      [
-        "执行并返回结果",
-        3,
-        0,
-        "RESULT / AUDIT",
-        "资源执行被允许的操作，向调用者返回结果；服务端另记录必要审计信息，并避免把凭证等秘密写入日志。",
-        "操作成功 · 已记录审计",
-        "data"
-      ]
-    ],
-    "principle": "认证回答“你是谁”，授权回答“你能对这个资源做什么”。",
-    "tradeoff": "更细的权限与隔离降低故障影响面，也增加策略、运维与资源成本。",
-    "pitfall": "登录成功不代表有权访问所有对象；前端隐藏按钮不是服务端授权。",
-    "code": [
-      "principal = authenticate(credential)",
-      "require authorize(principal, action, resource)",
-      "require withinTenantBudget(principal)",
-      "result = executeWithBoundaryChecks()",
-      "auditWithoutSecrets(principal, action, resource)",
-      "return result"
-    ],
-    "sources": [
-      "authz",
-      "systems"
-    ],
-    "related": [
-      "backpressure",
-      "fencing",
-      "observability"
-    ],
-    "fault": {
-      "name": "安全拒绝：身份有效，但对象未获授权",
-      "nodes": [
-        "租户 A 的调用者",
-        "认证入口",
-        "授权检查",
-        "租户 B 的目标资源"
-      ],
-      "steps": [
-        [
-          "认证确实成功",
-          0,
-          1,
-          "AUTHENTICATE",
-          "调用者提供有效凭证，身份为租户 A 的普通用户；该用户没有跨租户访问权限。",
-          "身份有效 · 权限仍待判断",
-          "request"
-        ],
-        [
-          "请求访问 B 的对象",
-          1,
-          2,
-          "READ object:B",
-          "授权逻辑收到可信主体及目标对象，发现请求指向租户 B；对象归属取自服务端可信状态。",
-          "待检查具体对象权限",
-          "check"
-        ],
-        [
-          "授权策略拒绝",
-          2,
-          2,
-          "DENY",
-          "本请求不满足对象级授权策略。系统在执行前拒绝它，不访问受保护内容，也不因已登录而放行。",
-          "未授权 · 目标资源未执行",
-          "local"
-        ],
-        [
-          "返回拒绝并审计",
-          2,
-          0,
-          "FORBIDDEN",
-          "向调用者返回按服务策略定义的拒绝结果，并记录必要安全审计；没有把请求继续发给目标资源。",
-          "拒绝完成 · 无越权效果",
-          "control"
-        ]
-      ],
-      "code": [
-        "principal = authenticate(validCredential)",
-        "if !authorize(principal, READ, objectB):",
-        "  auditDeniedWithoutSecrets()",
-        "  return FORBIDDEN",
-        "// Resource execution is never reached"
-      ]
-    }
-  },
-  {
-    "group": 2,
-    "id": "observability",
-    "title": "可观测性与进度检查",
-    "en": "OBSERVABILITY & PROGRESS",
-    "summary": "从日志、指标和追踪还原行为，并确认业务状态持续向目标推进。",
-    "nodes": [
-      "任务执行器",
-      "日志 / 指标",
-      "任务状态 / 追踪",
-      "恢复控制器"
-    ],
-    "steps": [
-      [
-        "记录关联身份",
-        0,
-        1,
-        "TASK / RUN / VERSION",
-        "执行器记录 taskId、runId 和目标版本，连接跨进程事件，区分一次逻辑任务与不同执行尝试。",
-        "执行记录可以关联",
-        "data"
-      ],
-      [
-        "汇总用户与业务指标",
-        1,
-        2,
-        "RATE / ERROR / AGE",
-        "监测吞吐、错误、延迟和队列年龄，并结合任务阶段与完成数量判断实际业务状态。",
-        "系统指标与业务状态可对照",
-        "data"
-      ],
-      [
-        "向控制器报告进展停滞",
-        2,
-        3,
-        "NO PROGRESS",
-        "超过约定期限没有阶段推进；监测把这一事实和上下文交给控制器，不能仅凭心跳认定业务正常。",
-        "阶段超过期限未推进",
-        "control"
-      ],
-      [
-        "在提交约束下恢复",
-        3,
-        0,
-        "GUARDED RECOVERY",
-        "控制器先建立新执行的有效身份与资源侧隔离条件，再在预算内重试、接管或告警，并继续确认业务是否推进。",
-        "恢复受控 · 仍需验证业务进展",
-        "control"
-      ]
-    ],
-    "principle": "可观测性让系统行为可解释；恢复协议决定干预是否安全。",
-    "tradeoff": "更细粒度观测消耗存储与性能，采样与保留策略应保留排障所需关联信息。",
-    "pitfall": "Watchdog 发现卡住不代表可以随意再启动一个执行者；要先约束重复和旧写入。",
-    "code": [
-      "observe(taskId, runId, version)",
-      "if noProgressWithin(progressBudget):",
-      "  establishNewRunAndCommitFence()",
-      "  recoverWithinRetryBudgetOrAlert()",
-      "verifyBusinessProgressResumes()"
-    ],
-    "sources": [
-      "health",
-      "systems"
-    ],
-    "related": [
-      "invariants",
-      "fencing",
-      "measure"
-    ],
-    "fault": {
-      "name": "安全检测：心跳正常但任务没有进展",
-      "nodes": [
-        "仍发心跳的执行器",
-        "日志 / 心跳指标",
-        "任务状态 / 追踪",
-        "恢复控制器"
-      ],
-      "steps": [
-        [
-          "心跳持续到达",
-          0,
-          1,
-          "HEARTBEAT OK",
-          "执行器的心跳线程仍能发送信号，这只能证明该路径当时还在运行。",
-          "组件可报告存活",
-          "data"
-        ],
-        [
-          "任务状态长期不变",
-          2,
-          2,
-          "PROGRESS AGE EXCEEDED",
-          "权威任务状态显示阶段、完成数量和最后进展时间长期不变，超过当前任务的进展预算。",
-          "任务仍未推进",
-          "local"
-        ],
-        [
-          "报告停滞与证据",
-          2,
-          3,
-          "STALLED",
-          "监测把任务身份、阻塞阶段和进展年龄交给恢复控制器；健康心跳不能覆盖这些业务证据。",
-          "已识别心跳与进展不一致",
-          "control"
-        ],
-        [
-          "先诊断并约束接管",
-          3,
-          3,
-          "RECOVERY GATE",
-          "控制器检查依赖与所有权；只有建立幂等、有效执行版本和资源侧隔离后才接管，否则保留告警和诊断，不能直接再起一个无约束执行者。",
-          "停滞已发现 · 尚不宣称恢复成功",
-          "local"
-        ]
-      ],
-      "code": [
-        "heartbeat = recentHeartbeat()",
-        "progress = inspectTaskProgress(taskId)",
-        "if progress.age > progressBudget:",
-        "  alertWithTaskAndRunContext()",
-        "  recoverOnlyAfterCommitFenceAndDedup()",
-        "  verifyActualProgress()"
-      ]
-    }
-  }
-];
+  ];
+
+  // src/course.ts
+  var COURSE_META = {
+    title: "K8s Systems Design",
+    audience: "\u5177\u5907 Linux \u4E0E\u5BB9\u5668\u57FA\u7840\u7684\u5F00\u53D1\u8005\u548C\u521D\u7EA7\u8FD0\u7EF4",
+    reviewed: "2026-11-05",
+    scope: "\u7A33\u5B9A\u7684 Kubernetes API \u4E0E\u901A\u7528\u673A\u5236\uFF1B\u5177\u4F53\u7248\u672C\u3001\u63D2\u4EF6\u4E0E\u6258\u7BA1\u670D\u52A1\u5DEE\u5F02\u4EE5\u5BF9\u5E94\u5B98\u65B9\u6587\u6863\u4E3A\u51C6\u3002"
+  };
+  var GROUPS = [
+    { name: "\u57FA\u7840\u4E0E\u67B6\u6784", color: "#164bc4", question: "\u4ECE\u4E00\u6B21\u58F0\u660E\u51FA\u53D1\uFF0C\u7406\u89E3\u63A7\u5236\u9762\u5982\u4F55\u9A71\u52A8 Pod \u8FD0\u884C\uFF0C\u4EE5\u53CA\u72B6\u6001\u4F55\u65F6\u624D\u7B97\u5C31\u7EEA\u3002" },
+    { name: "\u5E94\u7528\u4E0E\u6D41\u91CF", color: "#137f85", question: "\u9009\u62E9\u5DE5\u4F5C\u8D1F\u8F7D\uFF0C\u8FDE\u63A5\u914D\u7F6E\u3001\u7F51\u7EDC\u4E0E\u5B58\u50A8\uFF0C\u7406\u89E3\u6D41\u91CF\u5982\u4F55\u5230\u8FBE\u5E94\u7528\u3002" },
+    { name: "\u8FD0\u7EF4\u4E0E\u6392\u969C", color: "#7951ab", question: "\u7528\u8BC1\u636E\u5B9A\u4F4D\u6545\u969C\uFF0C\u7406\u89E3\u8BBF\u95EE\u8FB9\u754C\u3001\u6269\u7F29\u5BB9\u4E0E\u8282\u70B9\u7EF4\u62A4\u7684\u6761\u4EF6\u3002" }
+  ];
+  var doc = (name, path, note) => ({ name: `Kubernetes \xB7 ${name}`, url: `https://kubernetes.io/docs/${path}/`, note, kind: "\u5B98\u65B9\u6587\u6863" });
+  var SOURCES = {
+    architecture: doc("\u96C6\u7FA4\u67B6\u6784", "concepts/architecture", "\u63A7\u5236\u9762\u3001\u5DE5\u4F5C\u8282\u70B9\u4E0E\u7EC4\u4EF6\u804C\u8D23\u3002"),
+    api: doc("Kubernetes \u5BF9\u8C61", "concepts/overview/working-with-objects", "spec\u3001status \u4E0E\u58F0\u660E\u5F0F\u8D44\u6E90\u3002"),
+    apply: doc("\u58F0\u660E\u5F0F\u5BF9\u8C61\u7BA1\u7406", "tasks/manage-kubernetes-objects/declarative-config", "apply\u3001\u6E05\u5355\u4E0E\u914D\u7F6E\u7BA1\u7406\u3002"),
+    controllers: doc("\u63A7\u5236\u5668", "concepts/architecture/controller", "\u63A7\u5236\u5FAA\u73AF\u4E0E\u671F\u671B\u72B6\u6001\u3002"),
+    pods: doc("Pod", "concepts/workloads/pods", "\u5171\u4EAB\u7F51\u7EDC\u3001\u5B58\u50A8\u4E0E\u8C03\u5EA6\u5355\u5143\u3002"),
+    lifecycle: doc("Pod \u751F\u547D\u5468\u671F", "concepts/workloads/pods/pod-lifecycle", "\u9636\u6BB5\u3001\u6761\u4EF6\u3001\u5BB9\u5668\u72B6\u6001\u4E0E\u91CD\u542F\u3002"),
+    namespace: doc("Namespace", "concepts/overview/working-with-objects/namespaces", "\u547D\u540D\u8FB9\u754C\u4E0E\u96C6\u7FA4\u4F5C\u7528\u57DF\u8D44\u6E90\u3002"),
+    quota: doc("ResourceQuota", "concepts/policy/resource-quotas", "\u547D\u540D\u7A7A\u95F4\u8D44\u6E90\u7528\u91CF\u4E0E\u51C6\u5165\u9650\u5236\u3002"),
+    labels: doc("\u6807\u7B7E\u4E0E\u9009\u62E9\u5668", "concepts/overview/working-with-objects/labels", "\u96C6\u5408\u9009\u62E9\u3001\u6807\u7B7E\u4E0E\u8D44\u6E90\u5173\u8054\u3002"),
+    scheduling: doc("\u5C06 Pod \u5206\u914D\u7ED9\u8282\u70B9", "concepts/scheduling-eviction/assign-pod-node", "\u8282\u70B9\u9009\u62E9\u3001\u4EB2\u548C\u6027\u4E0E\u8C03\u5EA6\u7EA6\u675F\u3002"),
+    taints: doc("\u6C61\u70B9\u4E0E\u5BB9\u5FCD", "concepts/scheduling-eviction/taint-and-toleration", "\u5BB9\u5FCD\u89E3\u9664\u6392\u65A5\uFF0C\u4E0D\u4FDD\u8BC1\u8C03\u5EA6\u3002"),
+    resources: doc("\u5BB9\u5668\u8D44\u6E90\u7BA1\u7406", "concepts/configuration/manage-resources-containers", "requests\u3001CPU \u9650\u6D41\u3001\u5185\u5B58\u9650\u5236\u4E0E\u8C03\u5EA6\u3002"),
+    probes: doc("\u914D\u7F6E\u5B58\u6D3B\u3001\u5C31\u7EEA\u4E0E\u542F\u52A8\u63A2\u9488", "tasks/configure-pod-container/configure-liveness-readiness-startup-probes", "\u4E09\u79CD\u63A2\u9488\u7684\u4E0D\u540C\u6548\u679C\u53CA\u914D\u7F6E\u3002"),
+    deployment: doc("Deployment", "concepts/workloads/controllers/deployment", "ReplicaSet\u3001\u6EDA\u52A8\u66F4\u65B0\u4E0E\u56DE\u6EDA\u3002"),
+    statefulset: doc("StatefulSet", "concepts/workloads/controllers/statefulset", "\u7A33\u5B9A\u8EAB\u4EFD\u3001\u987A\u5E8F\u8BED\u4E49\u4E0E\u5B58\u50A8\u3002"),
+    daemonset: doc("DaemonSet", "concepts/workloads/controllers/daemonset", "\u5728\u7B26\u5408\u6761\u4EF6\u7684\u8282\u70B9\u8FD0\u884C\u5B88\u62A4 Pod\u3002"),
+    jobs: doc("Job", "concepts/workloads/controllers/job", "\u4EFB\u52A1\u5B8C\u6210\u3001\u91CD\u8BD5\u4E0E\u4E1A\u52A1\u5E42\u7B49\u3002"),
+    cronjob: doc("CronJob", "concepts/workloads/controllers/cron-jobs", "\u5B9A\u65F6\u3001\u5E76\u53D1\u7B56\u7565\u4E0E\u6F0F\u8C03\u5EA6\u3002"),
+    configmap: doc("ConfigMap", "concepts/configuration/configmap", "\u914D\u7F6E\u6CE8\u5165\u4E0E\u66F4\u65B0\u4F20\u64AD\u7684\u8FB9\u754C\u3002"),
+    secrets: doc("Secret", "concepts/configuration/secret", "\u673A\u5BC6\u5BF9\u8C61\u3001\u6743\u9650\u4E0E\u5B58\u50A8\u52A0\u5BC6\u3002"),
+    service: doc("Service", "concepts/services-networking/service", "\u670D\u52A1\u53D1\u73B0\u4E0E\u6D41\u91CF\u5165\u53E3\u3002"),
+    endpoints: doc("EndpointSlice", "concepts/services-networking/endpoint-slices", "\u7AEF\u70B9\u3001\u5C31\u7EEA\u72B6\u6001\u4E0E\u670D\u52A1\u540E\u7AEF\u3002"),
+    dns: doc("Service \u4E0E Pod \u7684 DNS", "concepts/services-networking/dns-pod-service", "\u670D\u52A1 DNS \u8BB0\u5F55\u4E0E\u641C\u7D22\u57DF\u3002"),
+    ingress: doc("Ingress", "concepts/services-networking/ingress", "HTTP \u8DEF\u7531\u89C4\u5219\u4F9D\u8D56\u5165\u53E3\u63A7\u5236\u5668\u3002"),
+    gateway: doc("Gateway API", "concepts/services-networking/gateway", "Gateway API \u6269\u5C55\u53CA\u89D2\u8272\u5212\u5206\u3002"),
+    storage: doc("\u6301\u4E45\u5377", "concepts/storage/persistent-volumes", "PV\u3001PVC\u3001\u7ED1\u5B9A\u3001\u8BBF\u95EE\u6A21\u5F0F\u4E0E\u56DE\u6536\u7B56\u7565\u3002"),
+    storageclass: doc("StorageClass", "concepts/storage/storage-classes", "\u52A8\u6001\u4F9B\u7ED9\u4E0E WaitForFirstConsumer\u3002"),
+    network: doc("NetworkPolicy", "concepts/services-networking/network-policies", "\u4F9D\u8D56\u7F51\u7EDC\u63D2\u4EF6\uFF0C\u5165\u7AD9\u548C\u51FA\u7AD9\u89C4\u5219\u5206\u522B\u53E0\u52A0\u3002"),
+    rbac: doc("RBAC \u6388\u6743", "reference/access-authn-authz/rbac", "Role\u3001ClusterRole \u4E0E\u7ED1\u5B9A\u4F5C\u7528\u57DF\u3002"),
+    security: doc("Pod \u5B89\u5168\u51C6\u5165", "concepts/security/pod-security-admission", "enforce\u3001audit \u4E0E warn \u7684\u4F5C\u7528\u3002"),
+    standards: doc("Pod \u5B89\u5168\u6807\u51C6", "concepts/security/pod-security-standards", "Privileged\u3001Baseline \u4E0E Restricted\u3002"),
+    hpa: doc("\u6C34\u5E73\u81EA\u52A8\u6269\u7F29\u5BB9", "tasks/run-application/horizontal-pod-autoscale", "\u6307\u6807\u6765\u6E90\u3001\u8D44\u6E90\u8BF7\u6C42\u4E0E\u6269\u7F29\u5BB9\u884C\u4E3A\u3002"),
+    observability: doc("\u53EF\u89C2\u6D4B\u6027", "concepts/cluster-administration/observability", "\u6307\u6807\u3001\u65E5\u5FD7\u4E0E\u8FFD\u8E2A\u7684\u4E0D\u540C\u7528\u9014\u3002"),
+    logging: doc("\u65E5\u5FD7\u67B6\u6784", "concepts/cluster-administration/logging", "\u5BB9\u5668\u65E5\u5FD7\u3001\u8F6E\u8F6C\u4E0E\u96C6\u7FA4\u7EA7\u91C7\u96C6\u3002"),
+    debug: doc("\u8C03\u8BD5 Pod", "tasks/debug/debug-application/debug-pods", "\u72B6\u6001\u3001\u4E8B\u4EF6\u3001\u5BB9\u5668\u65E5\u5FD7\u4E0E\u8BCA\u65AD\u3002"),
+    debugservice: doc("\u8C03\u8BD5 Service", "tasks/debug/debug-application/debug-service", "\u9010\u5C42\u9A8C\u8BC1 DNS\u3001\u7AEF\u70B9\u4E0E\u670D\u52A1\u6D41\u91CF\u3002"),
+    drain: doc("\u5B89\u5168\u6392\u7A7A\u8282\u70B9", "tasks/administer-cluster/safely-drain-node", "cordon\u3001\u9A71\u9010\u3001DaemonSet \u4E0E\u7EF4\u62A4\u6D41\u7A0B\u3002"),
+    pdb: doc("Pod \u5E72\u6270\u9884\u7B97", "concepts/workloads/pods/disruptions", "\u81EA\u613F\u4E2D\u65AD\u3001PDB \u4E0E\u53EF\u7528\u6027\u6761\u4EF6\u3002"),
+    etcd: doc("\u7BA1\u7406 etcd", "tasks/administer-cluster/configure-upgrade-etcd", "\u5FEB\u7167\u3001\u6062\u590D\u4E0E\u63A7\u5236\u9762\u72B6\u6001\u3002"),
+    upgrade: doc("kubeadm \u96C6\u7FA4\u5347\u7EA7", "tasks/administer-cluster/kubeadm/kubeadm-upgrade", "\u9010\u8282\u70B9\u5347\u7EA7\u4E0E\u524D\u7F6E\u68C0\u67E5\u3002"),
+    skew: doc("\u7248\u672C\u504F\u5DEE\u7B56\u7565", "setup/release/version-skew-policy", "\u7EC4\u4EF6\u7248\u672C\u4E0E\u652F\u6301\u8303\u56F4\u3002")
+  };
+  var lessons = [...foundations, ...applications, ...operations];
+  var LESSONS = lessons.map((lesson) => ({
+    ...lesson,
+    related: [.../* @__PURE__ */ new Set([...lesson.related, ...lessons.filter((other) => other.related.includes(lesson.id)).map((other) => other.id)])]
+  }));
+  return __toCommonJS(course_exports);
+})();

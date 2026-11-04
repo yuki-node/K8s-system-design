@@ -417,7 +417,7 @@ kubectl api-resources --api-group=gateway.networking.k8s.io`, '最后一条帮�
       ['节点准备挂载', 2, 3, 'ATTACH / MOUNT', '需要时进行挂接与挂载；CSI 等驱动负责相应步骤，并非 Bound 就代表挂载已成功。', '挂载仍可能失败', 'control'],
       ['应用访问目录', 3, 0, 'VOLUME READY', '节点准备好卷后容器可使用挂载目录；持久性不替代应用一致性、备份与恢复演练。', '数据路径可用', 'control'],
     ], code: ['Pod 引用 PVC', 'PVC 按 StorageClass 绑定 PV', '驱动与节点准备卷', '应用写入；另做备份和恢复验证'],
-    example: yaml('PVC 消费实验', '需要支持 ReadWriteOnce 的默认 StorageClass 与可用驱动；没有默认类时需选择真实 storageClassName。此实验会申请后端存储。', 'storage.yaml', `apiVersion: v1
+    example: yaml('PVC 消费实验', 'demo 命名空间已存在，需要支持 ReadWriteOnce 的默认 StorageClass 与可用驱动；没有默认类时需选择真实 storageClassName。此实验会申请后端存储。', 'storage.yaml', `apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: data-demo

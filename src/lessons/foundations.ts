@@ -50,7 +50,8 @@ kubectl -n demo describe pod "$POD"`, '查看 Events 中 Failed、BackOff 的具
       ['观察新目标', 2, 3, 'OBSERVE CHANGE', '控制器通过 API 观察资源变化并尝试协调对应子资源。', '目标与现状可能不同', 'control'],
       ['观察收敛结果', 3, 2, 'UPDATE STATUS', '组件回写条件与状态。学习者需要结合资源条件、事件和业务检查验证结果。', 'status 反映观测进展', 'data'],
     ], code: ['声明 desired spec', 'API 验证并保存', '控制器协调资源', '读 status / conditions 验证进展'],
-    example: sh('预检清单并观察结果', '已下载入门实验清单为 lab.yaml；server dry-run 需要相应权限及支持 dry-run 的准入组件。', `kubectl apply --dry-run=server -f lab.yaml
+    example: sh('预检清单并观察结果', '已下载入门实验清单为 lab.yaml。第一行会创建或更新 demo 命名空间；服务端预检不会创建它，因此须先完成该准备。需要相应权限及支持 dry-run 的准入组件。', `kubectl create namespace demo --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply --dry-run=server -f lab.yaml
 kubectl diff -f lab.yaml
 kubectl apply -f lab.yaml
 kubectl -n demo rollout status deployment/web --timeout=120s`, 'diff 退出码 1 表示存在差异；rollout status 的成功是 Deployment 进度检查，不替代业务验收。'),
@@ -119,7 +120,7 @@ kubectl -n demo describe resourcequota`, 'FailedCreate 表示创建环节失败�
       ['启动容器', 2, 3, 'START CONTAINER', '运行时启动容器后，Pod 可进入 Running；探针或其他就绪条件仍可能未满足。', 'Running · Ready 可能为 False', 'control'],
       ['报告就绪条件', 3, 2, 'READINESS OK', '假设所有相关容器和就绪门满足条件，kubelet 更新 Pod Ready。这里只描述此刻的就绪观察。', 'Ready=True', 'data'],
     ], code: ['读 .status.phase', '读 .status.conditions', '读 containerStatuses[*].state', '区分容器重启和 Pod 替换'],
-    example: yaml('一个完整的 Pod 清单', '实验集群可拉取 nginx:1.28；保存为 pod.yaml 后 kubectl apply -f pod.yaml。', 'pod.yaml', `apiVersion: v1
+    example: yaml('一个完整的 Pod 清单', 'demo 命名空间已存在，实验集群可拉取 nginx:1.28；保存为 pod.yaml 后 kubectl apply -f pod.yaml。', 'pod.yaml', `apiVersion: v1
 kind: Pod
 metadata:
   name: lifecycle-demo

@@ -9,7 +9,7 @@ function openLesson(hash = '', stored = {}, timers) {
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', error => errors.push(error));
   const dom = new JSDOM(fs.readFileSync('dist/index.html', 'utf8'), {
-    url: 'http://localhost/K8s-systems-design/' + hash,
+    url: 'http://localhost/K8s-system-design/' + hash,
     runScripts: 'outside-only', pretendToBeVisual: true, virtualConsole,
   });
   const { window } = dom;

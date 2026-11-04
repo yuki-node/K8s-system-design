@@ -52,9 +52,6 @@ jobs:
     steps:
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          token: ${{ secrets.PAGES_ADMIN_TOKEN || github.token }}
-          enablement: ${{ secrets.PAGES_ADMIN_TOKEN != '' }}
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4

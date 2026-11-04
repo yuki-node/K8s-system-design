@@ -1,5 +1,7 @@
 # K8s Systems Design
 
+学习站地址：[yuki-node.github.io/K8s-system-design](https://yuki-node.github.io/K8s-system-design/)。源码仓库：[yuki-node/K8s-system-design](https://github.com/yuki-node/K8s-system-design)。
+
 面向有 Linux 与容器基础的开发者和初级运维的 Kubernetes 中文交互学习站。通过 **27 个主题、54 个独立场景、216 个演示阶段**，连接基础知识、应用部署和日常运维排障。
 
 视觉与交互沿用 [Systems Explorer](https://kejun.github.io/cs-systems-design/)，形式参考 [Protocol Explorer](https://protocol-explorer-alpha.vercel.app/)。保留白底蓝线、细边框、三栏工作区、等距立体图解、状态观察和执行轨迹；支持深色主题与移动端。
@@ -79,6 +81,18 @@ npm run check           # 最新构建 + 完整检查
 
 课程产物和图解 bundle 由构建生成；修改课程时编辑 `src/`。界面文件沿用参考站在 `dist/` 内直接维护的方式，构建不会覆盖它们。DOM 测试运行真实应用与图解 bundle，仅用替代值提供测试环境缺少的 OS 媒体偏好／时间服务。
 
-`.github/workflows/pages.yml` 可在关联自己的 GitHub 仓库后进行检查和 Pages 发布；本地项目没有预设远端，也没有在本次实现中发布。使用前在仓库 Pages 设置中选择 GitHub Actions。
+## GitHub Pages 自动发布
+
+当前远端为 `https://github.com/yuki-node/K8s-system-design.git`，网站项目路径为 `/K8s-system-design/`，与仓库名的大小写和拼写一致。
+
+首次在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。之后推送 `main` 会自动执行 `.github/workflows/pages.yml`：
+
+1. 使用 Node.js 24 和 `npm ci` 安装锁定依赖。
+2. 构建最新产物，执行类型、课程、DOM 学习流程、216 阶段图解和动画检查。
+3. 只上传 `dist/`，通过 `github-pages` 环境发布到上方网址。
+
+PR 只检查和构建，不部署；也可以在 Actions 页面手动运行该工作流。发布只使用本仓库的 `GITHUB_TOKEN`，部署任务具有 `pages: write` 与 `id-token: write`；无需配置额外的长期个人令牌。若首次运行先于 Pages 设置启用而失败，完成设置后重新运行工作流即可。
+
+所有资源使用相对路径，不需要为项目子路径调整域名或 `base`。例如探针深链接为 [K8s-system-design/#probes](https://yuki-node.github.io/K8s-system-design/#probes)。
 
 IsoKit、React 等上游许可与声明位于 `dist/licenses/`。本仓库未替参考项目声明新的再分发许可；对外分发前请核对源项目及相关资产的许可要求。

@@ -83,15 +83,9 @@ npm run check           # 最新构建 + 完整检查
 
 ## GitHub Pages 自动发布
 
-当前远端为 `https://github.com/yuki-node/K8s-system-design.git`，网站项目路径为 `/K8s-system-design/`，与仓库名的大小写和拼写一致。
+日常开发与发布授权见 [AGENTS.md](AGENTS.md)：默认只改本地，明确要求发布时才上传代码并更新线上网页。完整的上传、部署跟踪、线上验证与排障流程见 [发布 skill](skills/publish-k8s-pages/SKILL.md)。
 
-首次在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。之后推送 `main` 会自动执行 `.github/workflows/pages.yml`：
-
-1. 使用 Node.js 24 和 `npm ci` 安装锁定依赖。
-2. 构建最新产物，执行类型、课程、DOM 学习流程、216 阶段图解和动画检查。
-3. 只上传 `dist/`，通过 `github-pages` 环境发布到上方网址。
-
-PR 只检查和构建，不部署；也可以在 Actions 页面手动运行该工作流。发布只使用本仓库的 `GITHUB_TOKEN`，部署任务具有 `pages: write` 与 `id-token: write`；无需配置额外的长期个人令牌。若首次运行先于 Pages 设置启用而失败，完成设置后重新运行工作流即可。
+当前源码仓库为 [yuki-node/K8s-system-design](https://github.com/yuki-node/K8s-system-design)，正式网站为 [Kubernetes 学习站](https://yuki-node.github.io/K8s-system-design/)。Pages 的 Source 已配置为 **GitHub Actions**；推送 `main` 会触发 [现有工作流](.github/workflows/pages.yml)，检查并构建后将 `dist/` 发布到网站。PR 只检查与构建，不部署。
 
 所有资源使用相对路径，不需要为项目子路径调整域名或 `base`。例如探针深链接为 [K8s-system-design/#probes](https://yuki-node.github.io/K8s-system-design/#probes)。
 

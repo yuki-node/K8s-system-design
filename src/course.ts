@@ -2,6 +2,7 @@ import type { Lesson } from './course-types';
 import { foundations } from './lessons/foundations';
 import { applications } from './lessons/applications';
 import { operations } from './lessons/operations';
+import { MECHANISMS, EXTENSIONS } from './scenarios';
 
 export const COURSE_META = {
   title: 'K8s Systems Design',
@@ -16,6 +17,8 @@ export const GROUPS = [
 ];
 const doc = (name: string, path: string, note: string) => ({ name: `Kubernetes · ${name}`, url: `https://kubernetes.io/docs/${path}/`, note, kind: '官方文档' });
 export const SOURCES = {
+  admission: doc('准入控制器', 'reference/access-authn-authz/admission-controllers', '认证授权、准入与持久化的先后边界。'),
+  cri: doc('容器运行时接口 CRI', 'concepts/containers/cri', 'kubelet 与容器运行时的接口，不是独立组件。'),
   architecture: doc('集群架构', 'concepts/architecture', '控制面、工作节点与组件职责。'),
   api: doc('Kubernetes 对象', 'concepts/overview/working-with-objects', 'spec、status 与声明式资源。'),
   apply: doc('声明式对象管理', 'tasks/manage-kubernetes-objects/declarative-config', 'apply、清单与配置管理。'),
@@ -62,5 +65,13 @@ const lessons = [...foundations, ...applications, ...operations];
 // Associations are undirected: either author's reference is sufficient to connect two topics.
 export const LESSONS: Lesson[] = lessons.map(lesson => ({
   ...lesson,
+  ...(MECHANISMS[lesson.id] || (() => {
+    const extension = EXTENSIONS[lesson.id];
+    if (!extension) throw new Error(`Missing mechanism: ${lesson.id}`);
+    const stages = [...(extension.before || []), ...lesson.steps, ...extension.after];
+    return { nodes: [...lesson.nodes, ...extension.nodes], steps: extension.order ? extension.order.map(index => stages[index]) : stages,
+      groups: [{ label: '核心机制', nodes: lesson.nodes.map((_, index) => index) },
+        { label: '关联组件与验证', nodes: extension.nodes.map((_, index) => lesson.nodes.length + index) }] };
+  })()),
   related: [...new Set([...lesson.related, ...lessons.filter(other => other.related.includes(lesson.id)).map(other => other.id)])],
 }));

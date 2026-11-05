@@ -38,14 +38,23 @@ test('every main and fault scenario has complete teaching steps and a downloadab
       assert(ids.has(id) && id !== lesson.id, lesson.id + ' has valid related topics');
     }
     for (const [name, scene] of [['main', lesson], ['fault', lesson.fault]]) {
-      assert.equal(scene.nodes.length, 4);
-      assert.equal(scene.steps.length, 4);
+      assert(scene.nodes.length >= 4);
+      assert.equal(new Set(scene.nodes).size, scene.nodes.length, lesson.id + ' unique participants');
+      assert(scene.steps.length >= 4);
       assert(scene.code.length >= 3);
+      if (scene.groups) {
+        const grouped = Array.from(scene.groups.flatMap(g => g.nodes)).sort((a,b) => a-b);
+        assert.deepEqual(grouped, Array.from(scene.nodes, (_, i) => i), lesson.id + ' groups partition participants');
+      }
+      for (const milestone of scene.milestones || []) {
+        assert(milestone.step >= 0 && milestone.step < scene.steps.length);
+        assert(milestone.node >= 0 && milestone.node < scene.nodes.length);
+      }
       assert(scene.example.prerequisite && scene.example.expected);
       for (const frame of scene.steps) {
         assert.equal(frame.length, 7);
-        assert(Number.isInteger(frame[1]) && frame[1] >= 0 && frame[1] < 4);
-        assert(Number.isInteger(frame[2]) && frame[2] >= 0 && frame[2] < 4);
+        assert(Number.isInteger(frame[1]) && frame[1] >= 0 && frame[1] < scene.nodes.length);
+        assert(Number.isInteger(frame[2]) && frame[2] >= 0 && frame[2] < scene.nodes.length);
         assert(relations.has(frame[6]));
         assert.equal(frame[1] === frame[2], frame[6] === 'local', lesson.id + ' local/transfer meaning');
         assert(frame[0] && frame[3] && frame[4] && frame[5]);
@@ -57,6 +66,8 @@ test('every main and fault scenario has complete teaching steps and a downloadab
       assert(fs.readFileSync(file, 'utf8').includes(scene.example.code));
     }
   }
-  assert.equal(stages, 216);
+  assert(stages > 290, 'expanded mechanisms have substantially more teaching stages');
+  assert(LESSONS.every(lesson => lesson.nodes.length > 4 && lesson.steps.length > 4));
+  assert(new Set(LESSONS.map(l => l.nodes.length)).size >= 3, 'topologies vary by topic');
   assert(fs.existsSync('dist/examples/lab.yaml'));
 });

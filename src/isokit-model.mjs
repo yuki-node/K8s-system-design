@@ -1,21 +1,35 @@
-// Fixed layout for four logical participants. Boxes are illustrative, not physical hosts.
-export const POSITIONS = [[155, 78], [505, 78], [505, 292], [155, 292]];
-export const VIEW_BOX = '0 0 660 420';
+// Layout follows participant groups. Each group has one or two columns, with clear routing gutters.
+export function topologyLayout(nodes, groups) {
+  const bands = groups?.length ? groups : [{ label: '场景参与者', nodes: nodes.map((_, i) => i) }];
+  const positions = [], regions = [];
+  let left = 20, rows = 1;
+  for (const group of bands) {
+    const columns = group.nodes.length > 3 ? 2 : 1;
+    const countRows = Math.ceil(group.nodes.length / columns);
+    const width = columns * 166 + 24;
+    group.nodes.forEach((node, i) => { positions[node] = [left + 12 + (i % columns + .5) * 166, 118 + Math.floor(i / columns) * 142]; });
+    regions.push({ ...group, x: left, width });
+    left += width + 24;
+    rows = Math.max(rows, countRows);
+  }
+  const height = 80 + rows * 142;
+  return { positions, regions, width: left - 4, height, viewBox: `0 0 ${left - 4} ${height}` };
+}
 const COS30 = Math.sqrt(3) / 2;
-
 export function toWorld([x, y]) {
   return [y + x / (2 * COS30), y - x / (2 * COS30), 0];
 }
-
-export function routeBetween(from, to) {
+export function routeBetween(from, to, positions) {
   if (from === to) return null;
-  const [x1, y1] = POSITIONS[from], [x2, y2] = POSITIONS[to];
-  const firstSide = x1 < 330 ? 1 : -1;
-  const lastSide = x2 < 330 ? 1 : -1;
-  const start = [x1 + firstSide * 102, y1 - 8];
-  const end = [x2 + lastSide * 102, y2 - 8];
-  if (y1 === y2) return [start, end];
-  return [start, [330, start[1]], [330, end[1]], end];
+  const [x1, y1] = positions[from], [x2, y2] = positions[to];
+  if (x1 === x2) return [[x1 + 54, y1], [x1 + 76, y1], [x2 + 76, y2], [x2 + 54, y2]];
+  const direction = Math.sign(x2 - x1);
+  const start = [x1 + direction * 55, y1 - 8], end = [x2 - direction * 55, y2 - 8];
+  // Route between rows through the gap above nodes, never across participant labels.
+  if (y1 === y2 && Math.abs(x2 - x1) < 230) return [start, end];
+  const channel = Math.min(y1, y2) - 64;
+  return [start, [x1 + direction * 76, start[1]], [x1 + direction * 76, channel],
+    [x2 - direction * 76, channel], [x2 - direction * 76, end[1]], end];
 }
 
 export function pathLength(points) {
@@ -50,12 +64,4 @@ export function labelLines(text, max = 18) {
   }
   if (line.trim()) lines.push(line.trim());
   return lines;
-}
-
-export function illustrationFor(name) {
-  if (/队列|缓冲|Outbox|就绪集合/.test(name)) return 'queue';
-  if (/校验|检查|规范|权限|锁状态|监控|模型|控制器|调度|规则|准入|策略|探针|Service|Ingress|Gateway|PDB|API|RBAC|HPA|readiness|liveness|startup|MMU|TLB/.test(name)) return 'control';
-  if (/日志|存储|数据库|磁盘|快照|ConfigMap|Secret|PVC|PV|etcd|数据页|版本链|检查点|记录|页面|索引|内存|主存|DRAM|缓存|页表/.test(name)) return 'storage';
-  if (/CPU|线程|Worker|Pod|kubelet|CRI|kubectl|节点|应用|容器|任务|事务|Leader|Follower|客户端|服务端|执行|处理|消费|转发|回调/.test(name)) return 'compute';
-  return 'record';
 }

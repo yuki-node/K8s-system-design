@@ -12,6 +12,7 @@ let current=byId[location.hash.slice(1)]||LESSONS[0],step=0,fault=false,filter='
 let dark=safeRead('k8s-explorer-dark',false)===true;
 let motionMode='preview',motionVersion=0,playbackEnded=false;
 let renderedDetail='';
+let diagramView='topology',selectedNode=null,expanded=false;
 const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
 function cueMotion(){motionMode='preview';motionVersion++;playbackEnded=false;}
 function saveProgress(){try{localStorage.setItem('k8s-explorer-completed',JSON.stringify([...completed]))}catch{}}
@@ -26,7 +27,7 @@ function accent(){return dark?['#82adff','#63cec4','#b79aeb'][current.group]:GRO
 function theme(){document.body.classList.toggle('dark',dark);document.body.style.setProperty('--accent',accent());$('#theme').setAttribute('aria-label',dark?'切换浅色主题':'切换深色主题');$('#theme').innerHTML=icon(dark?'sun':'moon');saveTheme()}
 function notify(s){clearTimeout(toastTimer);$('#toast').textContent=s;$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2600)}
 function updateProgress(){const n=completed.size;$('#progress-number').textContent=`${n} / ${LESSONS.length}`;$('#progress-bar').style.width=`${n/LESSONS.length*100}%`;$('#complete').innerHTML=completed.has(current.id)?`${icon('check')}<span>已学 · 取消标记</span>`:`<span>标记已学</span>${icon('check')}`;$('#complete').setAttribute('aria-pressed',String(completed.has(current.id)))}
-function stop(){if(timer)clearInterval(timer);timer=null;motionMode='paused';$('#play').innerHTML=`${icon('play')}<span>播放</span>`;$('#play').setAttribute('aria-label','播放演示');if($('#diagram svg'))draw();}
+function stop(){if(timer)clearInterval(timer);timer=null;motionMode='paused';syncScenePlayer();$('#play').innerHTML=`${icon('play')}<span>播放</span>`;$('#play').setAttribute('aria-label','播放演示');if($('#diagram svg'))draw();}
 function play(){
  if(timer){stop();return}
  if(playbackEnded||(step>=frames().length-1&&motionMode==='preview')){step=0;motionVersion++;playbackEnded=false;}
@@ -41,7 +42,7 @@ function play(){
 function finish(){if(!completed.has(current.id)){completed.add(current.id);saveProgress();renderNav();updateProgress();renderMap();notify(`已完成「${current.title}」的探索`)}}
 function goStep(n){stop();step=Math.max(0,Math.min(frames().length-1,n));cueMotion();renderStep();if(step===frames().length-1)finish()}
 function closeMenu(){$('#sidebar').classList.remove('open');$('#shade').hidden=true;$('#menu').setAttribute('aria-expanded','false')}
-function select(id,updateHash=true){if(!byId[id])return;stop();current=byId[id];step=0;fault=false;cueMotion();detail='concept';view='mechanism';if(filter!=='all'&&Number(filter)!==current.group)filter='all';query='';$('#search').value='';if(updateHash&&location.hash!==`#${id}`)history.pushState(null,'',`#${id}`);closeMenu();render();}
+function select(id,updateHash=true){if(!byId[id])return;stop();current=byId[id];step=0;fault=false;selectedNode=null;cueMotion();detail='concept';view='mechanism';if(filter!=='all'&&Number(filter)!==current.group)filter='all';query='';$('#search').value='';if(updateHash&&location.hash!==`#${id}`)history.pushState(null,'',`#${id}`);closeMenu();render();}
 function renderNav(){const eligible=LESSONS.filter(l=>(filter==='all'||l.group===Number(filter))&&`${l.title} ${l.en} ${l.summary} ${l.principle} ${l.pitfall} ${l.steps.flat().join(' ')} ${l.fault.steps.flat().join(' ')} ${l.sections.map(s=>s.title+' '+s.body).join(' ')} ${l.example.code} ${l.fault.name} ${l.fault.example.code}`.toLowerCase().includes(query.toLowerCase()));let html='';GROUPS.forEach((g,i)=>{const list=eligible.filter(l=>l.group===i);if(!list.length)return;html+=`<div class="topic-group"><b>0${i+1} / ${g.name}</b><span>${list.length}</span></div>`;for(const l of list){const active=l.id===current.id;html+=`<button class="topic ${active?'active':''} ${completed.has(l.id)?'done':''}" data-lesson="${l.id}" ${active?'aria-current="true"':''} aria-label="${l.title}"><span class="topic-dot"></span><span><strong>${l.title}</strong><small>${l.en}</small></span><span class="chev">${icon(active?'chevron-down':'chevron-right')}</span></button>`;if(active&&!query)html+=`<div class="topic-steps">${frames().map((s,j)=>`<button class="topic-step ${step===j?'active':''}" data-step="${j}" aria-label="步骤 ${j+1}：${s[0]}"><span>${j+1}</span>${s[0]}</button>`).join('')}</div>`;}});$('#topic-list').innerHTML=html||'<div class="empty">没有找到匹配的主题。<br>试试「探针」「Pending」或「DNS」。</div>';$$('[data-filter]').forEach(b=>b.classList.toggle('selected',b.dataset.filter===filter))}
 function relationButtons(){return current.related.filter(id=>byId[id]).map(id=>`<button data-related="${id}">${byId[id].title} ${icon('arrow-up-right')}</button>`).join('')}
 function exampleHref(){return `./examples/${current.id}-${fault?'fault':'main'}.${scenario().example.language==='yaml'?'yaml':'sh'}`}
@@ -74,19 +75,44 @@ async function copyExample(){
  catch{notify('无法自动复制，请在示例中选择文本复制')}
 }
 function labelLines(text){const max=16,lines=[];let line='',units=0;const tokens=text.match(/[A-Za-z0-9_=./+\-]+|[^\x00-\x7F]|\s+|./gu)||[];for(const token of tokens){const w=[...token].reduce((n,ch)=>n+(/[^\x00-\x7F]/.test(ch)?2:1),0);if(units+w>max&&line.trim()){lines.push(line.trim());line='';units=0}if(!line&&/^\s+$/.test(token))continue;line+=token;units+=w}if(line.trim())lines.push(line.trim());return lines;}
+function revealInScroller(scroller,target,padding=12){
+ if(!target)return;const bounds=scroller.getBoundingClientRect(),item=target.getBoundingClientRect();
+ if(item.bottom>bounds.bottom-padding)scroller.scrollTop+=item.bottom-bounds.bottom+padding;
+ else if(item.top<bounds.top+padding)scroller.scrollTop=Math.max(0,scroller.scrollTop+item.top-bounds.top-padding);
+}
 function draw(){
  const s=currentFrame(),kind=s[6];
  window.SystemsDiagram.render({
   label:current.title+'：'+s[0]+'；'+RELATIONS[kind]+'；'+relationText(s),
-  nodes:nodes(),frame:s,playing:!!timer,motionMode,motionVersion,speed,dark,
+  nodes:nodes(),frame:s,frames:frames(),frameIndex:step,groups:scenario().groups,milestones:scenario().milestones,playing:!!timer,motionMode,motionVersion,speed,dark,
+  viewMode:diagramView,selectedNode,onInspectNode:inspectNode,onSelectStep:goStep,
   stageKey:current.id+':'+(fault?'alternate':'main')+':'+step,
   reducedMotion:motionPreference.matches
  });
+ $('#participant-count').textContent=nodes().length;$('#stage-count').textContent=frames().length;
+ $('#diagram').classList.toggle('sequence-mode',diagramView==='sequence');
+ if(diagramView==='sequence')revealInScroller($('#diagram'),$('#diagram [data-sequence-step="'+step+'"]'));
+ $('#diagram-hint').textContent=diagramView==='sequence'?'可横向滚动 · 点击时序行定位阶段':'可横向滚动 · 点击组件探索';
+ renderNodeInsight();
  $('#relation-kind').textContent=RELATIONS[kind];$('#diagram-state').textContent=s[5];
 }
-function renderTrace(){const list=frames();$('#trace-body').innerHTML=list.map((s,i)=>`<tr class="${i===step?'current':i<step?'done':''}" data-trace="${i}" tabindex="0" aria-label="查看步骤 ${i+1}：${s[0]}" ${i===step?'aria-current="step"':''}><td><span class="row-no">${i+1}</span></td><td><span class="signal">${esc(s[3])}</span></td><td class="route">${esc(relationText(s))}</td><td>${esc(s[5])}</td></tr>`).join('');$('#flow-count').textContent=`0${step+1} / 0${list.length}`;$('#previous').disabled=step===0;$('#next').disabled=step===list.length-1;}
+function inspectNode(index){selectedNode=selectedNode===index?null:index;draw()}
+function renderNodeInsight(){
+ const panel=$('#node-insight');panel.hidden=diagramView==='sequence';
+ if(selectedNode===null){panel.innerHTML='<span>等距立体模型 · 保留官方识别图标</span>';return}
+ const related=frames().map((frame,i)=>({frame,i})).filter(({frame})=>frame[1]===selectedNode||frame[2]===selectedNode);
+ panel.innerHTML=`<strong>${esc(nodes()[selectedNode])}</strong><span>参与 ${related.length} 个阶段</span><div>${related.map(({frame,i})=>`<button data-step="${i}" class="${step===i?'active':''}" title="${esc(frame[0])}">${String(i+1).padStart(2,'0')} ${esc(frame[0])}</button>`).join('')}</div><button class="node-dismiss" aria-label="关闭组件说明">×</button>`;
+ panel.querySelector('.node-dismiss').onclick=()=>{selectedNode=null;draw()};
+}
+function toggleExpanded(){expanded=!expanded;$('#main').classList.toggle('expanded',expanded);document.body.classList.toggle('canvas-open',expanded);$$('.topbar,.sidebar,.inspector,.flow').forEach(el=>{el.inert=expanded});$('#expand-scene').textContent=expanded?'收起画布 ↙':'展开画布 ↗';$('#expand-scene').setAttribute('aria-label',expanded?'收起画布':'展开画布');$('#expand-scene').setAttribute('aria-pressed',String(expanded));draw()}
+$('#expand-scene').onclick=toggleExpanded;
+function syncScenePlayer(){
+ $('#scene-play').innerHTML=icon(timer?'pause':'play');$('#scene-play').setAttribute('aria-label',timer?'暂停当前场景':'播放当前场景');$('#scene-prev').disabled=step===0;$('#scene-next').disabled=step===frames().length-1;
+}
+$('#scene-play').onclick=play;$('#scene-prev').onclick=()=>goStep(step-1);$('#scene-next').onclick=()=>goStep(step+1);
+function renderTrace(){syncScenePlayer();const list=frames();$('#trace-body').innerHTML=list.map((s,i)=>`<tr class="${i===step?'current':i<step?'done':''}" data-trace="${i}" tabindex="0" aria-label="查看步骤 ${i+1}：${s[0]}" ${i===step?'aria-current="step"':''}><td><span class="row-no">${i+1}</span></td><td><span class="signal">${esc(s[3])}</span></td><td class="route">${esc(relationText(s))}</td><td>${esc(s[5])}</td></tr>`).join('');$('#flow-count').textContent=`${String(step+1).padStart(2,'0')} / ${String(list.length).padStart(2,'0')}`;$('#stage-rail').innerHTML=list.map((s,i)=>`<button data-step="${i}" class="${i===step?'active':i<step?'visited':''}" aria-label="步骤 ${i+1}：${esc(s[0])}" ${i===step?'aria-current="step"':''}><span>${String(i+1).padStart(2,'0')}</span><i></i></button>`).join('');$('#previous').disabled=step===0;$('#next').disabled=step===list.length-1;if(step===0)$('.trace-scroll').scrollTop=0;else revealInScroller($('.trace-scroll'),$('#trace-body tr.current'),28);}
 function renderStep(){step=Math.min(step,frames().length-1);const s=currentFrame();$('#step-chip').textContent=String(step+1).padStart(2,'0');$('#step-title').textContent=s[0];$('#step-signal').textContent=s[3];$('#step-description').textContent=s[4];draw();renderTrace();renderDetail();$$('[data-step]').forEach(b=>b.classList.toggle('active',Number(b.dataset.step)===step));$('#normal').classList.toggle('selected',!fault);$('#normal').setAttribute('aria-pressed',String(!fault));$('#fault').classList.toggle('selected',fault);$('#fault').setAttribute('aria-pressed',String(fault));}
-function renderView(){const isMap=view==='map';$('#lesson-view').hidden=isMap;$('#map-view').hidden=!isMap;$('#mechanism-tab').setAttribute('aria-selected',String(!isMap));$('#map-tab').setAttribute('aria-selected',String(isMap));if(isMap)renderMap()}
+function renderView(){const isMap=view==='map';$('#lesson-view').hidden=isMap;$('#map-view').hidden=!isMap;$('#mechanism-tab').setAttribute('aria-selected',String(!isMap&&diagramView==='topology'));$('#sequence-tab').setAttribute('aria-selected',String(!isMap&&diagramView==='sequence'));$('#map-tab').setAttribute('aria-selected',String(isMap));if(isMap)renderMap()}
 function renderMap(){
  const width=680,col=218,pad=14,row=68,start=85,positions={};
  GROUPS.forEach((g,gi)=>LESSONS.filter(l=>l.group===gi).forEach((l,j)=>positions[l.id]={x:pad+gi*col,y:start+j*row}));
@@ -104,16 +130,16 @@ function renderMap(){
 function render(){theme();const n=LESSONS.indexOf(current)+1;$('#current-no').textContent=`${String(n).padStart(2,'0')} / ${LESSONS.length}`;$('#current-title').textContent=current.title;$('#scene-title').textContent=current.title;$('#scene-en').textContent=current.en;$('#scene-index').textContent=String(n).padStart(2,'0');$('#group-badge').textContent=`0${current.group+1} / ${GROUPS[current.group].name}`;$('#fault').innerHTML=`${icon('bolt')}<span>${esc(current.fault.name)}</span>`;$$('[data-group]').forEach(b=>b.classList.toggle('active',Number(b.dataset.group)===current.group));renderNav();renderStep();renderView();updateProgress();document.title=`${current.title} · K8s Systems Design`;}
 document.addEventListener('click',e=>{if(e.target.closest('[data-copy-example]')){copyExample();return}const l=e.target.closest('[data-lesson],[data-related],[data-map]');if(l){e.preventDefault();select(l.dataset.lesson||l.dataset.related||l.dataset.map);return}const s=e.target.closest('[data-step],[data-trace]');if(s){goStep(Number(s.dataset.step??s.dataset.trace));return}const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;renderNav();return}const g=e.target.closest('[data-group]');if(g){select(LESSONS.find(l=>l.group===Number(g.dataset.group)).id);filter=g.dataset.group;renderNav();return}const d=e.target.closest('[data-detail]');if(d){detail=d.dataset.detail;renderDetail();return}if(e.target.closest('[data-about]'))$('#about-dialog').showModal();});
 $('#search').addEventListener('input',e=>{query=e.target.value;renderNav()});$('#all-topics').onclick=()=>{filter='all';query='';$('#search').value='';renderNav()};
-$('#normal').onclick=()=>{stop();fault=false;step=0;cueMotion();renderNav();renderStep()};$('#fault').onclick=()=>{stop();fault=true;step=0;cueMotion();renderNav();renderStep();};
+$('#normal').onclick=()=>{stop();fault=false;step=0;selectedNode=null;cueMotion();renderNav();renderStep()};$('#fault').onclick=()=>{stop();fault=true;step=0;selectedNode=null;cueMotion();renderNav();renderStep();};
 $('#previous').onclick=()=>goStep(step-1);$('#next').onclick=()=>goStep(step+1);$('#play').onclick=play;$('#reset').onclick=()=>{stop();step=0;cueMotion();renderStep()};
 $('#speed').onclick=()=>{const running=!!timer,previousMotion=motionMode;stop();speed=speed===.5?1:speed===1?1.5:speed===1.5?2:.5;$('#speed').textContent=`${speed}×`;if(running)play();else{motionMode=previousMotion;draw();}};
 $('#theme').onclick=()=>{dark=!dark;theme();draw();if(view==='map')renderMap()};
-$('#mechanism-tab').onclick=()=>{view='mechanism';renderView()};$('#map-tab').onclick=()=>{stop();view='map';renderView()};
+$('#mechanism-tab').onclick=()=>{view='mechanism';diagramView='topology';$('#diagram').scrollTop=0;$('#diagram').scrollLeft=0;renderView();draw()};$('#sequence-tab').onclick=()=>{view='mechanism';diagramView='sequence';renderView();draw()};$('#map-tab').onclick=()=>{stop();view='map';renderView()};
 $('#complete').onclick=()=>{if(completed.has(current.id))completed.delete(current.id);else completed.add(current.id);saveProgress();renderNav();renderMap();updateProgress()};
 $('#about').onclick=()=>$('#about-dialog').showModal();$('#close-about').onclick=()=>$('#about-dialog').close();$('#clear-progress').onclick=()=>{completed.clear();saveProgress();renderNav();renderMap();updateProgress();$('#about-dialog').close();notify('本机学习进度已清除')};
 $('#menu').onclick=()=>{const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#shade').hidden=!open;$('#menu').setAttribute('aria-expanded',String(open))};$('#shade').onclick=closeMenu;
 window.addEventListener('popstate',()=>select(location.hash.slice(1),false));window.addEventListener('hashchange',()=>{if(location.hash.slice(1)!==current.id)select(location.hash.slice(1),false)});
-document.addEventListener('keydown',e=>{if($('#about-dialog').open)return;if(e.target.matches('input,textarea,select')||e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='/'){e.preventDefault();if(innerWidth<=700){$('#sidebar').classList.add('open');$('#shade').hidden=false}$('#search').focus()}else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();if(view==='mechanism')play()}else if(e.key==='ArrowRight'&&view==='mechanism'){e.preventDefault();goStep(step+1)}else if(e.key==='ArrowLeft'&&view==='mechanism'){e.preventDefault();goStep(step-1)}else if(e.key==='Escape'){stop();step=0;closeMenu();renderStep()}else if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-trace]')){e.preventDefault();goStep(Number(e.target.dataset.trace))}});
+document.addEventListener('keydown',e=>{if($('#about-dialog').open)return;if(e.target.matches('input,textarea,select')||e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='/'){e.preventDefault();if(innerWidth<=700){$('#sidebar').classList.add('open');$('#shade').hidden=false}$('#search').focus()}else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();if(view==='mechanism')play()}else if(e.key==='ArrowRight'&&view==='mechanism'){e.preventDefault();goStep(step+1)}else if(e.key==='ArrowLeft'&&view==='mechanism'){e.preventDefault();goStep(step-1)}else if(e.key==='Escape'){if(expanded){toggleExpanded();return}stop();step=0;closeMenu();renderStep()}else if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-trace]')){e.preventDefault();goStep(Number(e.target.dataset.trace))}});
 window.addEventListener('storage',e=>{if(e.key==='k8s-explorer-completed'){completed=readCompleted();updateProgress();renderNav();renderMap()}});
 window.addEventListener('resize',()=>{draw()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});

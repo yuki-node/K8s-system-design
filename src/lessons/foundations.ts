@@ -3,7 +3,7 @@ import { sh, yaml, type Lesson } from '../course-types';
 export const foundations: Lesson[] = [
   {
     id: 'architecture', group: 0, title: '集群架构与组件', en: 'CLUSTER ARCHITECTURE',
-    summary: '从提交一个 Pod 开始，分清 API Server、控制器、调度器与 kubelet 的职责。',
+    summary: '从提交一个 Deployment 开始，分清 API Server、控制器、调度器与 kubelet 的职责。',
     principle: '控制面通过 API 协作，节点上的 kubelet 才驱动容器运行时运行容器。',
     tradeoff: '组件分工让系统可以独立扩展与恢复，也使一次操作需要跨越多个异步环节。',
     pitfall: 'API 返回成功只说明对象已被接受；不代表 Pod 已调度、镜像已拉取或应用已就绪。',
@@ -22,8 +22,8 @@ kubectl -n demo get pods -o wide`, '节点列表显示状态与版本；demo Pod
     sections: [
       { title: '控制面保存目标，节点落实目标', body: 'API Server 提供资源读写入口，etcd 保存集群状态。调度器负责选择节点，控制器负责各类资源的控制循环。kubelet 管理节点上的 Pod，容器运行时负责容器执行；CNI、CSI 等扩展承担相应网络与存储工作。' },
       { title: '控制路径与业务路径分开', body: '请求应用 Service 的业务流量通常不经过 API Server。Service 的转发可能由 kube-proxy 或替代数据面实现；API 保存配置与发现信息，不替每个请求做业务代理。' },
-      { title: '先找到卡住的环节', body: '对象不存在先查请求与权限；没有节点绑定查调度事件；已绑定但容器未创建查 kubelet、运行时、镜像和挂载。组件职责是排查顺序的依据，四个图解节点只是逻辑角色。' },
-    ], sources: ['architecture', 'pods'], related: ['api', 'reconcile', 'scheduling', 'pod'],
+      { title: '先找到卡住的环节', body: '对象不存在先查请求与权限；没有节点绑定查调度事件；已绑定但容器未创建查 kubelet、运行时、镜像和挂载。组件职责是排查顺序的依据，图中角色按控制面、节点与资源分组，不等于物理主机数量。' },
+    ], sources: ['architecture', 'pods', 'controllers', 'deployment', 'admission', 'cri'], related: ['api', 'reconcile', 'scheduling', 'pod'],
     fault: {
       name: 'API 可用，镜像拉取失败', nodes: ['Pod 声明', '调度绑定', 'kubelet / CRI', '镜像仓库'],
       steps: [

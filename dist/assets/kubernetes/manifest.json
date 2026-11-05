@@ -1,0 +1,231 @@
+{
+  "source": "https://github.com/kubernetes/community/tree/main/icons",
+  "retrieved": "2026-11-05",
+  "license": "CC-BY-4.0 (chosen from upstream dual license)",
+  "icons": [
+    {
+      "id": "api",
+      "file": "api.svg",
+      "upstream": "icons/svg/control_plane_components/labeled/api.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/control_plane_components/labeled/api.svg",
+      "sha256": "da177da264ed0d77e824c0a442cfb19d89bdaa37e40bf9125ef2f6cf26c2ca36"
+    },
+    {
+      "id": "c-m",
+      "file": "c-m.svg",
+      "upstream": "icons/svg/control_plane_components/labeled/c-m.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/control_plane_components/labeled/c-m.svg",
+      "sha256": "0b626876bff943a38c6df66bcd884cfbfb0b7158514a1bd05e767b9024fdf991"
+    },
+    {
+      "id": "k-proxy",
+      "file": "k-proxy.svg",
+      "upstream": "icons/svg/control_plane_components/labeled/k-proxy.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/control_plane_components/labeled/k-proxy.svg",
+      "sha256": "44661762ab7c8ba4b847c1a87bc3007b10a3b8d408795cc228871d64cb2ced2e"
+    },
+    {
+      "id": "kubelet",
+      "file": "kubelet.svg",
+      "upstream": "icons/svg/control_plane_components/labeled/kubelet.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/control_plane_components/labeled/kubelet.svg",
+      "sha256": "669b4006009978b8a1a081b2bf722a397d8d1aac6f71731533b7aad5b8ada7a1"
+    },
+    {
+      "id": "sched",
+      "file": "sched.svg",
+      "upstream": "icons/svg/control_plane_components/labeled/sched.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/control_plane_components/labeled/sched.svg",
+      "sha256": "fb4687735bf41fc3cf5e870280ff12bd8e24f1496f036548a1af6ad696bcf2ad"
+    },
+    {
+      "id": "node",
+      "file": "node.svg",
+      "upstream": "icons/svg/infrastructure_components/unlabeled/node.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/infrastructure_components/unlabeled/node.svg",
+      "sha256": "a99367b8a805d9bbc91ef82cf47c8a243fe4e6dd8ff2ce4342f597c2cbec965a"
+    },
+    {
+      "id": "etcd",
+      "file": "etcd.svg",
+      "upstream": "icons/svg/infrastructure_components/unlabeled/etcd.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/infrastructure_components/unlabeled/etcd.svg",
+      "sha256": "d700f6d4ca360656b29138fe3424ead6d7e89ce46f2eb3b932df92e67e378d0e"
+    },
+    {
+      "id": "cm",
+      "file": "cm.svg",
+      "upstream": "icons/svg/resources/unlabeled/cm.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/cm.svg",
+      "sha256": "79cd881b717aed580d90a83f4c67c7f2c2b5672a26669ef61d0ddd2da6aac2af"
+    },
+    {
+      "id": "cronjob",
+      "file": "cronjob.svg",
+      "upstream": "icons/svg/resources/unlabeled/cronjob.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/cronjob.svg",
+      "sha256": "7cbd1aba0bfd3570e512ab1a0f1f4ecf11c1148bb96a3e38d93fa0a0ef51f262"
+    },
+    {
+      "id": "deploy",
+      "file": "deploy.svg",
+      "upstream": "icons/svg/resources/unlabeled/deploy.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/deploy.svg",
+      "sha256": "d96f6e93a0f57ca9583b2120e3ddb4453afb5a29aa6d8c1360e8eb8e458489f7"
+    },
+    {
+      "id": "ds",
+      "file": "ds.svg",
+      "upstream": "icons/svg/resources/unlabeled/ds.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/ds.svg",
+      "sha256": "5acb397d5b55f6a4c1fb6750a7ff5faa6f846f4d82b59ec06f0b80faebfcd19d"
+    },
+    {
+      "id": "ep",
+      "file": "ep.svg",
+      "upstream": "icons/svg/resources/unlabeled/ep.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/ep.svg",
+      "sha256": "98f6e8adc3859cc625ee5ea67d3858b05dd4841dd8583b195a171c92a6b79bd4"
+    },
+    {
+      "id": "hpa",
+      "file": "hpa.svg",
+      "upstream": "icons/svg/resources/unlabeled/hpa.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/hpa.svg",
+      "sha256": "7b92a11ab6050825927bc91bf654499a02e8f8488b059d2578ab22037900fbed"
+    },
+    {
+      "id": "ing",
+      "file": "ing.svg",
+      "upstream": "icons/svg/resources/unlabeled/ing.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/ing.svg",
+      "sha256": "66ac75442eff83ef51a8d1ef01edd858cc621b0f43ff60e2170f1d10c4d49813"
+    },
+    {
+      "id": "job",
+      "file": "job.svg",
+      "upstream": "icons/svg/resources/unlabeled/job.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/job.svg",
+      "sha256": "1f0f273f4271b2a5b22c1422d82187579f548619c8c030f9e2226bccfb3ce67f"
+    },
+    {
+      "id": "limits",
+      "file": "limits.svg",
+      "upstream": "icons/svg/resources/unlabeled/limits.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/limits.svg",
+      "sha256": "5fc6beb333b380c11a38dddb6a94a0b18bb1d4c74f095de1497dcf67c05d9728"
+    },
+    {
+      "id": "netpol",
+      "file": "netpol.svg",
+      "upstream": "icons/svg/resources/unlabeled/netpol.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/netpol.svg",
+      "sha256": "99ec4a960470a6cc38cb78eb571d8f6f39f41622d03e1fc85dadd4a6608e9d3d"
+    },
+    {
+      "id": "ns",
+      "file": "ns.svg",
+      "upstream": "icons/svg/resources/unlabeled/ns.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/ns.svg",
+      "sha256": "6539e288ca6f5ce9c88aedf8520301618d0b1e0115783483104096b0c5a8ad19"
+    },
+    {
+      "id": "pod",
+      "file": "pod.svg",
+      "upstream": "icons/svg/resources/unlabeled/pod.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/pod.svg",
+      "sha256": "3356f7ca970f811da2b1aa34a0f13e846255378727809ab6629837a842db0a2d"
+    },
+    {
+      "id": "pv",
+      "file": "pv.svg",
+      "upstream": "icons/svg/resources/unlabeled/pv.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/pv.svg",
+      "sha256": "93d6ccca227c8631eaac916fc37911d5c16e07607cbd4bfb8825e2972c22ad66"
+    },
+    {
+      "id": "pvc",
+      "file": "pvc.svg",
+      "upstream": "icons/svg/resources/unlabeled/pvc.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/pvc.svg",
+      "sha256": "1be3839623947b0c6d3283538f213c2793398c720dc8f739436371e96462bb26"
+    },
+    {
+      "id": "quota",
+      "file": "quota.svg",
+      "upstream": "icons/svg/resources/unlabeled/quota.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/quota.svg",
+      "sha256": "106a65ac31e998a35316e37a46a531faa2475d3546043c93b418a867fc8f8dd5"
+    },
+    {
+      "id": "rb",
+      "file": "rb.svg",
+      "upstream": "icons/svg/resources/unlabeled/rb.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/rb.svg",
+      "sha256": "68e9b6ec0f9771ddca87dab21dfc7c66866c1837fa62e703e45a206adfa21f7f"
+    },
+    {
+      "id": "role",
+      "file": "role.svg",
+      "upstream": "icons/svg/resources/unlabeled/role.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/role.svg",
+      "sha256": "4b3c4407e2ffe7fac8599aea02e0f45c720ba81a6891c37f1678ba89c75048e6"
+    },
+    {
+      "id": "rs",
+      "file": "rs.svg",
+      "upstream": "icons/svg/resources/unlabeled/rs.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/rs.svg",
+      "sha256": "234adcccb525efccc79dd996bdc18d73b5ac57c74beb8ee8549726f6b2beb5a7"
+    },
+    {
+      "id": "sa",
+      "file": "sa.svg",
+      "upstream": "icons/svg/resources/unlabeled/sa.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/sa.svg",
+      "sha256": "fd113e685c6842c074f8916cdd2424241fcaa64dabddce82f9ad60f9b1d93285"
+    },
+    {
+      "id": "sc",
+      "file": "sc.svg",
+      "upstream": "icons/svg/resources/unlabeled/sc.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/sc.svg",
+      "sha256": "829f6a257572269ab97e6967aeabef76dd9ab23d93cfcc4d5f43dd754a8162c6"
+    },
+    {
+      "id": "secret",
+      "file": "secret.svg",
+      "upstream": "icons/svg/resources/unlabeled/secret.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/secret.svg",
+      "sha256": "144fb9972d456ef172fcebbe6a6d7d4921254c6586b0381962c9add0b34468c2"
+    },
+    {
+      "id": "sts",
+      "file": "sts.svg",
+      "upstream": "icons/svg/resources/unlabeled/sts.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/sts.svg",
+      "sha256": "a35e5fafa0d5d642eeb5edbe4692716e95a763188ef16d0ec1476b7e082ece27"
+    },
+    {
+      "id": "svc",
+      "file": "svc.svg",
+      "upstream": "icons/svg/resources/unlabeled/svc.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/svc.svg",
+      "sha256": "a86fad881253c4d7abbe7413c0efbca2e7dde7e54a55774f79349494bd823990"
+    },
+    {
+      "id": "user",
+      "file": "user.svg",
+      "upstream": "icons/svg/resources/unlabeled/user.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/user.svg",
+      "sha256": "be727f58f91ef61aebf1b1bda24fb8efff18bc106a9fc260ddfdb8dc10f5b25f"
+    },
+    {
+      "id": "vol",
+      "file": "vol.svg",
+      "upstream": "icons/svg/resources/unlabeled/vol.svg",
+      "url": "https://raw.githubusercontent.com/kubernetes/community/main/icons/svg/resources/unlabeled/vol.svg",
+      "sha256": "07624349d456d064e411b3a3710370be6487568808b72e2dfc97ca5c78f5d020"
+    }
+  ]
+}

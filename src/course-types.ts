@@ -1,6 +1,7 @@
 export type Relation = 'request' | 'data' | 'control' | 'check' | 'reject' | 'lost' | 'local' | 'compare';
 export type Frame = [title: string, from: number, to: number, event: string, explanation: string, state: string, relation: Relation];
-export type Four<T> = [T, T, T, T];
+export interface ParticipantGroup { label: string; nodes: number[] }
+export interface Milestone { step: number; node: number; status: 'pending' | 'running' | 'ready' | 'failed' | 'removed' }
 export interface Example {
   title: string;
   language: 'sh' | 'yaml';
@@ -10,8 +11,10 @@ export interface Example {
   filename?: string;
 }
 export interface Scenario {
-  nodes: Four<string>;
-  steps: Four<Frame>;
+  nodes: string[];
+  steps: Frame[];
+  groups?: ParticipantGroup[];
+  milestones?: Milestone[];
   code: string[];
   example: Example;
 }

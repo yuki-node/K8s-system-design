@@ -67,16 +67,18 @@ test('playback can pause, finish and reset, while theme and learning marks survi
   let stored;
   try {
     const { document, window } = page;
-    document.querySelector('#play').click();
+    document.querySelector('#scene-play').click();
     assert.equal(document.querySelector('#play').getAttribute('aria-label'), '暂停演示');
+    assert.equal(document.querySelector('#scene-play').getAttribute('aria-label'), '暂停当前场景');
     timers.get(1)();
     assert.equal(document.querySelector('#step-chip').textContent, '02');
     document.querySelector('#play').click();
     assert.equal(timers.size, 0);
     assert.equal(document.querySelector('#step-chip').textContent, '02');
     document.querySelector('#play').click();
-    timers.get(1)(); timers.get(1)();
-    assert.equal(document.querySelector('#step-chip').textContent, '04');
+    const stageCount = document.querySelectorAll('#trace-body tr').length;
+    for(let i = 1; i < stageCount - 1; i++) timers.get(1)();
+    assert.equal(document.querySelector('#step-chip').textContent, String(stageCount).padStart(2, '0'));
     assert.equal(document.querySelector('#play').getAttribute('aria-label'), '暂停演示', 'final stage gets a full dwell');
     timers.get(1)();
     assert.equal(timers.size, 0);
@@ -101,5 +103,46 @@ test('invalid saved progress does not prevent a learner opening the course', () 
     assert.equal(page.document.querySelector('#scene-title').textContent, '集群架构与组件');
     assert.equal(page.document.querySelector('#progress-number').textContent, '0 / 27');
     assert(!page.document.body.classList.contains('dark'));
+  } finally { page.close(); }
+});
+
+
+test('topology, sequence, component inspection and variable stage controls share a playhead', () => {
+  const page = openLesson('#architecture');
+  try {
+    const { document } = page;
+    assert.equal(document.querySelectorAll('#diagram [data-node]').length, 9);
+    assert.equal(document.querySelectorAll('#stage-rail button').length, 12);
+    document.querySelector('#diagram [data-node="1"]').dispatchEvent(new page.window.MouseEvent('click', { bubbles: true }));
+    assert(document.querySelector('#node-insight').textContent.includes('API Server'));
+    assert(document.querySelectorAll('#node-insight [data-step]').length > 4);
+    document.querySelector('#sequence-tab').click();
+    assert.equal(document.querySelector('#sequence-tab').getAttribute('aria-selected'), 'true');
+    assert.equal(document.querySelectorAll('[data-sequence-step]').length, 12);
+    document.querySelector('[data-sequence-step="10"]').dispatchEvent(new page.window.MouseEvent('click', { bubbles: true }));
+    assert.equal(document.querySelector('#flow-count').textContent, '11 / 12');
+    const keyboardStep = document.querySelector('[data-sequence-step="9"]');
+    keyboardStep.dispatchEvent(new page.window.KeyboardEvent('keydown', { key:' ', bubbles:true }));
+    assert.equal(document.querySelector('#step-chip').textContent, '10');
+    assert.equal(document.querySelector('#play').getAttribute('aria-label'), '播放演示');
+    document.querySelector('[data-sequence-step="10"]').dispatchEvent(new page.window.MouseEvent('click', { bubbles: true }));
+    document.querySelector('#mechanism-tab').click();
+    assert.equal(document.querySelector('#step-chip').textContent, '11');
+    document.querySelector('#expand-scene').click();
+    assert(document.querySelector('#main').classList.contains('expanded'));
+    assert.equal(document.querySelector('.sidebar').inert, true);
+    document.querySelector('#expand-scene').click();
+    assert(!document.body.classList.contains('canvas-open'));
+    document.querySelector('[data-lesson="deployment"]').click();
+    document.querySelector('#stage-rail [data-step="4"]').click();
+    assert.equal(document.querySelector('[data-node="4"]').dataset.status, 'removed');
+    assert.equal(document.querySelector('[data-node="6"]').dataset.status, 'ready');
+    document.querySelector('#reset').click();
+    assert.equal(document.querySelector('[data-node="4"]').dataset.status, 'ready');
+    assert.equal(document.querySelector('[data-node="6"]').dataset.status, 'pending');
+    document.querySelector('#fault').click();
+    assert.equal(document.querySelectorAll('#stage-rail button').length, 4);
+    assert.equal(document.querySelector('#participant-count').textContent, '4');
+    assert.equal(page.errors.length, 0);
   } finally { page.close(); }
 });

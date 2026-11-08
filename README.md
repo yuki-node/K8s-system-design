@@ -2,7 +2,7 @@
 
 学习站地址：[yuki-node.github.io/K8s-system-design](https://yuki-node.github.io/K8s-system-design/)。源码仓库：[yuki-node/K8s-system-design](https://github.com/yuki-node/K8s-system-design)。
 
-面向有 Linux 与容器基础的开发者和初级运维的 Kubernetes 中文交互学习站。通过 **27 个主题、54 个独立场景、305 个演示阶段**，连接基础知识、应用部署和日常运维排障。
+面向懂一点应用开发和 Docker、准备学习 Kubernetes 的读者，以及希望深入机制的开发者和初级运维。先通过 **7 节入门导读**建立整体认识，再用 **27 个主题、54 个独立场景、305 个演示阶段**连接基础知识、应用部署和日常运维排障。
 
 视觉与交互沿用 [Systems Explorer](https://kejun.github.io/cs-systems-design/)，形式参考 [Protocol Explorer](https://protocol-explorer-alpha.vercel.app/)。保留白底蓝线、细边框、三栏工作区、组件分组图解、状态观察和执行轨迹；支持深色主题与移动端。
 
@@ -28,6 +28,8 @@ npm ci --registry=https://registry.npmjs.org
 
 ## 三条学习路径
 
+无主题链接时默认进入“00 · Kubernetes 入门”（`#intro`）。导读从镜像与容器回顾，逐步介绍为什么需要 K8s、集群、Pod、Deployment 和 Service，最后通过本地教学模拟体验扩容、就绪和新 Pod 替代。预计阅读与交互约 8–10 分钟，可跳过；导读独立于 27 个机制主题及其原有进度。主题深链接继续直达。
+
 | 路径 | 主题 |
 | --- | --- |
 | 基础与架构 | 集群架构、声明式 API、控制循环、Pod 生命周期、Namespace/配额、标签/选择器、调度、requests/limits、健康探针 |
@@ -43,6 +45,8 @@ npm ci --registry=https://registry.npmjs.org
 全部图标本地加载，无运行时 CDN。资源来源、下载日期、哈希与许可见 `dist/assets/kubernetes/manifest.json` 和 `dist/licenses/kubernetes-icons.md`。符号映射集中在 `src/component-visuals.mjs`，立体造型在 `src/isometric-component.jsx`，状态徽标与时序符号在 `src/component-glyph.jsx`，便于后续配置。
 
 ## 如何学习
+
+第一次接触 K8s 时，先阅读基础路径最前面的入门导读；每次只看一小节，配合图解区分容器、Pod、管理副本的资源和访问入口，再进入下面的机制探索。
 
 1. 选择主题，先观察主流程的组件拓扑与可变阶段，再切到故障场景比较条件变化。
 2. 用右侧「机制」理解取舍，「命令 / YAML」查看和下载示例，「来源」继续阅读官方文档。
@@ -79,8 +83,9 @@ npm run check           # 最新构建 + 完整检查
 | `src/course-types.ts` | 参与者、阶段、关系、示例的类型约束 |
 | `src/lessons/*.ts` | 三条路径的机制讲解、示例与独立故障场景 |
 | `src/scenarios.ts` | 各主题展开的主流程、角色分组与状态里程碑 |
+| `src/intro-content.mjs` / `src/beginner-intro.jsx` | 独立入门导读的原创讲解、渐进图解与教学模拟 |
 | `src/lab.yaml` | 可选入门实验的完整清单 |
-| `dist/index.html` / `styles.css` / `explorer.css` / `app.js` | 沿用参考项目的静态界面源文件 |
+| `dist/index.html` / `styles.css` / `explorer.css` / `intro.css` / `app.js` | 静态界面源文件与入门／主题导航 |
 | `src/isokit-*.{jsx,mjs}` | 真正的 React / IsoKit 逻辑参与者图解 |
 | `src/point-motion.mjs` | 基于经过时间的运动、暂停与恢复 |
 | `scripts/build.mjs` | 生成 `dist/data.js`、示例与本地依赖和许可证 |

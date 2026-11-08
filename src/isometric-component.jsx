@@ -47,10 +47,10 @@ function Database() {
     {[-7,8,23].map(y=><circle className="sculpt-led" key={y} cx="18" cy={y} r="1.7"/>)}
   </g>;
 }
-function Pod() {
+function Pod({ singleContainer = false }) {
   return <g transform="translate(0 10)">
     <Slab w={65} d={51} h={4}/>
-    <Cube x={-20} y={-13} size={18} h={23}/><Cube x={3} y={-10} size={18} h={23}/>
+    <Cube x={singleContainer ? -9 : -20} y={-13} size={18} h={23}/>{!singleContainer && <Cube x={3} y={-10} size={18} h={23}/>}
     <Box className="sculpt-pod-cage" x={-27} y={-22} z={4} w={54} d={44} h={35} r={2}/>
     <path className="sculpt-ink" d="M-42-14v-8l7-4M42-15v-8l-7-4M0 29v9m-5-3 5 3 5-3"/>
   </g>;
@@ -128,11 +128,11 @@ const MODELS = { laptop: Laptop, rack: Rack, agent: ()=><Rack agent/>, database:
   scheduler: ()=><Console scheduler/>, router: Router, globe: Globe,
   monitor: ()=><Laptop monitor/>, documents: Documents, shield: Shield, enclosure: Enclosure };
 
-export function IsometricComponent({ visual }) {
+export function IsometricComponent({ visual, singleContainer = false }) {
   const model = componentModel(visual), Model = MODELS[model];
   return <g className="isometric-component" data-model={model} data-dimensionality="isometric">
     <path className="sculpt-shadow" d="M-41 20 8-8 60 22 11 49Z"/>
-    <g className="sculpture-lift"><g className="sculpture-body" transform="translate(0 -11) scale(.82)"><Model/>
+    <g className="sculpture-lift"><g className="sculpture-body" transform="translate(0 -11) scale(.82)"><Model singleContainer={singleContainer}/>
       {visual.source === 'kubernetes' && <g className="sculpt-badge" transform="translate(34 19)">
         <circle r="15"/><image className="component-artwork" href={`./assets/kubernetes/${visual.icon}.svg`} x="-12" y="-12" width="24" height="24"/>
       </g>}

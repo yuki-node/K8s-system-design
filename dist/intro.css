@@ -1,0 +1,106 @@
+/* Beginner guide uses the existing workspace, palette and isometric component family. */
+.intro-open .workspace{grid-template-rows:auto;align-items:start}
+.intro-open .sidebar{grid-row:1;align-self:start;position:sticky;top:16px;height:calc(100dvh - 114px);min-height:0}
+.intro{grid-column:2/4;grid-row:1;min-width:0;background:var(--panel)}
+.intro-guide{display:flex;flex-direction:column}
+.intro-toolbar{display:flex;align-items:center;gap:20px;padding:19px 30px;border-bottom:1px solid var(--faint);font:11px/1.6 ui-monospace,"PingFang SC",monospace;color:var(--muted)}
+.intro-toolbar>span:first-child{color:var(--accent);letter-spacing:1px}
+.intro-toolbar a{margin-left:auto;font-size:12px;text-decoration:none}
+.intro-reading{padding:22px 30px}
+.intro-chapter-meta{display:flex;justify-content:space-between;gap:20px;font-size:11px;color:var(--muted)}
+.intro-chapter-meta>span:last-child{font-family:ui-monospace,monospace}
+.intro-reading h1{max-width:24em;font-size:clamp(25px,2.1vw,32px);line-height:1.4;letter-spacing:-.8px;margin:0 0 10px;font-weight:600}
+.intro-reading h1:focus{outline:none}
+.intro-copy>.intro-lead{font-size:16px;color:var(--accent);line-height:1.8;margin:0 0 20px}
+.intro-spread{display:grid;grid-template-columns:minmax(240px,1fr) minmax(300px,1fr);gap:28px;align-items:start;margin-top:18px}
+.intro-copy{font-size:14px;line-height:2;color:var(--ink)}
+.intro-copy>p{margin:0 0 18px;max-width:40em}
+.intro-takeaway{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:25px 0 20px}
+.intro-takeaway strong{font-size:11px;font-weight:500;color:var(--muted)}
+.intro-takeaway p{font-size:14px;line-height:1.9;margin:5px 0 0}
+.intro-source{font-size:11px;text-decoration:none}
+.intro-figure{margin:0;min-width:0;width:100%;max-width:500px;justify-self:center;padding-top:3px}
+.intro-illustration{display:block;width:100%;height:auto;overflow:visible}
+.intro-region{fill:color-mix(in srgb,var(--accent) 2%,var(--panel));stroke:var(--line);stroke-width:1;stroke-dasharray:4 5}
+.intro-link{fill:none;stroke:var(--accent);stroke-width:1.5}
+.intro-link.control{stroke-dasharray:5 5}
+.intro-link.muted{stroke:var(--line);stroke-dasharray:3 4}
+.intro-unit-name{font-size:16px;fill:var(--ink);font-weight:550}
+.intro-unit-sub{font-size:12px;fill:var(--muted)}
+.intro-diagram-label{font-size:12px;fill:var(--muted);letter-spacing:.5px}
+.intro-diagram-note{font-size:14px;fill:var(--ink)}
+.intro-unit.pending .intro-unit-art{opacity:.35}
+.intro-unit.failed .intro-unit-art{opacity:.2}
+.intro-unit.failed .intro-unit-sub{fill:var(--fault)}
+.intro-unit.pending .intro-unit-sub{fill:var(--warn)}
+.intro-figure figcaption{border-top:1px solid var(--faint);padding-top:13px;margin-top:9px;font-size:11px;color:var(--muted);line-height:1.8}
+.intro-footer{display:flex;gap:22px;align-items:center;padding:18px 30px;border-top:1px solid var(--faint)}
+.intro-footer>button{font-size:12px;min-height:40px;padding:8px 12px;white-space:nowrap;border:1px solid var(--line)}
+.intro-footer nav{display:flex;gap:5px;flex:1}
+.intro-footer nav button{flex:1;min-width:18px;padding:5px 0;text-align:left}
+.intro-footer nav span{font:10px ui-monospace,monospace;color:var(--muted)}
+.intro-footer nav i{display:block;height:3px;background:var(--faint);margin-top:7px}
+.intro-footer nav [aria-current=step] span{color:var(--accent)}
+.intro-footer nav [aria-current=step] i{background:var(--accent)}
+.intro-action{background:var(--blue);color:var(--panel);border-color:var(--blue)!important}
+.intro-action:hover{background:var(--ink)}
+.dark .intro-action{background:var(--accent);color:var(--paper)}
+.nav-group{width:100%;text-align:left;margin:0;border:0;border-radius:0;gap:8px}
+.nav-group b{min-width:0}
+.nav-group-summary{display:flex;align-items:center;gap:7px;flex:none}
+.nav-group-summary .ui-icon{width:12px;height:12px}
+.intro-nav-chapters{padding:0 0 16px 4px;display:grid;gap:2px}
+.intro-nav-chapters button{display:flex;gap:12px;align-items:center;text-align:left;font-size:12px;padding:7px 8px}
+.intro-nav-chapters span{font:10px ui-monospace,monospace;color:var(--muted)}
+.intro-nav-chapters [aria-current=step]{color:var(--accent);font-weight:600;background:var(--wash)}
+.intro-demo{border-top:1px solid var(--faint);margin-top:17px;padding-top:14px}
+.intro-demo-counts{display:flex;gap:20px;font-size:12px;color:var(--muted);align-items:center}
+.intro-demo-counts b{font:20px ui-monospace,monospace;color:var(--ink);margin-left:5px}
+.intro-demo-counts small{margin-left:auto;font-size:10px}
+.intro-demo-controls{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}
+.intro-demo-controls button{font-size:11px;line-height:1.7;min-height:34px;padding:6px 9px;border:1px solid var(--line)}
+.intro-demo-status{font-size:12px;line-height:1.9;color:var(--ink);min-height:5.7em;margin:0}
+.intro-onward{border-top:1px solid var(--faint);margin-top:27px;padding-top:20px}
+.intro-onward h2{font-size:16px;font-weight:550;margin:0 0 14px}
+.intro-onward>div{display:flex;flex-wrap:wrap;gap:12px 24px}
+.intro-onward a{font-size:12px}
+.intro-onward p{font-size:12px;line-height:1.8;color:var(--muted);margin:20px 0 0}
+.intro-onward p a{margin:0 4px}
+@media(prefers-reduced-motion:no-preference){
+  .intro-reading{animation:intro-enter .25s ease-out both}
+  .intro-unit-art{transition:opacity .25s ease}
+  .intro-demo-controls button:active,.intro-footer>button:active{transform:translateY(1px)}
+  @keyframes intro-enter{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+}
+@media(min-width:1600px){.intro-reading{padding:26px 36px}.intro-spread{gap:40px}.intro-copy{font-size:15px;line-height:2}.intro-takeaway p{font-size:15px}.intro-figure{max-width:520px}}
+@media(max-width:1190px){.intro-reading{padding:26px}.intro-figure{max-width:560px;width:100%;margin:auto}.intro-footer{padding:17px 24px;gap:12px}.intro-toolbar{padding:17px 24px}.intro-copy{font-size:14px}}
+@media(max-width:1050px){.intro-spread{grid-template-columns:1fr;gap:24px}.intro-copy>p{max-width:none}.intro{grid-column:2}.intro-open .workspace{grid-template-rows:auto}.intro-open .sidebar{grid-row:1;max-height:1100px}}
+@media(max-width:700px){
+  .intro-open .workspace{display:flex}
+  .intro-open .sidebar{position:fixed;top:82px;bottom:8px;height:auto;max-height:none}
+  .intro{width:100%;order:0}
+  .intro-toolbar{padding:14px 16px;gap:8px;flex-wrap:wrap;font-size:10px}
+  .intro-toolbar>span:nth-child(2){margin-left:auto}
+  .intro-toolbar a{flex-basis:100%;margin:3px 0 0;font-size:11px}
+  .intro-reading{padding:22px 17px 20px}
+  .intro-reading h1{font-size:26px;letter-spacing:-.6px;margin-top:16px}
+  .intro-copy>.intro-lead{font-size:15px;margin-bottom:20px}
+  .intro-copy{font-size:14px;line-height:1.95}
+  .intro-spread{gap:14px}
+  .intro-takeaway{margin-top:20px;margin-bottom:17px}
+  .intro-figure figcaption{font-size:11px}
+  .intro-footer{padding:15px;gap:12px;flex-wrap:wrap}
+  .intro-footer nav{flex-basis:100%;order:-1}
+  .intro-footer>button:last-child{margin-left:auto;max-width:75%;white-space:normal;text-align:right}
+  .intro-nav-chapters button{font-size:13px;min-height:36px}
+  .intro-demo-controls button{font-size:12px}
+}
+
+@media(min-width:1051px){
+  .intro-open .workspace{grid-template-rows:minmax(0,1fr);align-items:stretch}
+  .intro-open .sidebar{position:static;align-self:stretch;height:auto}
+  .intro{min-height:0;overflow:hidden}
+  .intro-guide{height:100%;min-height:0}
+  .intro-toolbar,.intro-footer{flex:none}
+  .intro-reading{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+}

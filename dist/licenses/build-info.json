@@ -4,7 +4,7 @@
   "react": "19.3.1",
   "outputs": {
     "dist/isokit.js": {
-      "bytes": 291365
+      "bytes": 314460
     },
     "dist/isokit.css": {
       "bytes": 10755

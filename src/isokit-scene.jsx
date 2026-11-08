@@ -63,6 +63,7 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
   playing, motionMode = playing ? 'playing' : 'paused', motionVersion = 0, speed = 1, stageKey,
   reducedMotion, dark, viewMode = 'topology', selectedNode, onInspectNode, onSelectStep }) {
   if (viewMode === 'sequence') return <SequenceScene {...{ label, nodes, frames, frameIndex, onSelectStep, dark }} />;
+  const phaseTime = 1760 / speed;
   const layout = topologyLayout(nodes, groups);
   const [, from, to, , , , kind] = frame;
   const lost = kind === 'lost', rejected = kind === 'reject' || lost;
@@ -76,7 +77,7 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
   return <Plate className="systems-iso topology-plate" label={label} role="group" credit={false}
     viewBox={layout.viewBox} theme={dark ? 'dark' : 'light'} data-kind={kind} data-renderer="react-isokit"
     data-stage={stageKey} data-playing={playing ? 'true' : 'false'} data-motion={motionMode} data-reduced={reducedMotion ? 'true' : 'false'}
-    style={{ '--phase-time': `${2200 / speed}ms` }}>
+    style={{ '--phase-time': `${phaseTime}ms` }}>
     <defs>
       <marker id="iso-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="var(--accent)" /></marker>
       <marker id="iso-reject" markerWidth="10" markerHeight="12" refX="5" refY="6" orient="auto"><path d="M2 2L8 10M8 2L2 10" fill="none" stroke="var(--fault)" strokeWidth="2" /></marker>
@@ -95,6 +96,6 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
     {nodes.map((name, index) => <LogicalModule key={index} name={name} index={index} position={layout.positions[index]}
       active={index === from || (!lost && index === to)} local={kind === 'local' || kind === 'check'}
       status={statuses[index]} selected={selectedNode === index} onInspect={onInspectNode} effectKey={`${stageKey}:${motionVersion}`} />)}
-    {transfer && route && !reducedMotion && <TravelDot points={route} duration={Math.round(2200 / speed)} mode={motionMode} motionKey={`${stageKey}:${motionVersion}`} />}
+    {transfer && route && !reducedMotion && <TravelDot points={route} duration={Math.round(phaseTime)} mode={motionMode} motionKey={`${stageKey}:${motionVersion}`} />}
   </Plate>;
 }

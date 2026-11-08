@@ -44,7 +44,7 @@ const vm = require('node:vm');
   const playFunction = app.slice(app.indexOf('function play(){'), app.indexOf('function finish()'));
   let interval, stops = 0, finishes = 0;
   const states = [];
-  const context = { timer: null, step: 0, speed: 1, motionMode: 'preview', motionVersion: 0, playbackEnded: false,
+  const context = { introOpen: false, timer: null, step: 0, speed: 1, motionMode: 'preview', motionVersion: 0, playbackEnded: false,
     frames: () => [0, 1, 2, 3], $: () => ({ setAttribute() {} }), icon: () => '',
     setInterval: fn => { interval = fn; return 1; },
     renderStep: () => states.push(context.step),
@@ -57,5 +57,9 @@ const vm = require('node:vm');
   interval();
   assert.equal(stops, 1); assert.equal(finishes, 1);
   assert.equal(context.playbackEnded, true);
+  context.introOpen = true;
+  vm.runInNewContext('play();', context);
+  assert.equal(context.timer, null, 'the guide must not start hidden lesson playback');
+  assert.equal(states.length, 4);
   console.log('Motion regression passed: real positions, corners, pause/resume, speed, cleanup, and final-stage dwell.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

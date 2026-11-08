@@ -16,6 +16,7 @@ let dark=safeRead('k8s-explorer-dark',false)===true;
 let motionMode='preview',motionVersion=0,playbackEnded=false;
 let renderedDetail='';
 let diagramView='topology',selectedNode=null,expanded=false;
+let drawnTopology;
 const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
 function cueMotion(){motionMode='preview';motionVersion++;playbackEnded=false;}
 function saveProgress(){try{localStorage.setItem('k8s-explorer-completed',JSON.stringify([...completed]))}catch{}}
@@ -147,6 +148,8 @@ function revealInScroller(scroller,target,padding=12){
 function draw(){
  if(introOpen)return;
  const s=currentFrame(),kind=s[6];
+ const diagram=$('#diagram'),isSequence=diagramView==='sequence';
+ const topology=isSequence?null:`${current.id}:${fault}`;
  window.SystemsDiagram.render({
   label:current.title+'：'+s[0]+'；'+RELATIONS[kind]+'；'+relationText(s),
   nodes:nodes(),frame:s,frames:frames(),frameIndex:step,groups:scenario().groups,milestones:scenario().milestones,playing:!!timer,motionMode,motionVersion,speed,dark,
@@ -154,8 +157,10 @@ function draw(){
   stageKey:current.id+':'+(fault?'alternate':'main')+':'+step,
   reducedMotion:motionPreference.matches
  });
- $('#diagram').classList.toggle('sequence-mode',diagramView==='sequence');
- if(diagramView==='sequence')revealInScroller($('#diagram'),$('#diagram [data-sequence-step="'+step+'"]'));
+ diagram.classList.toggle('sequence-mode',isSequence);
+ if(isSequence)revealInScroller(diagram,diagram.querySelector('[data-sequence-step="'+step+'"]'));
+ else if(topology!==drawnTopology)diagram.scrollLeft=0;
+ drawnTopology=topology;
  $('#diagram-hint').textContent=diagramView==='sequence'?'可横向滚动 · 点击时序行定位阶段':'可横向滚动 · 点击组件探索';
  renderNodeInsight();
  $('#relation-kind').textContent=RELATIONS[kind];$('#diagram-state').textContent=s[5];

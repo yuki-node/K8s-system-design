@@ -71,13 +71,13 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
   if (viewMode === 'sequence') return <SequenceScene {...{ label, nodes, frames, frameIndex, onSelectStep, dark, referenceScene, mainScene }} />;
   const phaseTime = 1760 / speed;
   const layout = topologyLayout(nodes, groups);
-  let viewBox = layout.viewBox;
-  if (referenceScene) {
-    const reference = topologyLayout(referenceScene.nodes, referenceScene.groups);
-    const width = Math.max(layout.width, reference.width), height = Math.max(layout.height, reference.height);
-    const left = mainScene ? 0 : (layout.width - width) / 2;
-    viewBox = `${left} 0 ${width} ${height}`;
-  }
+  const reference = referenceScene ? topologyLayout(referenceScene.nodes, referenceScene.groups) : layout;
+  const referenceWidth = Math.max(layout.width, reference.width);
+  const referenceHeight = Math.max(layout.height, reference.height);
+  const firstRegion = layout.regions[0];
+  const lastRegion = layout.regions[layout.regions.length - 1];
+  const contentWidth = lastRegion.x + lastRegion.width - firstRegion.x;
+  const viewBox = `${firstRegion.x} 0 ${contentWidth} ${referenceHeight}`;
   const [, from, to, , , , kind] = frame;
   const lost = kind === 'lost', rejected = kind === 'reject' || lost;
   const transfer = kind === 'request' || kind === 'data';
@@ -90,7 +90,11 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
   return <Plate className="systems-iso topology-plate" label={label} role="group" credit={false}
     viewBox={viewBox} theme={dark ? 'dark' : 'light'} data-kind={kind} data-renderer="react-isokit"
     data-stage={stageKey} data-playing={playing ? 'true' : 'false'} data-motion={motionMode} data-reduced={reducedMotion ? 'true' : 'false'}
-    style={{ '--phase-time': `${phaseTime}ms` }}>
+    style={{
+      '--phase-time': `${phaseTime}ms`,
+      '--topology-width-ratio': contentWidth / referenceWidth,
+      '--topology-height-ratio': contentWidth / referenceHeight,
+    }}>
     <defs>
       <marker id="iso-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="var(--accent)" /></marker>
       <marker id="iso-reject" markerWidth="10" markerHeight="12" refX="5" refY="6" orient="auto"><path d="M2 2L8 10M8 2L2 10" fill="none" stroke="var(--fault)" strokeWidth="2" /></marker>

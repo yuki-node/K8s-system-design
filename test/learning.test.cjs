@@ -301,7 +301,7 @@ test('the speed menu supports keyboard selection and dismisses on outside intera
     assert.equal(button.textContent, '2×');
     assert.equal(document.activeElement, button);
     button.click();
-    document.querySelector('#scene-title').click();
+    document.querySelector('.canvas-toolbar').click();
     assert.equal(menu.hidden, true);
     assert.equal(button.textContent, '2×');
     button.click();
@@ -399,7 +399,7 @@ test('topology, sequence, component inspection and variable stage controls share
     assert.equal(document.querySelector('[data-node="6"]').dataset.status, 'pending');
     document.querySelector('#fault').click();
     assert.equal(document.querySelectorAll('#stage-rail button').length, 4);
-    assert.equal(document.querySelector('#participant-count').textContent, '4');
+    assert.equal(document.querySelectorAll('#diagram [data-node]').length, 4);
     assert.equal(page.errors.length, 0);
   } finally { page.close(); }
 });

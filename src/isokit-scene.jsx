@@ -29,11 +29,17 @@ function LogicalModule({ name, index, position, active, local, status, selected,
   </g>;
 }
 
-function SequenceScene({ label, nodes, frames, frameIndex, onSelectStep, dark }) {
-  const width = Math.max(720, nodes.length * 120 + 74), height = 129 + frames.length * 57;
-  const x = index => 92 + index * (width - 145) / Math.max(1, nodes.length - 1);
+const sequenceWidth = count => Math.max(720, count * 120 + 74);
+
+function SequenceScene({ label, nodes, frames, frameIndex, onSelectStep, dark, referenceScene, mainScene }) {
+  const participantSlots = Math.max(nodes.length, mainScene?.nodes.length ?? 0);
+  const width = sequenceWidth(participantSlots), height = 129 + frames.length * 57;
+  const referenceWidth = sequenceWidth(referenceScene?.nodes.length ?? nodes.length);
+  const laneSpacing = (width - 145) / Math.max(1, participantSlots - 1);
+  const x = index => 92 + index * laneSpacing;
   return <Plate className="systems-iso sequence-plate" label={label} role="group" credit={false}
-    viewBox={`0 0 ${width} ${height}`} theme={dark ? 'dark' : 'light'} data-renderer="react-isokit" data-view="sequence" style={{ '--sequence-ratio': `${width} / ${height}`, minWidth: width }}>
+    viewBox={`0 0 ${width} ${height}`} theme={dark ? 'dark' : 'light'} data-renderer="react-isokit" data-view="sequence"
+    style={{ '--sequence-ratio': `${width} / ${height}`, width: `max(${width}px, ${100 * width / referenceWidth}%)`, minWidth: 0 }}>
     <defs><marker id="sequence-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="var(--accent)" /></marker></defs>
     {nodes.map((name, index) => <g key={index}>
       <g transform={`translate(${x(index)} 25) scale(.5)`}><ComponentGlyph visual={componentVisual(name)} compact/></g>
@@ -61,10 +67,17 @@ function SequenceScene({ label, nodes, frames, frameIndex, onSelectStep, dark })
 
 export function MechanismScene({ label, nodes, frame, frames = [frame], frameIndex = 0, groups, milestones = [],
   playing, motionMode = playing ? 'playing' : 'paused', motionVersion = 0, speed = 1, stageKey,
-  reducedMotion, dark, viewMode = 'topology', selectedNode, onInspectNode, onSelectStep }) {
-  if (viewMode === 'sequence') return <SequenceScene {...{ label, nodes, frames, frameIndex, onSelectStep, dark }} />;
+  reducedMotion, dark, viewMode = 'topology', referenceScene, mainScene, selectedNode, onInspectNode, onSelectStep }) {
+  if (viewMode === 'sequence') return <SequenceScene {...{ label, nodes, frames, frameIndex, onSelectStep, dark, referenceScene, mainScene }} />;
   const phaseTime = 1760 / speed;
   const layout = topologyLayout(nodes, groups);
+  let viewBox = layout.viewBox;
+  if (referenceScene) {
+    const reference = topologyLayout(referenceScene.nodes, referenceScene.groups);
+    const width = Math.max(layout.width, reference.width), height = Math.max(layout.height, reference.height);
+    const left = mainScene ? 0 : (layout.width - width) / 2;
+    viewBox = `${left} 0 ${width} ${height}`;
+  }
   const [, from, to, , , , kind] = frame;
   const lost = kind === 'lost', rejected = kind === 'reject' || lost;
   const transfer = kind === 'request' || kind === 'data';
@@ -75,7 +88,7 @@ export function MechanismScene({ label, nodes, frame, frames = [frame], frameInd
   for (const milestone of milestones) if (milestone.step <= frameIndex) statuses[milestone.node] = milestone.status;
   const connections = [...new Map(frames.filter(s => s[1] !== s[2]).map(s => [s[1] + ':' + s[2], [s[1], s[2]]])).values()];
   return <Plate className="systems-iso topology-plate" label={label} role="group" credit={false}
-    viewBox={layout.viewBox} theme={dark ? 'dark' : 'light'} data-kind={kind} data-renderer="react-isokit"
+    viewBox={viewBox} theme={dark ? 'dark' : 'light'} data-kind={kind} data-renderer="react-isokit"
     data-stage={stageKey} data-playing={playing ? 'true' : 'false'} data-motion={motionMode} data-reduced={reducedMotion ? 'true' : 'false'}
     style={{ '--phase-time': `${phaseTime}ms` }}>
     <defs>

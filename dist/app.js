@@ -100,9 +100,13 @@ function render(){
  const skip=$('.skip');
  skip.href=introOpen?'#intro-view':'#main';
  skip.textContent=introOpen?'跳到入门导读':'跳到机制演示';
+ $$('.parts button').forEach(button=>{
+  const active=introOpen?button.hasAttribute('data-intro'):Number(button.dataset.group)===current.group;
+  button.classList.toggle('active',active);
+  if(active)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');
+ });
  if(!introOpen){renderLesson();return}
  $('#current-no').textContent='00 / 入门';$('#current-title').textContent='从容器到 Kubernetes';
- $$('[data-group]').forEach(b=>b.classList.toggle('active',b.dataset.group==='0'));
  renderIntro();renderNav();updateProgress();document.title='Kubernetes 入门 · K8s Systems Design';
 }
 function relationButtons(){return current.related.filter(id=>byId[id]).map(id=>`<button data-related="${id}">${byId[id].title} ${icon('arrow-up-right')}</button>`).join('')}
@@ -146,11 +150,10 @@ function draw(){
  window.SystemsDiagram.render({
   label:current.title+'：'+s[0]+'；'+RELATIONS[kind]+'；'+relationText(s),
   nodes:nodes(),frame:s,frames:frames(),frameIndex:step,groups:scenario().groups,milestones:scenario().milestones,playing:!!timer,motionMode,motionVersion,speed,dark,
-  viewMode:diagramView,selectedNode,onInspectNode:inspectNode,onSelectStep:goStep,
+  viewMode:diagramView,referenceScene:byId.architecture,mainScene:fault?current:undefined,selectedNode,onInspectNode:inspectNode,onSelectStep:goStep,
   stageKey:current.id+':'+(fault?'alternate':'main')+':'+step,
   reducedMotion:motionPreference.matches
  });
- $('#participant-count').textContent=nodes().length;$('#stage-count').textContent=frames().length;
  $('#diagram').classList.toggle('sequence-mode',diagramView==='sequence');
  if(diagramView==='sequence')revealInScroller($('#diagram'),$('#diagram [data-sequence-step="'+step+'"]'));
  $('#diagram-hint').textContent=diagramView==='sequence'?'可横向滚动 · 点击时序行定位阶段':'可横向滚动 · 点击组件探索';
@@ -175,21 +178,22 @@ function renderTrace(){syncScenePlayer();const list=frames();$('#trace-body').in
 function renderStep(){step=Math.min(step,frames().length-1);const s=currentFrame();$('#step-chip').textContent=String(step+1).padStart(2,'0');$('#step-title').textContent=s[0];$('#step-signal').textContent=s[3];$('#step-description').textContent=s[4];draw();renderTrace();renderDetail();$$('[data-step]').forEach(b=>b.classList.toggle('active',Number(b.dataset.step)===step));$('#normal').classList.toggle('selected',!fault);$('#normal').setAttribute('aria-pressed',String(!fault));$('#fault').classList.toggle('selected',fault);$('#fault').setAttribute('aria-pressed',String(fault));}
 function renderView(){const isMap=view==='map';$('#lesson-view').hidden=isMap;$('#map-view').hidden=!isMap;$('#mechanism-tab').setAttribute('aria-selected',String(!isMap&&diagramView==='topology'));$('#sequence-tab').setAttribute('aria-selected',String(!isMap&&diagramView==='sequence'));$('#map-tab').setAttribute('aria-selected',String(isMap));if(isMap)renderMap()}
 function renderMap(){
- const width=680,col=218,pad=14,row=59,start=48,positions={};
+ const width=680,col=218,pad=14,row=56,start=45,cardHeight=40,positions={};
+ const cardCenter=cardHeight/2, labelBaseline=cardCenter+4.5;
  GROUPS.forEach((g,gi)=>LESSONS.filter(l=>l.group===gi).forEach((l,j)=>positions[l.id]={x:pad+gi*col,y:start+j*row}));
  const related=new Set(current.related),origin=positions[current.id];let links='',cards='',heads='';
  for(const id of related){const dest=positions[id];if(!dest)continue;const a=origin,b=dest;let d;
- if(a.x===b.x){const lane=a.x+200;d=`M${a.x+192} ${a.y+21}H${lane}V${b.y+21}H${b.x+192}`;}
+ if(a.x===b.x){const lane=a.x+200;d=`M${a.x+192} ${a.y+cardCenter}H${lane}V${b.y+cardCenter}H${b.x+192}`;}
  else{const right=b.x>a.x,ax=a.x+(right?192:0),bx=b.x+(right?0:192),mid=(ax+bx)/2;
- if(Math.abs(a.x-b.x)>col){const laneA=ax+(right?12:-12),laneB=bx+(right?-12:12);d=`M${ax} ${a.y+21}H${laneA}V36H${laneB}V${b.y+21}H${bx}`;}
- else d=`M${ax} ${a.y+21} C${mid} ${a.y+21} ${mid} ${b.y+21} ${bx} ${b.y+21}`;}
+ if(Math.abs(a.x-b.x)>col){const laneA=ax+(right?12:-12),laneB=bx+(right?-12:12);d=`M${ax} ${a.y+cardCenter}H${laneA}V${start-12}H${laneB}V${b.y+cardCenter}H${bx}`;}
+ else d=`M${ax} ${a.y+cardCenter} C${mid} ${a.y+cardCenter} ${mid} ${b.y+cardCenter} ${bx} ${b.y+cardCenter}`;}
  links+=`<path class="map-relation" data-related-from="${current.id}" data-related-to="${id}" d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.5"><title>${esc(current.title+' 与 '+byId[id].title+' 相关')}</title></path>`;}
- GROUPS.forEach((g,gi)=>{const x=pad+gi*col,ls=LESSONS.filter(l=>l.group===gi),color=dark?['#82adff','#63cec4','#b79aeb'][gi]:g.color;heads+=`<text x="${x+96}" y="22" text-anchor="middle" style="fill:${color};font-size:12.8px;font-weight:600">0${gi+1} ${g.name}</text>`;
- ls.forEach(l=>{const {x,y}=positions[l.id];cards+=`<a class="map-node ${current.id===l.id?'selected':''} ${related.has(l.id)?'related-node':''} ${completed.has(l.id)?'completed':''}" href="#${l.id}" data-map="${l.id}" aria-label="打开${l.title}"><rect x="${x}" y="${y}" width="192" height="42" rx="3"/>${completed.has(l.id)?`<g class="map-check" aria-hidden="true" transform="translate(${x+8} ${y+13})"><use href="./icons.svg#check" width="16" height="16"/></g>`:`<text class="map-num" x="${x+10}" y="${y+26}">${String(LESSONS.indexOf(l)+1).padStart(2,'0')}</text>`}<text x="${x+34}" style="font-size:11px"><tspan x="${x+34}" y="${y+26}">${esc(l.title)}</tspan></text></a>`;});});
+ GROUPS.forEach((g,gi)=>{const x=pad+gi*col,ls=LESSONS.filter(l=>l.group===gi),color=dark?['#82adff','#63cec4','#b79aeb'][gi]:g.color;heads+=`<text x="${x+96}" y="22" text-anchor="middle" style="fill:${color};font-size:12.2px;font-weight:600">0${gi+1} ${g.name}</text>`;
+ ls.forEach(l=>{const {x,y}=positions[l.id];cards+=`<a class="map-node ${current.id===l.id?'selected':''} ${related.has(l.id)?'related-node':''} ${completed.has(l.id)?'completed':''}" href="#${l.id}" data-map="${l.id}" aria-label="打开${l.title}"><rect x="${x}" y="${y}" width="192" height="${cardHeight}" rx="3"/>${completed.has(l.id)?`<g class="map-check" aria-hidden="true" transform="translate(${x+8} ${y+cardCenter-8})"><use href="./icons.svg#check" width="16" height="16"/></g>`:`<text class="map-num" x="${x+10}" y="${y+labelBaseline}">${String(LESSONS.indexOf(l)+1).padStart(2,'0')}</text>`}<text x="${x+34}" style="font-size:10.5px"><tspan x="${x+34}" y="${y+labelBaseline}">${esc(l.title)}</tspan></text></a>`;});});
  $('#knowledge-map').innerHTML=`<svg viewBox="0 0 ${width} ${start+Math.max(...GROUPS.map((_,i)=>LESSONS.filter(l=>l.group===i).length))*row+20}" role="img" aria-label="Kubernetes 知识图谱">${heads}${links}${cards}</svg>`;
 }
-function renderLesson(){theme();const n=LESSONS.indexOf(current)+1;$('#current-no').textContent=`${String(n).padStart(2,'0')} / ${LESSONS.length}`;$('#current-title').textContent=current.title;$('#scene-title').textContent=current.title;$('#scene-en').textContent=current.en;$('#scene-index').textContent=String(n).padStart(2,'0');$('#group-badge').textContent=`0${current.group+1} / ${GROUPS[current.group].name}`;$('#fault').innerHTML=`${icon('bolt')}<span>${esc(current.fault.name)}</span>`;$$('[data-group]').forEach(b=>b.classList.toggle('active',Number(b.dataset.group)===current.group));renderNav();renderStep();renderView();updateProgress();document.title=`${current.title} · K8s Systems Design`;}
-document.addEventListener('click',e=>{const group=e.target.closest('[data-nav-group]');if(group){toggleDirectory(collapsedGroups,Number(group.dataset.navGroup),'[data-nav-group="'+group.dataset.navGroup+'"]');return}if(e.target.closest('[data-intro-toggle]')){introCollapsed=!introCollapsed;renderNav();$('[data-intro-toggle]').focus({preventScroll:true});return}const intro=e.target.closest('[data-intro]');if(intro){selectIntro();return}const chapter=e.target.closest('[data-intro-chapter]');if(chapter){goIntroChapter(Number(chapter.dataset.introChapter));return}if(e.target.closest('[data-copy-example]')){copyExample();return}const l=e.target.closest('[data-lesson],[data-related],[data-map]');if(l){e.preventDefault();if(l.dataset.lesson===current.id&&!introOpen){toggleDirectory(collapsedLessons,current.id,'[data-lesson="'+current.id+'"]')}else select(l.dataset.lesson||l.dataset.related||l.dataset.map);return}const s=e.target.closest('[data-step],[data-trace]');if(s){goStep(Number(s.dataset.step??s.dataset.trace));return}const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;renderNav();return}const g=e.target.closest('[data-group]');if(g){if(g.dataset.group==='0'){selectIntro();return}select(LESSONS.find(l=>l.group===Number(g.dataset.group)).id);filter=g.dataset.group;renderNav();return}const d=e.target.closest('[data-detail]');if(d){detail=d.dataset.detail;renderDetail();return}if(e.target.closest('[data-about]'))$('#about-dialog').showModal();});
+function renderLesson(){theme();const n=LESSONS.indexOf(current)+1;$('#current-no').textContent=`${String(n).padStart(2,'0')} / ${LESSONS.length}`;$('#current-title').textContent=current.title;$('#scene-title').textContent=current.title;$('#group-badge').textContent=`0${current.group+1} / ${GROUPS[current.group].name}`;$('#fault').innerHTML=`${icon('bolt')}<span>${esc(current.fault.name)}</span>`;renderNav();renderStep();renderView();updateProgress();document.title=`${current.title} · K8s Systems Design`;}
+document.addEventListener('click',e=>{const group=e.target.closest('[data-nav-group]');if(group){toggleDirectory(collapsedGroups,Number(group.dataset.navGroup),'[data-nav-group="'+group.dataset.navGroup+'"]');return}if(e.target.closest('[data-intro-toggle]')){introCollapsed=!introCollapsed;renderNav();$('[data-intro-toggle]').focus({preventScroll:true});return}const intro=e.target.closest('[data-intro]');if(intro){selectIntro();return}const chapter=e.target.closest('[data-intro-chapter]');if(chapter){goIntroChapter(Number(chapter.dataset.introChapter));return}if(e.target.closest('[data-copy-example]')){copyExample();return}const l=e.target.closest('[data-lesson],[data-related],[data-map]');if(l){e.preventDefault();if(l.dataset.lesson===current.id&&!introOpen){toggleDirectory(collapsedLessons,current.id,'[data-lesson="'+current.id+'"]')}else select(l.dataset.lesson||l.dataset.related||l.dataset.map);return}const s=e.target.closest('[data-step],[data-trace]');if(s){goStep(Number(s.dataset.step??s.dataset.trace));return}const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;renderNav();return}const g=e.target.closest('[data-group]');if(g){select(LESSONS.find(l=>l.group===Number(g.dataset.group)).id);filter=g.dataset.group;renderNav();return}const d=e.target.closest('[data-detail]');if(d){detail=d.dataset.detail;renderDetail();return}if(e.target.closest('[data-about]'))$('#about-dialog').showModal();});
 $('#search').addEventListener('input',e=>{query=e.target.value;if(query){collapsedGroups.clear();if(matchesIntroSearch())introCollapsed=false}renderNav()});$('#all-topics').onclick=()=>{filter='all';query='';$('#search').value='';renderNav()};
 $('#normal').onclick=()=>{stop();fault=false;step=0;selectedNode=null;cueMotion();renderNav();renderStep()};$('#fault').onclick=()=>{stop();fault=true;step=0;selectedNode=null;cueMotion();renderNav();renderStep();};
 $('#previous').onclick=()=>goStep(step-1);$('#next').onclick=()=>goStep(step+1);$('#play').onclick=play;$('#reset').onclick=()=>{stop();step=0;cueMotion();renderStep()};
